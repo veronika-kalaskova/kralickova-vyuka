@@ -1,2 +1,25 @@
 @import "tailwindcss";
 
+html {
+  margin: 0 auto;
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: #fdfdfd;
+  box-sizing: border-box;
+}
+
+@layer components {
+  .sidebar-item {
+    @apply mb-4 cursor-pointer rounded-md p-2 font-semibold transition hover:bg-orange-100;
+  }
+
+  .sidebar-item.active {
+    @apply text-orange-500;
+  }
+
+  .orange-background {
+    @apply rounded-md bg-orange-100 px-2 py-1;
+  }
+}
