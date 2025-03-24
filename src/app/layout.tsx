@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Poppins } from "next/font/google";
 import "./globals.css";
 import Navbar from "./components/Navbar";
@@ -13,6 +13,12 @@ const poppinsSans = Poppins({
 export const metadata: Metadata = {
   title: "Králíčkova výuka jazyků",
   description: "Králíčkova výuka jazyků",
+};
+
+export const viewport: Viewport = {
+  initialScale: 1,
+  width: "device-width",
+  maximumScale: 1,
 };
 
 export default function RootLayout({
