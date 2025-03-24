@@ -15,11 +15,6 @@ export const metadata: Metadata = {
   description: "Králíčkova výuka jazyků",
 };
 
-export const viewport: Viewport = {
-  initialScale: 1,
-  width: "device-width",
-  maximumScale: 1,
-};
 
 export default function RootLayout({
   children,
@@ -34,7 +29,7 @@ export default function RootLayout({
         <Navbar />
         <div className="flex flex-1">
           <Sidebar />
-          <div className="flex-1 p-8">{children}</div>
+          <div className="flex-1">{children}</div>
         </div>
       </body>
     </html>

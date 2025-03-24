@@ -24,7 +24,7 @@ export default function Home() {
   };
 
   return (
-    <div className="flex flex-col gap-8 md:flex-row">
+    <div className="flex flex-col items-center justify-center gap-8 p-4 md:flex-row">
       {/* PREHLED LEKCI */}
       <div className="w-full md:w-3/4">
         <h1 className="title">Přehled lekcí</h1>
