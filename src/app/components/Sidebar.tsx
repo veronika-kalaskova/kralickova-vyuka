@@ -1,10 +1,12 @@
 import React from "react";
 import SidebarItems from "./SidebarItems";
 
+// TODO: reponzivita sidebar
+
 export default function Sidebar() {
   return (
-    <div className="px-8 shadow-md mt-8 hidden sm:block">
-      <ul className="flex flex-col h-full">
+    <div className="hidden bg-[#FAF8F7] px-8 pt-8 sm:block">
+      <ul className="flex h-full flex-col">
         <SidebarItems />
       </ul>
     </div>

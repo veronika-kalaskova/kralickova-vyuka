@@ -13,15 +13,19 @@ export default function Navbar() {
   };
 
   return (
-    <div className="flex items-center justify-between p-8 shadow-sm">
+    <div className="z-10 flex items-center justify-between p-4 shadow-xs">
+      
       {/* LOGO */}
       <Link href="/" className="hidden items-center gap-2 sm:flex">
         <Image src="logo.svg" alt="logo" height={110} width={75} />
-        <h1 className="font-semibold">Králíčková výuka jazyků</h1>
+        <h1 className="font-bold">Králíčková výuka jazyků</h1>
       </Link>
 
       {/* USER */}
-      <p className="orange-background font-semibold">Jméno uživatele</p>
+      <div className="flex items-center gap-2">
+        <p className="font-bold">Jméno uživatele</p>
+        <span className="orange-background text-sm font-semibold">Student</span>
+      </div>
 
       {/* HAMBURGER MENU */}
       <button
@@ -39,7 +43,7 @@ export default function Navbar() {
             animate={{ x: 0 }}
             exit={{ x: "100%" }}
             transition={{ style: "ease-in-out", duration: 0.3 }}
-            className="fixed top-0 right-0 z-20 mt-8 flex h-full w-3/5 flex-col bg-white px-8 shadow-md"
+            className="fixed top-0 right-0 z-20 flex h-full w-3/5 flex-col bg-[#FAF8F7] px-8 pt-8 shadow-md"
           >
             <button
               onClick={() => setIsMenuOpen(false)}
@@ -47,7 +51,7 @@ export default function Navbar() {
             >
               <Image src="close.svg" alt="close" width={30} height={30} />
             </button>
-            <ul className="mt-10 flex h-[85%] flex-col">
+            <ul className="mt-10 flex h-[90%] flex-col">
               <SidebarItems closeMenu={closeMenu} />
             </ul>
           </motion.div>

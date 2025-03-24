@@ -7,10 +7,15 @@ html {
 
 body {
   background-color: #fdfdfd;
+  color: #1e2939;
   box-sizing: border-box;
 }
 
 @layer components {
+  .title {
+    @apply mb-6 text-2xl font-bold;
+  }
+
   .sidebar-item {
     @apply mb-4 cursor-pointer rounded-md p-2 font-semibold transition hover:bg-orange-100;
   }

@@ -22,11 +22,13 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="cs" suppressHydrationWarning>
-      <body className={`${poppinsSans.variable} antialiased h-screen flex flex-col`}>
+      <body
+        className={`${poppinsSans.variable} flex h-screen flex-col antialiased`}
+      >
         <Navbar />
         <div className="flex flex-1">
           <Sidebar />
-          {children}
+          <div className="flex-1 p-8">{children}</div>
         </div>
       </body>
     </html>
