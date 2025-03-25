@@ -1,0 +1,152 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Uzivatel {
+  id          Int       @id @default(autoincrement())
+  username    String
+  password    String
+  jmeno       String
+  prijmeni    String
+  telefon     String?
+  email       String?
+  trida       String?
+  vyzvedavani Boolean?
+  vytvoren    DateTime?
+  zrusen      DateTime?
+
+  UzivatelRole   UzivatelRole[]
+  Skupina        Skupina[]
+  StudentSkupina StudentSkupina[]
+  Dochazka       Dochazka[]
+  Komentar       Komentar[]
+  Nahrada        Nahrada[]
+  KurzyLektor    Kurz[]           @relation("LektorKurz")
+  KurzyStudent   Kurz[]           @relation("StudentKurz")
+}
+
+model Role {
+  id    Int    @id @default(autoincrement())
+  nazev String
+
+  UzivatelRole UzivatelRole[]
+}
+
+model UzivatelRole {
+  id         Int @id @default(autoincrement())
+  uzivatelId Int
+  roleId     Int
+
+  uzivatel Uzivatel @relation(fields: [uzivatelId], references: [id])
+  role     Role     @relation(fields: [roleId], references: [id])
+}
+
+model Skupina {
+  id       Int    @id @default(autoincrement())
+  lektorId Int
+  nazev    String
+
+  lektor         Uzivatel         @relation(fields: [lektorId], references: [id])
+  StudentSkupina StudentSkupina[]
+  Kurz           Kurz[]
+}
+
+model StudentSkupina {
+  id        Int       @id @default(autoincrement())
+  studentId Int
+  skupinaId Int
+  vytvoreno DateTime
+  zruseno   DateTime?
+
+  student Uzivatel @relation(fields: [studentId], references: [id])
+  skupina Skupina  @relation(fields: [skupinaId], references: [id])
+}
+
+model Lekce {
+  id         Int      @id @default(autoincrement())
+  kurzId     Int
+  datum      DateTime
+  delkaLekce Int
+
+  kurz            Kurz             @relation(fields: [kurzId], references: [id])
+  Dochazka        Dochazka[]
+  UcebniMaterial  UcebniMaterial[]
+  Komentar        Komentar[]
+  NahradaPuvodni  Nahrada[]        @relation("PuvodniLekce")
+  NahradaNahradni Nahrada[]        @relation("NahradniLekce")
+}
+
+model Dochazka {
+  id         Int      @id @default(autoincrement())
+  lekceId    Int
+  uzivatelId Int
+  text       String
+  datum      DateTime
+  typ        String
+
+  lekce    Lekce    @relation(fields: [lekceId], references: [id])
+  uzivatel Uzivatel @relation(fields: [uzivatelId], references: [id])
+}
+
+model UcebniMaterial {
+  id            Int      @id @default(autoincrement())
+  lekceId       Int
+  nazev         String
+  cestaKSouboru String
+  typSouboru    String
+  datumNahrani  DateTime
+
+  lekce Lekce @relation(fields: [lekceId], references: [id])
+}
+
+model Komentar {
+  id           Int      @id @default(autoincrement())
+  lekceId      Int
+  uzivatelId   Int
+  text         String
+  vytvorenoDne DateTime
+
+  lekce    Lekce    @relation(fields: [lekceId], references: [id])
+  uzivatel Uzivatel @relation(fields: [uzivatelId], references: [id])
+}
+
+model Nahrada {
+  id              Int      @id @default(autoincrement())
+  puvodniLekceId  Int
+  nahradniLekceId Int
+  studentId       Int
+  datum           DateTime
+  poznamka        String
+
+  puvodniLekce  Lekce    @relation("PuvodniLekce", fields: [puvodniLekceId], references: [id])
+  nahradniLekce Lekce    @relation("NahradniLekce", fields: [nahradniLekceId], references: [id])
+  student       Uzivatel @relation(fields: [studentId], references: [id])
+}
+
+model Kurz {
+  id           Int       @id @default(autoincrement())
+  lektorId     Int
+  studentId    Int?
+  skupinaId    Int?
+  nazev        String
+  datumOd      DateTime
+  datumDo      DateTime
+  popis        String
+  ucebnice     String
+  individualni Boolean
+  vytvoreno    DateTime
+  zruseno      DateTime?
+
+  lektor  Uzivatel  @relation("LektorKurz", fields: [lektorId], references: [id])
+  student Uzivatel? @relation("StudentKurz", fields: [studentId], references: [id])
+  skupina Skupina?  @relation(fields: [skupinaId], references: [id])
+  Lekce   Lekce[]
+}

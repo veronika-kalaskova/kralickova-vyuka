@@ -1,43 +1,23 @@
-"use client";
+import Button from "@/components/Button";
+import CalendarComponent from "@/components/Calendar";
 
-import { Calendar, momentLocalizer, View, Views } from "react-big-calendar";
-import "react-big-calendar/lib/css/react-big-calendar.css";
-import moment from "moment";
-import { useState } from "react";
-import Button from "./components/Button";
-
-// TODO: cestina
-// TODO: cesky timezone
-// TODO: casy staci od 10-19h napriklad
-// TODO: pridat Agenda view do kalendare jako seznam
-// TODO: pridat lekce do kalendare
-// TODO: uprava designu kalendare
-// TODO: drag and drop
-
-const localizer = momentLocalizer(moment);
-
-export default function Home() {
-  const [view, setView] = useState<View>(Views.WORK_WEEK);
-
-  const handleOnChangeView = (selectedView: View) => {
-    setView(selectedView);
-  };
+export default async function Home() {
+  // const users = await prisma.uzivatel.findMany({
+  //   include: {
+  //     UzivatelRole: {
+  //       include: {
+  //         role: true,
+  //       },
+  //     },
+  //   },
+  // });
 
   return (
-    <div className="flex flex-col items-center justify-center gap-8 p-4 md:flex-row">
+    <div className="flex flex-col items-center justify-center gap-8 p-4 md:flex-row md:items-start">
       {/* PREHLED LEKCI */}
       <div className="w-full md:w-3/4">
         <h1 className="title">Přehled lekcí</h1>
-        <Calendar
-          localizer={localizer}
-          events={[]}
-          views={["work_week", "day"]}
-          view={view}
-          onView={handleOnChangeView}
-          startAccessor="start"
-          endAccessor="end"
-          style={{ height: 500 }}
-        />
+        <CalendarComponent />
       </div>
 
       {/* RYCHLE AKCE */}
