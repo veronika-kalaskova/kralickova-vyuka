@@ -2,6 +2,7 @@
 import React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { signOut } from "next-auth/react";
 
 type SidebarItemsProps = {
   closeMenu?: () => void;
@@ -24,7 +25,7 @@ export default function SidebarItems({ closeMenu }: SidebarItemsProps) {
 
   const handleCloseMenu = () => {
     if (closeMenu) {
-      closeMenu(); 
+      closeMenu();
     }
   };
 
@@ -37,12 +38,17 @@ export default function SidebarItems({ closeMenu }: SidebarItemsProps) {
           className={
             isActive(page.path) ? "sidebar-item active" : "sidebar-item"
           }
-          onClick={handleCloseMenu}  
+          onClick={handleCloseMenu}
         >
           {page.name}
         </Link>
       ))}
-      <li className="sidebar-item mt-auto text-center">Odhlásit se</li>
+      <button
+        onClick={() => signOut({redirect: true, callbackUrl: `${window.location.origin}/prihlaseni`})}
+        className="sidebar-item mt-auto text-center"
+      >
+        Odhlásit se
+      </button>
     </>
   );
 }

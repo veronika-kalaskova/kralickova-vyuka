@@ -10,143 +10,144 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Uzivatel {
+model User {
   id          Int       @id @default(autoincrement())
-  username    String
+  username    String    @unique
   password    String
-  jmeno       String
-  prijmeni    String
-  telefon     String?
+  firstName   String
+  lastName    String
+  phone       String?
   email       String?
-  trida       String?
-  vyzvedavani Boolean?
-  vytvoren    DateTime?
-  zrusen      DateTime?
+  class       String?
+  pickup      Boolean?
+  createdAt   DateTime @default(now())
+  deletedAt   DateTime?
 
-  UzivatelRole   UzivatelRole[]
-  Skupina        Skupina[]
-  StudentSkupina StudentSkupina[]
-  Dochazka       Dochazka[]
-  Komentar       Komentar[]
-  Nahrada        Nahrada[]
-  KurzyLektor    Kurz[]           @relation("LektorKurz")
-  KurzyStudent   Kurz[]           @relation("StudentKurz")
+  UserRole       UserRole[]
+  Group          Group[]
+  StudentGroup   StudentGroup[]
+  Attendance     Attendance[]
+  Comment        Comment[]
+  Replacement    Replacement[]
+  CoursesTaught  Course[] @relation("TeacherCourse")
+  CoursesTaken   Course[] @relation("StudentCourse")
 }
 
 model Role {
   id    Int    @id @default(autoincrement())
-  nazev String
+  name  String
 
-  UzivatelRole UzivatelRole[]
+  UserRole UserRole[]
 }
 
-model UzivatelRole {
-  id         Int @id @default(autoincrement())
-  uzivatelId Int
-  roleId     Int
+model UserRole {
+  id       Int @id @default(autoincrement())
+  userId   Int
+  roleId   Int
 
-  uzivatel Uzivatel @relation(fields: [uzivatelId], references: [id])
-  role     Role     @relation(fields: [roleId], references: [id])
+  user User @relation(fields: [userId], references: [id])
+  role Role @relation(fields: [roleId], references: [id])
 }
 
-model Skupina {
-  id       Int    @id @default(autoincrement())
-  lektorId Int
-  nazev    String
+model Group {
+  id        Int    @id @default(autoincrement())
+  teacherId Int?
+  name      String
 
-  lektor         Uzivatel         @relation(fields: [lektorId], references: [id])
-  StudentSkupina StudentSkupina[]
-  Kurz           Kurz[]
+  teacher       User?           @relation(fields: [teacherId], references: [id])
+  StudentGroup  StudentGroup[]
+  Course        Course[]
 }
 
-model StudentSkupina {
+model StudentGroup {
   id        Int       @id @default(autoincrement())
   studentId Int
-  skupinaId Int
-  vytvoreno DateTime
-  zruseno   DateTime?
+  groupId   Int
+  createdAt DateTime @default(now())
+  deletedAt DateTime?
 
-  student Uzivatel @relation(fields: [studentId], references: [id])
-  skupina Skupina  @relation(fields: [skupinaId], references: [id])
+  student User  @relation(fields: [studentId], references: [id])
+  group   Group @relation(fields: [groupId], references: [id])
 }
 
-model Lekce {
+model Lesson {
   id         Int      @id @default(autoincrement())
-  kurzId     Int
-  datum      DateTime
-  delkaLekce Int
+  courseId   Int
+  date       DateTime 
+  duration   Int
 
-  kurz            Kurz             @relation(fields: [kurzId], references: [id])
-  Dochazka        Dochazka[]
-  UcebniMaterial  UcebniMaterial[]
-  Komentar        Komentar[]
-  NahradaPuvodni  Nahrada[]        @relation("PuvodniLekce")
-  NahradaNahradni Nahrada[]        @relation("NahradniLekce")
+  course          Course          @relation(fields: [courseId], references: [id])
+  Attendance      Attendance[]
+  StudyMaterial   StudyMaterial[]
+  Comment         Comment[]
+  OriginalReplacement Replacement[] @relation("OriginalLesson")
+  SubstituteReplacement Replacement[] @relation("SubstituteLesson")
 }
 
-model Dochazka {
+model Attendance {
   id         Int      @id @default(autoincrement())
-  lekceId    Int
-  uzivatelId Int
+  lessonId   Int
+  userId     Int
   text       String
-  datum      DateTime
-  typ        String
+  date       DateTime
+  type       String
 
-  lekce    Lekce    @relation(fields: [lekceId], references: [id])
-  uzivatel Uzivatel @relation(fields: [uzivatelId], references: [id])
+  lesson Lesson @relation(fields: [lessonId], references: [id])
+  user   User   @relation(fields: [userId], references: [id])
 }
 
-model UcebniMaterial {
+model StudyMaterial {
   id            Int      @id @default(autoincrement())
-  lekceId       Int
-  nazev         String
-  cestaKSouboru String
-  typSouboru    String
-  datumNahrani  DateTime
+  lessonId      Int
+  name          String
+  filePath      String
+  fileType      String
+  uploadedAt    DateTime
 
-  lekce Lekce @relation(fields: [lekceId], references: [id])
+  lesson Lesson @relation(fields: [lessonId], references: [id])
 }
 
-model Komentar {
+model Comment {
   id           Int      @id @default(autoincrement())
-  lekceId      Int
-  uzivatelId   Int
+  lessonId     Int
+  userId       Int
   text         String
-  vytvorenoDne DateTime
+  createdAt    DateTime
 
-  lekce    Lekce    @relation(fields: [lekceId], references: [id])
-  uzivatel Uzivatel @relation(fields: [uzivatelId], references: [id])
+  lesson Lesson @relation(fields: [lessonId], references: [id])
+  user   User   @relation(fields: [userId], references: [id])
 }
 
-model Nahrada {
-  id              Int      @id @default(autoincrement())
-  puvodniLekceId  Int
-  nahradniLekceId Int
-  studentId       Int
-  datum           DateTime
-  poznamka        String
+model Replacement {
+  id                Int      @id @default(autoincrement())
+  originalLessonId  Int
+  substituteLessonId Int
+  studentId         Int
+  date             DateTime
+  note             String
 
-  puvodniLekce  Lekce    @relation("PuvodniLekce", fields: [puvodniLekceId], references: [id])
-  nahradniLekce Lekce    @relation("NahradniLekce", fields: [nahradniLekceId], references: [id])
-  student       Uzivatel @relation(fields: [studentId], references: [id])
+  originalLesson   Lesson  @relation("OriginalLesson", fields: [originalLessonId], references: [id])
+  substituteLesson Lesson  @relation("SubstituteLesson", fields: [substituteLessonId], references: [id])
+  student          User    @relation(fields: [studentId], references: [id])
 }
 
-model Kurz {
+model Course {
   id           Int       @id @default(autoincrement())
-  lektorId     Int
+  teacherId    Int?
   studentId    Int?
-  skupinaId    Int?
-  nazev        String
-  datumOd      DateTime
-  datumDo      DateTime
-  popis        String
-  ucebnice     String
-  individualni Boolean
-  vytvoreno    DateTime
-  zruseno      DateTime?
+  groupId      Int?
+  name         String
+  startDate    DateTime
+  endDate      DateTime
+  description  String?
+  textbook     String?
+  isIndividual   Boolean
+  isPair Boolean?
+  createdAt    DateTime @default(now())
+  deletedAt    DateTime?
 
-  lektor  Uzivatel  @relation("LektorKurz", fields: [lektorId], references: [id])
-  student Uzivatel? @relation("StudentKurz", fields: [studentId], references: [id])
-  skupina Skupina?  @relation(fields: [skupinaId], references: [id])
-  Lekce   Lekce[]
+  teacher User?  @relation("TeacherCourse", fields: [teacherId], references: [id])
+  student User?  @relation("StudentCourse", fields: [studentId], references: [id])
+  group   Group? @relation(fields: [groupId], references: [id])
+  Lesson  Lesson[]
 }

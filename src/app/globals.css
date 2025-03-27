@@ -11,6 +11,10 @@ body {
   box-sizing: border-box;
 }
 
+input {
+	outline: inherit;
+}
+
 @layer components {
   .title {
     @apply mb-6 text-2xl font-bold;

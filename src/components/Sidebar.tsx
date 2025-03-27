@@ -1,7 +1,6 @@
 import React from "react";
 import SidebarItems from "./SidebarItems";
 
-// TODO: reponzivita sidebar
 
 export default function Sidebar() {
   return (

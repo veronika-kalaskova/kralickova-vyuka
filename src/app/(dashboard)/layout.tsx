@@ -1,8 +1,11 @@
 import type { Metadata, Viewport } from "next";
 import { Poppins } from "next/font/google";
-import "./globals.css";
+import "../globals.css";
 import Navbar from "@/components/Navbar";
 import Sidebar from "@/components/Sidebar";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
+import { prisma } from "@/lib/db";
 
 // TODO: pridat favicon
 
@@ -17,18 +20,36 @@ export const metadata: Metadata = {
   description: "Králíčkova výuka jazyků",
 };
 
-
-export default function RootLayout({
+export default async function DashboardLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+
+  const session = await getServerSession(authOptions);
+
+  
+  let userRole = null;
+
+  if (session?.user?.id) {
+    const roles = await prisma.userRole.findMany({
+      where: {
+        userId: Number(session.user.id),
+      },
+      include: {
+        role: true,
+      },
+    });
+
+    userRole = roles.map((r) => r.role.name);
+  }
+
   return (
     <html lang="cs" suppressHydrationWarning>
       <body
         className={`${poppinsSans.variable} flex h-screen flex-col antialiased`}
       >
-        <Navbar />
+        <Navbar session={session} userRole={userRole} />
         <div className="flex flex-1">
           <Sidebar />
           <div className="flex-1">{children}</div>

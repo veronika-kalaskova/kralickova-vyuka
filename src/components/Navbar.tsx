@@ -4,8 +4,14 @@ import Image from "next/image";
 import SidebarItems from "./SidebarItems";
 import Link from "next/link";
 import { AnimatePresence, motion } from "framer-motion";
+import { Session } from "next-auth";
 
-export default function Navbar() {
+interface Props {
+  session: Session | null;
+  userRole: string[] | null;
+}
+
+export default function Navbar({ session, userRole }: Props) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const closeMenu = () => {
@@ -14,7 +20,6 @@ export default function Navbar() {
 
   return (
     <div className="z-10 flex items-center justify-between p-4 shadow-xs">
-      
       {/* LOGO */}
       <Link href="/" className="hidden items-center gap-2 sm:flex">
         <Image src="logo.svg" alt="logo" height={110} width={75} />
@@ -23,8 +28,18 @@ export default function Navbar() {
 
       {/* USER */}
       <div className="flex items-center gap-2">
-        <p className="font-bold">Jméno uživatele</p>
-        <span className="orange-background text-sm font-semibold">Student</span>
+        {session?.user ? (
+          <p className="font-bold">
+            {session.user.firstName} {session.user.lastName}
+          </p>
+        ) : (
+          <p className="font-bold">Nepřihlášený uživatel</p>
+        )}
+        {userRole?.map((role) => (
+          <span key={role} className="orange-background text-sm font-semibold">
+            {role}
+          </span>
+        ))}
       </div>
 
       {/* HAMBURGER MENU */}
