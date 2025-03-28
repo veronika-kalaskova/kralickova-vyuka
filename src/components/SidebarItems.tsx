@@ -44,7 +44,7 @@ export default function SidebarItems({ closeMenu }: SidebarItemsProps) {
         </Link>
       ))}
       <button
-        onClick={() => signOut({redirect: true, callbackUrl: `${window.location.origin}/prihlaseni`})}
+        onClick={() => signOut({redirect: true, callbackUrl: process.env.NEXT_PUBLIC_SITE_URL + "/prihlaseni"})}
         className="sidebar-item mt-auto text-center"
       >
         Odhlásit se
