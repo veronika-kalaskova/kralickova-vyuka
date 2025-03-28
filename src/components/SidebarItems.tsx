@@ -29,6 +29,8 @@ export default function SidebarItems({ closeMenu }: SidebarItemsProps) {
     }
   };
 
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
+
   return (
     <>
       {pages.map((page) => (
@@ -44,7 +46,9 @@ export default function SidebarItems({ closeMenu }: SidebarItemsProps) {
         </Link>
       ))}
       <button
-        onClick={() => signOut({redirect: true, callbackUrl: process.env.NEXT_PUBLIC_SITE_URL + "/prihlaseni"})}
+        onClick={() =>
+          signOut({ redirect: true, callbackUrl: `${siteUrl}/prihlaseni` })
+        }
         className="sidebar-item mt-auto text-center"
       >
         Odhlásit se
