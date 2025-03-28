@@ -37,6 +37,8 @@ export default function SidebarItems({ closeMenu }: SidebarItemsProps) {
     siteUrl = "http://localhost:3000"
   }
 
+  console.log("SITE_URL:", process.env.NEXT_PUBLIC_SITE_URL);
+
 
   return (
     <>
