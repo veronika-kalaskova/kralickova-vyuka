@@ -6,6 +6,7 @@ import Sidebar from "@/components/Sidebar";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/db";
+import { redirect } from "next/navigation";
 
 // TODO: pridat favicon
 
@@ -28,6 +29,9 @@ export default async function DashboardLayout({
 
   const session = await getServerSession(authOptions);
 
+  if (!session) {
+    redirect("/prihlaseni");
+  }
   
   let userRole = null;
 

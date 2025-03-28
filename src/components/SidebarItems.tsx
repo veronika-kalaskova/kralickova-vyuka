@@ -29,17 +29,6 @@ export default function SidebarItems({ closeMenu }: SidebarItemsProps) {
     }
   };
 
-  let siteUrl = "";
-
-  if (process.env.NEXT_PUBLIC_SITE_URL) {
-    siteUrl = process.env.NEXT_PUBLIC_SITE_URL
-  } else {
-    siteUrl = "http://localhost:3000"
-  }
-
-  console.log("SITE_URL:", process.env.NEXT_PUBLIC_SITE_URL);
-
-
   return (
     <>
       {pages.map((page) => (
@@ -56,7 +45,7 @@ export default function SidebarItems({ closeMenu }: SidebarItemsProps) {
       ))}
       <button
         onClick={() =>
-          signOut({ redirect: true, callbackUrl: `${siteUrl}/prihlaseni` })
+          signOut()
         }
         className="sidebar-item mt-auto text-center"
       >
