@@ -148,7 +148,7 @@ export default function CreateLectorModal({
             </div>
 
             <div className="col-span-2 mb-4 flex w-full flex-col gap-2">
-              <label className="text-xs text-gray-500">Vyberte kurzy</label>
+              <label className="text-xs text-gray-500">Vyberte kurz(y)</label>
               <p className="text-[10px] text-gray-500">
                 Jedná se pouze o kurzy, které nemají přiřazeného lektora
               </p>

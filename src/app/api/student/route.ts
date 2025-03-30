@@ -6,7 +6,7 @@ import { hash } from "bcrypt";
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    const { username, password, firstName, lastName, phone, email, courseIds, roleId } = body
+    const { username, password, firstName, lastName, phone, email, courseIds, roleId, class: studentClass, pickup } = body
 
     const hashedPassword = await hash(password, 10);
 
@@ -36,12 +36,14 @@ export async function POST(req: Request) {
         lastName: lastName,
         phone: phone,
         email: email,
+        class: studentClass,
+        pickup: pickup,
         UserRole: {
           create: {
             roleId: parseInt(roleId),
           },
         },
-        CoursesTaught: courseIds && courseIds.length > 0
+        CoursesTaken: courseIds && courseIds.length > 0
         ? {
             connect: courseIds.map((courseId: number) => ({ id: courseId })),
           }

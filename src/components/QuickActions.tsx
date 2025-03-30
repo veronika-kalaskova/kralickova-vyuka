@@ -6,17 +6,18 @@ import CreateStudentModal from "./auth/CreateStudentModal";
 import { Course } from "@prisma/client";
 
 interface Props {
-  courses: Course[]
+  coursesWithoutLector: Course[];
+  coursesWithoutStudent: Course[];
 }
 
-export default function QuickActions({courses}:Props) {
+export default function QuickActions({ coursesWithoutLector, coursesWithoutStudent }: Props) {
   const [isOpen, setIsOpen] = useState(false);
-  const [roleId, setRoleId] = useState(0)
+  const [roleId, setRoleId] = useState(0);
 
   const openModal = (id: number) => {
-    setIsOpen(true)
-    setRoleId(id)
-  }
+    setIsOpen(true);
+    setRoleId(id);
+  };
 
   return (
     <>
@@ -36,7 +37,16 @@ export default function QuickActions({courses}:Props) {
         <CreateLectorModal
           roleId={roleId}
           isOpen={isOpen}
-          courses={courses}
+          courses={coursesWithoutLector}
+          onClose={() => setIsOpen(false)}
+        />
+      )}
+
+      {roleId === 3 && (
+        <CreateStudentModal
+          roleId={roleId}
+          isOpen={isOpen}
+          courses={coursesWithoutStudent}
           onClose={() => setIsOpen(false)}
         />
       )}

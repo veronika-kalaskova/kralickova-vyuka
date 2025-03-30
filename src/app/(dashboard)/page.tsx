@@ -4,14 +4,18 @@ import { prisma } from "@/lib/db";
 
 export default async function Home() {
 
-  const courses = await prisma.course.findMany({
+  const coursesWithoutLector = await prisma.course.findMany({
     where: {
       teacherId: null
     }
   });
-  
-  
 
+  const coursesWithoutStudent = await prisma.course.findMany({
+    where: {
+      studentId: null
+    }
+  });
+  
   return (
     <div className="flex flex-col items-center justify-center gap-8 p-4 md:flex-row md:items-start">
       {/* PREHLED LEKCI */}
@@ -20,7 +24,7 @@ export default async function Home() {
         <CalendarComponent />
       </div>
 
-      <QuickActions courses={courses} />
+      <QuickActions coursesWithoutLector={coursesWithoutLector} coursesWithoutStudent={coursesWithoutStudent} />
     </div>
   );
 }
