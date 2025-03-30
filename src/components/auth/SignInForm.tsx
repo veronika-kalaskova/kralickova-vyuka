@@ -46,9 +46,9 @@ const SignInForm = () => {
   };
 
   return (
-    <div className="mx-4 flex h-screen items-center justify-center bg-[#FAF8F7]">
+    <div className="flex h-screen items-center justify-center bg-[#FAF8F7]">
       <form
-        className="rounded-md bg-white p-8 shadow-md"
+        className="mx-4 rounded-md bg-white p-8 shadow-md"
         onSubmit={handleSubmit(onSubmit)}
       >
         {/* LOGO */}
