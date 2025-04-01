@@ -69,9 +69,6 @@ export default function CreateLectorModal({
         ),
       )
       .filter(Boolean) as (Course & { group: Group })[];
-
-      console.log(groupCourses)
-      console.log(selectedCourses)
    
       const group = groupCourses.map((course) => course.group);
       const name = group.map((group) => group.name).join(", ");

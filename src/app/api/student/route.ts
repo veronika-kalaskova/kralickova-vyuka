@@ -2,20 +2,27 @@ import { db } from "@/lib/db";
 import { NextResponse } from "next/server";
 import { hash } from "bcrypt";
 
-
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    const { username, password, firstName, lastName, phone, email, courseIds, roleId, class: studentClass, pickup } = body
+    const {
+      username,
+      password,
+      firstName,
+      lastName,
+      phone,
+      email,
+      courseIds,
+      roleId,
+      class: studentClass,
+      pickup,
+    } = body;
 
     const hashedPassword = await hash(password, 10);
 
     const existingUser = await db.user.findFirst({
       where: {
-      OR: [
-        { username: username },
-        { email: email }
-      ],
+        OR: [{ username: username }, { email: email }],
       },
     });
 
@@ -43,14 +50,48 @@ export async function POST(req: Request) {
             roleId: parseInt(roleId),
           },
         },
-        CoursesTaken: courseIds && courseIds.length > 0
-        ? {
-            connect: courseIds.map((courseId: number) => ({ id: courseId })),
-          }
-        : undefined
-    },
+      },
     });
-    
+
+    const individualCourses = await db.course.findMany({
+      where: {
+        id: { in: courseIds },
+        isIndividual: true,
+      },
+    });
+
+    if (individualCourses.length > 0) {
+      await db.user.update({
+        where: { id: newUser.id },
+        data: {
+          CoursesTaken: {
+            connect: individualCourses.map((course) => ({ id: course.id })),
+          },
+        },
+      });
+    }
+
+    const groups = await db.group.findMany({
+      where: {
+        Course: {
+          some: {
+            id: { in: courseIds },
+          },
+        },
+      },
+      select: {
+        id: true,
+      },
+    });
+
+    if (groups.length > 0) {
+      await db.studentGroup.createMany({
+        data: groups.map((group) => ({
+          studentId: newUser.id,
+          groupId: group.id,
+        })),
+      });
+    }
 
     const { password: newUserPassword, ...rest } = newUser;
 
