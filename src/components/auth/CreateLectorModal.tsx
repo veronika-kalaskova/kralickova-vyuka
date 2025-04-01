@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { Course } from "@prisma/client";
+import { Course, Group } from "@prisma/client";
 
 const FormSchema = z.object({
   firstName: z.string().min(1, "Jméno je povinné"),
@@ -18,7 +18,7 @@ interface Props {
   roleId: number;
   isOpen: boolean;
   onClose: () => void;
-  courses: Course[];
+  courses: (Course & { group: Group | null })[];
 }
 
 export default function CreateLectorModal({
@@ -46,15 +46,45 @@ export default function CreateLectorModal({
   const firstName = watch("firstName");
   const lastName = watch("lastName");
 
+  const selectedCourses = watch("courseIds") || [];
+
   useEffect(() => {
     if (firstName && lastName) {
-      const suggestedUsername = `${firstName.toLowerCase()}.${lastName
+      const suggestedUsername = `${firstName
+        .toLowerCase()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")}.${lastName
         .toLowerCase()
         .normalize("NFD")
         .replace(/[\u0300-\u036f]/g, "")}`;
       setValue("username", suggestedUsername);
     }
   }, [firstName, lastName, setValue]);
+
+  useEffect(() => {
+    const groupCourses = selectedCourses
+      .map((courseId) =>
+        courses.find(
+          (course) => course.id === parseInt(courseId) && course.group,
+        ),
+      )
+      .filter(Boolean) as (Course & { group: Group })[];
+
+      console.log(groupCourses)
+      console.log(selectedCourses)
+   
+      const group = groupCourses.map((course) => course.group);
+      const name = group.map((group) => group.name).join(", ");
+
+    if (groupCourses.length > 0) {
+      const courseNames = groupCourses.map((course) => course.name).join(", ");
+      setMessage(
+        `Upozornění: Výběrem skupinového kurzu (${courseNames}) se lektor stává lektorem i pro skupinu: ${name}.`,
+      );
+    } else {
+      setMessage("");
+    }
+  }, [selectedCourses, courses]);
 
   const generatePassword = () => {
     var length = 8,

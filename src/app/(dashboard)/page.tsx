@@ -7,14 +7,26 @@ export default async function Home() {
   const coursesWithoutLector = await prisma.course.findMany({
     where: {
       teacherId: null
+    },
+    include: {
+      group: true
     }
   });
 
   const coursesWithoutStudent = await prisma.course.findMany({
     where: {
       studentId: null
+    },
+    include: {
+      group: true
     }
   });
+
+  // const groups = await prisma.group.findMany({
+  //   include: {
+  //     Course: true,
+  //   },
+  // });
   
   return (
     <div className="flex flex-col items-center justify-center gap-8 p-4 md:flex-row md:items-start">

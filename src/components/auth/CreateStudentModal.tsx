@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { Course } from "@prisma/client";
+import { Course, Group } from "@prisma/client";
 
 const FormSchema = z.object({
   firstName: z.string().min(1, "Jméno je povinné"),
@@ -13,6 +13,7 @@ const FormSchema = z.object({
   email: z.string().email("Neplatná e-mailová adresa"),
   courseType: z.enum(["individual", "pair", "group"]).optional(),
   courseIds: z.array(z.string()).optional(),
+  groupIds: z.array(z.string()).optional(),
   class: z.string(),
   pickup: z.boolean(),
 });
@@ -21,7 +22,7 @@ interface Props {
   roleId: number;
   isOpen: boolean;
   onClose: () => void;
-  courses: Course[];
+  courses: (Course & { group: Group | null })[];
 }
 
 export default function CreateStudentModal({
@@ -52,6 +53,8 @@ export default function CreateStudentModal({
   const lastName = watch("lastName");
   const courseType = watch("courseType");
 
+  const [filteredGroups, setFilteredGroups] = useState<(Group & { Course: Course[] })[]>([])
+
   useEffect(() => {
     if (firstName && lastName) {
       const suggestedUsername = `${firstName.toLowerCase()}.${lastName
@@ -73,6 +76,20 @@ export default function CreateStudentModal({
 
     setValue("password", password);
   };
+
+  // const filterGroupsByCourse = (courseId: number) => {
+  //   console.log(groups.map((group) => group.Course));
+  //   return groups.filter((group) =>
+  //     group.Course.some((course) => course.id === courseId)
+  //   );
+  // };
+  
+  
+
+  // const handleCourseChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+  //   const selectedCourseId = Number(event.target.value);
+  //   setFilteredGroups(filterGroupsByCourse(selectedCourseId));
+  // };
 
   const onSubmit = async (values: z.infer<typeof FormSchema>) => {
     const courseIds = values.courseIds?.map((id) => parseInt(id, 10));
@@ -104,13 +121,16 @@ export default function CreateStudentModal({
     filter: (course: any) => boolean;
     message?: string;
   }) => (
-    <div className="col-span-2 mb-4 flex w-full flex-col gap-2 md:col-span-3">
+    <div   className={`grid w-full gap-4 ${
+      filteredGroups.length > 0 ? "col-span-2 md:col-span-2" : "col-span-2 md:col-span-3"
+    }`}>
       <label className="text-xs text-gray-500">Vyberte kurz(y)</label>
       <p className="text-[10px] text-gray-500">{message}</p>
       <select
         multiple
         {...register("courseIds")}
         className="rounded-md border-[1.5px] border-gray-300 p-2 focus:border-orange-300"
+        
       >
         {courses.filter(filter).map((course) => (
           <option key={course.id} value={course.id}>
@@ -155,7 +175,7 @@ export default function CreateStudentModal({
             </div>
 
             <div className="mb-4 flex flex-col gap-2">
-              <label className="text-xs text-gray-500">Email</label>
+              <label className="text-xs text-gray-500">Email*</label>
               <input
                 type="email"
                 {...register("email")}
@@ -206,6 +226,7 @@ export default function CreateStudentModal({
             <div className="col-span-2 mb-4 flex flex-col gap-2 md:col-span-3">
               <label className="text-xs text-gray-500">Typ kurzu</label>
               <select
+              
                 {...register("courseType")}
                 className="rounded-md border-[1.5px] border-gray-300 p-2 focus:border-orange-300"
               >
@@ -219,6 +240,7 @@ export default function CreateStudentModal({
                 </p>
               )}
             </div>
+
 
             {courseType === "group" && (
               <CourseSelector
@@ -236,6 +258,24 @@ export default function CreateStudentModal({
                 filter={(course) => !course.isIndividual && course.isPair}
               />
             )}
+
+            {/* {filteredGroups && filteredGroups.length > 0 && (
+              <div className="col-span-2 mb-4 flex w-full flex-col gap-2 md:col-span-1">
+                <label className="text-xs text-gray-500">Vyberte skupinu</label>
+                <p className="text-[10px] text-gray-500"></p>
+                <select
+                  multiple
+                  {...register("groupIds")}
+                  className="rounded-md border-[1.5px] border-gray-300 p-2 focus:border-orange-300"
+                >
+                  {filteredGroups.map((group) => (
+                    <option key={group.id} value={group.id}>
+                      {group.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )} */}
 
             <div className="col-span-2 mb-4 flex flex-col gap-2 md:col-span-1">
               <label className="text-xs text-gray-500">

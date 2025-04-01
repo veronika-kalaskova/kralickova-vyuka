@@ -3,11 +3,11 @@ import React, { useState } from "react";
 import Button from "./Button";
 import CreateLectorModal from "./auth/CreateLectorModal";
 import CreateStudentModal from "./auth/CreateStudentModal";
-import { Course } from "@prisma/client";
+import { Course, Group } from "@prisma/client";
 
 interface Props {
-  coursesWithoutLector: Course[];
-  coursesWithoutStudent: Course[];
+  coursesWithoutLector: (Course & { group: Group | null })[];
+  coursesWithoutStudent: (Course & { group: Group | null })[];
 }
 
 export default function QuickActions({ coursesWithoutLector, coursesWithoutStudent }: Props) {

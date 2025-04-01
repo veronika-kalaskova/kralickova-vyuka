@@ -48,6 +48,11 @@ export async function POST(req: Request) {
         : undefined
     },
     });
+
+    await db.group.updateMany({
+      where: { Course: { some: { id: { in: courseIds } } } },
+      data: { teacherId: newUser.id },
+    });
     
 
     const { password: newUserPassword, ...rest } = newUser;
