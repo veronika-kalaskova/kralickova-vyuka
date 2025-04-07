@@ -65,27 +65,27 @@ export default function CreateStudentModal({
     }
   }, [firstName, lastName, setValue]);
 
-    useEffect(() => {
-      const groupCourses = selectedCourses
-        .map((courseId) =>
-          courses.find(
-            (course) => course.id === parseInt(courseId) && course.group,
-          ),
-        )
-        .filter(Boolean) as (Course & { group: Group })[];
-     
-        const group = groupCourses.map((course) => course.group);
-        const name = group.map((group) => group.name).join(", ");
-  
-      if (groupCourses.length > 0) {
-        const courseNames = groupCourses.map((course) => course.name).join(", ");
-        setMessage(
-          `Upozornění: Výběrem skupinového kurzu (${courseNames}) se student přiřadí také do skupiny: ${name}.`,
-        );
-      } else {
-        setMessage("");
-      }
-    }, [selectedCourses, courses]);
+  useEffect(() => {
+    const groupCourses = selectedCourses
+      .map((courseId) =>
+        courses.find(
+          (course) => course.id === parseInt(courseId) && course.group,
+        ),
+      )
+      .filter(Boolean) as (Course & { group: Group })[];
+
+    const group = groupCourses.map((course) => course.group);
+    const name = group.map((group) => group.name).join(", ");
+
+    if (groupCourses.length > 0) {
+      const courseNames = groupCourses.map((course) => course.name).join(", ");
+      setMessage(
+        `Upozornění: Výběrem skupinového kurzu (${courseNames}) se student přiřadí také do skupiny: ${name}.`,
+      );
+    } else {
+      setMessage("");
+    }
+  }, [selectedCourses, courses]);
 
   const generatePassword = () => {
     var length = 8,
@@ -110,6 +110,7 @@ export default function CreateStudentModal({
 
     if (response.ok) {
       onClose();
+      window.location.reload();
     } else {
       const errorData = await response.json();
       if (errorData.message === "User exists") {

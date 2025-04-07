@@ -106,6 +106,7 @@ export default function CreateLectorModal({
 
     if (response.ok) {
       onClose();
+      window.location.reload();
     } else {
       const errorData = await response.json();
       if (errorData.message === "User exists") {
