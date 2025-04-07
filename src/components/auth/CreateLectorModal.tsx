@@ -69,9 +69,9 @@ export default function CreateLectorModal({
         ),
       )
       .filter(Boolean) as (Course & { group: Group })[];
-   
-      const group = groupCourses.map((course) => course.group);
-      const name = group.map((group) => group.name).join(", ");
+
+    const group = groupCourses.map((course) => course.group);
+    const name = group.map((group) => group.name).join(", ");
 
     if (groupCourses.length > 0) {
       const courseNames = groupCourses.map((course) => course.name).join(", ");
@@ -119,7 +119,7 @@ export default function CreateLectorModal({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-10 flex items-center justify-center bg-[#0000007e]">
+    <div className="fixed inset-0 z-10 flex items-center justify-center bg-[rgba(0,0,0,0.49)]">
       <div className="h-full w-full overflow-auto bg-white p-6 shadow-md sm:h-auto sm:max-w-xl md:rounded-md">
         <h2 className="title">Vytvořit lektora</h2>
         <form onSubmit={handleSubmit(onSubmit)}>
