@@ -8,14 +8,17 @@ import CreateLectorModal from "../auth/CreateLectorModal";
 // TODO: delete
 // TODO: edit
 // TODO: search input
-// TODO: refresh po pridani lektora
 // TODO: prejit na profil lektora link
+// TODO: pagination
 
 interface Lector {
   id: number;
   firstName: string;
   lastName: string;
+  username: string;
+  phone: string | null;
   email: string | null;
+  createdAt: Date;
   CoursesTaught?: Course[];
 }
 
@@ -26,19 +29,35 @@ interface Props {
 
 export default function Table({ data, coursesWithoutLector }: Props) {
   const [isOpen, setIsOpen] = useState(false);
+
   const openModal = () => {
     setIsOpen(true);
   };
+
+  const [isOpenUpdate, setIsOpenUpdate] = useState(false);
+  const openModalUpdate = (lector: Lector) => {
+    setSelectedLector(lector);
+    setIsOpenUpdate(true);
+  };
+
+  const [selectedLector, setSelectedLector] = useState<Lector | null>(null);
+
+  console.log(selectedLector)
+
+  const sortedData = [...data].sort(
+    (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+  );
+  
 
   return (
     <>
       <div className="flex flex-col p-4">
         <div className="mb-4 flex items-center justify-between">
-          <h1 className="title">Přehled lektorů</h1>
+          <h1 className="title mb-0">Přehled lektorů</h1>
 
           <button
             onClick={() => openModal()}
-            className="cursor-pointer rounded-lg bg-gray-100 px-3 py-3 font-medium text-gray-800 transition-all hover:bg-orange-400 hover:text-white"
+            className="cursor-pointer rounded-lg bg-orange-400 px-4 py-3 font-medium text-white transition-all hover:bg-orange-500"
           >
             Přidat lektora
           </button>
@@ -53,9 +72,9 @@ export default function Table({ data, coursesWithoutLector }: Props) {
                 <th className="px-3 py-2"></th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-orange-100">
-              {data.map((lector) => (
-                <tr key={lector.id} className="odd:bg-orange-50 even:bg-white">
+            <tbody className="divide-y divide-gray-200">
+              {sortedData.map((lector) => (
+                <tr key={lector.id} className="odd:bg-gray-50 even:bg-white">
                   <td className="px-3 py-2 font-semibold">
                     {lector.firstName} {lector.lastName}
                   </td>
@@ -90,7 +109,10 @@ export default function Table({ data, coursesWithoutLector }: Props) {
                       <button className="hidden transform cursor-pointer rounded-full bg-orange-100 px-3 py-2 text-xs font-semibold transition-all duration-300 hover:bg-orange-200 md:block">
                         Přejít na profil
                       </button>
-                      <button className="transform cursor-pointer rounded-full px-2 py-2 transition-all duration-300 hover:bg-orange-200">
+                      <button
+                        className="transform cursor-pointer rounded-full px-2 py-2 transition-all duration-300 hover:bg-orange-200"
+                        onClick={() => openModalUpdate(lector)}
+                      >
                         <Image
                           src="/edit.svg"
                           alt="edit"
@@ -119,6 +141,15 @@ export default function Table({ data, coursesWithoutLector }: Props) {
         isOpen={isOpen}
         courses={coursesWithoutLector}
         onClose={() => setIsOpen(false)}
+        type="create"
+      />
+      <CreateLectorModal
+        roleId={2}
+        isOpen={isOpenUpdate}
+        courses={coursesWithoutLector}
+        onClose={() => {setIsOpenUpdate(false)}}
+        data={selectedLector}
+        type="update"
       />
     </>
   );

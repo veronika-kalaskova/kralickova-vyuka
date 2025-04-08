@@ -39,6 +39,7 @@ export default function QuickActions({ coursesWithoutLector, coursesWithoutStude
           isOpen={isOpen}
           courses={coursesWithoutLector}
           onClose={() => setIsOpen(false)}
+          type="create"
         />
       )}
 

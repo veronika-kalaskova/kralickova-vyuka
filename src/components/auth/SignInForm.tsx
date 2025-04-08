@@ -53,7 +53,7 @@ const SignInForm = () => {
       >
         {/* LOGO */}
         <div className="flex items-center justify-center gap-2">
-          <Image src="logo.svg" alt="logo" height={110} width={75} />
+          <Image src="/logo.svg" alt="logo" height={110} width={110} />
           <h1 className="text-2xl font-bold">Králíčkova výuka jazyků</h1>
         </div>
 

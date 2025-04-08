@@ -22,7 +22,7 @@ export default function Navbar({ session, userRole }: Props) {
     <div className="z-10 flex items-center justify-between p-4 shadow-xs">
       {/* LOGO */}
       <Link href="/" className="hidden items-center gap-2 sm:flex">
-        <Image src="logo.svg" alt="logo" height={110} width={75} />
+        <Image src="/logo.svg" alt="logo" height={110} width={75} />
         <h1 className="font-bold">Králíčková výuka jazyků</h1>
       </Link>
 
