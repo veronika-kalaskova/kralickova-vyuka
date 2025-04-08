@@ -165,7 +165,7 @@ export default function CreateLectorModal({
 
   return (
     <div className="fixed inset-0 z-10 flex items-center justify-center bg-[rgba(0,0,0,0.49)]">
-      <div className="h-full w-full overflow-auto bg-white p-6 shadow-md sm:h-auto sm:max-w-xl md:rounded-md">
+      <div className="max-h-screen w-full overflow-y-auto bg-white p-6 shadow-md sm:h-auto sm:max-w-xl md:rounded-md">
         {type === "update" && <h2 className="title">Upravit lektora</h2>}
         {type === "create" && <h2 className="title">Vytvořit lektora</h2>}
         <form onSubmit={handleSubmit(onSubmit)}>
