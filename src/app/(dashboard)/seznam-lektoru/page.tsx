@@ -1,4 +1,4 @@
-import Table from "@/components/table/TableLector";
+import TableLector from "@/components/table/TableLector";
 import { prisma } from "@/lib/db";
 import React from "react";
 
@@ -36,6 +36,6 @@ export default async function SeznamLektoru() {
   });
 
   return (
-    <Table data={allLectors} coursesWithoutLector={coursesWithoutLector} />
+    <TableLector data={allLectors} coursesWithoutLector={coursesWithoutLector} />
   );
 }

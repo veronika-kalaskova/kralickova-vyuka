@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import Image from "next/image";
 import Button from "../Button";
 import CreateLectorModal from "../auth/CreateLectorModal";
+import Link from "next/link";
 
 // TODO: search input
 // TODO: prejit na profil lektora link
@@ -25,7 +26,7 @@ interface Props {
   coursesWithoutLector: (Course & { group: Group | null })[];
 }
 
-export default function Table({ data, coursesWithoutLector }: Props) {
+export default function TableLector({ data, coursesWithoutLector }: Props) {
   const [isOpen, setIsOpen] = useState(false);
 
   const openModal = () => {
@@ -41,19 +42,19 @@ export default function Table({ data, coursesWithoutLector }: Props) {
   const [selectedLector, setSelectedLector] = useState<Lector | null>(null);
 
   const sortedData = [...data].sort(
-    (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+    (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime(),
   );
 
   const handleDelete = async (id: number) => {
-    const confirmed = confirm("Opravdu chceš smazat tohoto lektora?");
+    const confirmed = confirm("Opravdu chcete smazat tohoto lektora?");
     if (!confirmed) return;
-  
+
     const response = await fetch("/api/user/delete", {
       method: "PUT",
       body: JSON.stringify({ id }),
       headers: { "Content-Type": "application/json" },
     });
-  
+
     if (response.ok) {
       window.location.reload();
     } else {
@@ -66,7 +67,6 @@ export default function Table({ data, coursesWithoutLector }: Props) {
       <div className="flex flex-col p-4">
         <div className="mb-4 flex items-center justify-between">
           <h1 className="title mb-0">Přehled lektorů</h1>
-
           <button
             onClick={() => openModal()}
             className="cursor-pointer rounded-lg bg-orange-400 px-4 py-3 font-medium text-white transition-all hover:bg-orange-500"
@@ -118,9 +118,12 @@ export default function Table({ data, coursesWithoutLector }: Props) {
                           height={20}
                         />
                       </button>
-                      <button className="hidden transform cursor-pointer rounded-full bg-orange-100 px-3 py-2 text-xs font-semibold transition-all duration-300 hover:bg-[#FFE3C5] md:block">
-                        Přejít na profil
-                      </button>
+                      <Link href={`/seznam-lektoru/${lector.id}`}>
+                        <button className="hidden transform cursor-pointer rounded-full bg-orange-100 px-3 py-2 text-xs font-semibold transition-all duration-300 hover:bg-[#FFE3C5] md:block">
+                          Přejít na profil
+                        </button>
+                      </Link>
+
                       <button
                         className="transform cursor-pointer rounded-full px-2 py-2 transition-all duration-300 hover:bg-orange-200"
                         onClick={() => openModalUpdate(lector)}
@@ -132,7 +135,12 @@ export default function Table({ data, coursesWithoutLector }: Props) {
                           height={20}
                         />
                       </button>
-                      <button className="transform cursor-pointer rounded-full px-2 py-2 transition-all duration-300 hover:bg-red-300" onClick={() => {handleDelete(lector.id)}}>
+                      <button
+                        className="transform cursor-pointer rounded-full px-2 py-2 transition-all duration-300 hover:bg-red-300"
+                        onClick={() => {
+                          handleDelete(lector.id);
+                        }}
+                      >
                         <Image
                           src="/trash.svg"
                           alt="delete"
@@ -159,7 +167,9 @@ export default function Table({ data, coursesWithoutLector }: Props) {
         roleId={2}
         isOpen={isOpenUpdate}
         courses={coursesWithoutLector}
-        onClose={() => {setIsOpenUpdate(false)}}
+        onClose={() => {
+          setIsOpenUpdate(false);
+        }}
         data={selectedLector}
         type="update"
       />
