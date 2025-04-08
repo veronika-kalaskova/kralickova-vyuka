@@ -5,8 +5,6 @@ import Image from "next/image";
 import Button from "../Button";
 import CreateLectorModal from "../auth/CreateLectorModal";
 
-// TODO: delete
-// TODO: edit
 // TODO: search input
 // TODO: prejit na profil lektora link
 // TODO: pagination
@@ -42,12 +40,26 @@ export default function Table({ data, coursesWithoutLector }: Props) {
 
   const [selectedLector, setSelectedLector] = useState<Lector | null>(null);
 
-  console.log(selectedLector)
-
   const sortedData = [...data].sort(
     (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
   );
+
+  const handleDelete = async (id: number) => {
+    const confirmed = confirm("Opravdu chceš smazat tohoto lektora?");
+    if (!confirmed) return;
   
+    const response = await fetch("/api/user/delete", {
+      method: "PUT",
+      body: JSON.stringify({ id }),
+      headers: { "Content-Type": "application/json" },
+    });
+  
+    if (response.ok) {
+      window.location.reload();
+    } else {
+      alert("Chyba při mazání lektora.");
+    }
+  };
 
   return (
     <>
@@ -106,7 +118,7 @@ export default function Table({ data, coursesWithoutLector }: Props) {
                           height={20}
                         />
                       </button>
-                      <button className="hidden transform cursor-pointer rounded-full bg-orange-100 px-3 py-2 text-xs font-semibold transition-all duration-300 hover:bg-orange-200 md:block">
+                      <button className="hidden transform cursor-pointer rounded-full bg-orange-100 px-3 py-2 text-xs font-semibold transition-all duration-300 hover:bg-[#FFE3C5] md:block">
                         Přejít na profil
                       </button>
                       <button
@@ -120,7 +132,7 @@ export default function Table({ data, coursesWithoutLector }: Props) {
                           height={20}
                         />
                       </button>
-                      <button className="transform cursor-pointer rounded-full px-2 py-2 transition-all duration-300 hover:bg-red-300">
+                      <button className="transform cursor-pointer rounded-full px-2 py-2 transition-all duration-300 hover:bg-red-300" onClick={() => {handleDelete(lector.id)}}>
                         <Image
                           src="/trash.svg"
                           alt="delete"

@@ -63,7 +63,7 @@ export default function CreateLectorModal({
   const selectedCourses = watch("courseIds") || [];
 
   useEffect(() => {
-    if (firstName && lastName) {
+    if (firstName && lastName && type === "create") {
       const suggestedUsername = `${firstName
         .toLowerCase()
         .normalize("NFD")
@@ -125,18 +125,21 @@ export default function CreateLectorModal({
 
   const onSubmit = async (values: z.infer<typeof FormSchema>) => {
     const courseIds = values.courseIds?.map((id) => parseInt(id, 10));
-  
-    const body = type === "update" 
-      ? JSON.stringify({ ...values, id: data?.id, roleId, courseIds })
-      : JSON.stringify({ ...values, roleId, courseIds });
-    
+
+    const body =
+      type === "update"
+        ? JSON.stringify({ ...values, id: data?.id, roleId, courseIds })
+        : JSON.stringify({ ...values, roleId, courseIds });
+
     const method = type === "update" ? "PUT" : "POST";
-    
+
     const response = await fetch("/api/user", {
       method,
       body,
       headers: { "Content-Type": "application/json" },
     });
+
+    console.log(response);
 
     if (response.ok) {
       onClose();
@@ -151,6 +154,7 @@ export default function CreateLectorModal({
             ? "Chyba při úpravě uživatele."
             : "Chyba při vytváření uživatele.",
         );
+        console.log(errorData);
       }
     }
   };

@@ -5,6 +5,7 @@ import React from "react";
 export default async function SeznamLektoru() {
   const allLectors = await prisma.user.findMany({
     where: {
+      deletedAt: null,
       UserRole: {
         some: {
           roleId: 2,
@@ -25,14 +26,16 @@ export default async function SeznamLektoru() {
     },
   });
 
-    const coursesWithoutLector = await prisma.course.findMany({
-      where: {
-        teacherId: null
-      },
-      include: {
-        group: true
-      }
-    });
+  const coursesWithoutLector = await prisma.course.findMany({
+    where: {
+      teacherId: null,
+    },
+    include: {
+      group: true,
+    },
+  });
 
-  return <Table data={allLectors} coursesWithoutLector={coursesWithoutLector} />;
+  return (
+    <Table data={allLectors} coursesWithoutLector={coursesWithoutLector} />
+  );
 }

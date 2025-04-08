@@ -25,13 +25,13 @@ export const authOptions: NextAuthOptions = {
           return null;
         }
 
-        const existingUser = await db.user.findUnique({
+        const existingUser = await db.user.findFirst({
           where: {
             username: credentials?.username,
           },
         });
 
-        if (!existingUser) {
+        if (!existingUser || existingUser.deletedAt) {
           return null;
         }
 

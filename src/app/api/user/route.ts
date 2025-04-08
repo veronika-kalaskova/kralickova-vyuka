@@ -20,9 +20,14 @@ export async function POST(req: Request) {
 
     const existingUser = await db.user.findFirst({
       where: {
-        OR: [{ username: username }, { email: email }],
+        OR: [
+          { username: username, deletedAt: null },
+          { email: email, deletedAt: null },
+        ],
       },
     });
+
+    console.log(existingUser);
 
     if (existingUser) {
       return NextResponse.json(
@@ -91,8 +96,12 @@ export async function PUT(req: Request) {
       where: {
         AND: [
           { id: { not: id } },
+
           {
-            OR: [{ username: username }, { email: email }],
+            OR: [
+              { username: username, deletedAt: null },
+              { email: email, deletedAt: null },
+            ],
           },
         ],
       },
