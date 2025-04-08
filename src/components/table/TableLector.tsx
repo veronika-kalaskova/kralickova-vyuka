@@ -5,7 +5,7 @@ import Image from "next/image";
 import Button from "../Button";
 import CreateLectorModal from "../auth/CreateLectorModal";
 import Link from "next/link";
-
+import SearchInput from "../SearchInput";
 // TODO: search input
 // TODO: prejit na profil lektora link
 // TODO: pagination
@@ -45,6 +45,25 @@ export default function TableLector({ data, coursesWithoutLector }: Props) {
     (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime(),
   );
 
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const handleSearch = (query: string) => {
+    setSearchQuery(
+      query
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .toLowerCase(),
+    );
+  };
+
+  const filteredData = sortedData.filter((lector) =>
+    `${lector.firstName} ${lector.lastName}`
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .toLowerCase()
+      .includes(searchQuery),
+  );
+
   const handleDelete = async (id: number) => {
     const confirmed = confirm("Opravdu chcete smazat tohoto lektora?");
     if (!confirmed) return;
@@ -74,6 +93,9 @@ export default function TableLector({ data, coursesWithoutLector }: Props) {
             Přidat lektora
           </button>
         </div>
+        <div className="">
+          <SearchInput searchForQuery={handleSearch} />
+        </div>
         <div className="overflow-x-auto">
           <table className="w-full rounded-md text-sm">
             <thead className="text-left text-xs text-gray-500 uppercase">
@@ -85,7 +107,7 @@ export default function TableLector({ data, coursesWithoutLector }: Props) {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
-              {sortedData.map((lector) => (
+              {filteredData.map((lector) => (
                 <tr key={lector.id} className="odd:bg-gray-50 even:bg-white">
                   <td className="px-3 py-2 font-semibold">
                     {lector.firstName} {lector.lastName}

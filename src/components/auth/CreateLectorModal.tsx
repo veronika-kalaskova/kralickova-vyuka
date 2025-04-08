@@ -4,6 +4,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Course, Group } from "@prisma/client";
 
+// TODO: prejmenovat na createUpdateModal a presunout do forms slozky
+
 interface Lector {
   id: number;
   firstName: string;
