@@ -1,34 +1,31 @@
 "use client";
-import { Group, User, Course } from "@prisma/client";
+import { Group, User, Course, StudentGroup } from "@prisma/client";
 import React, { useState } from "react";
 import Image from "next/image";
 import Button from "../Button";
 import CreateLectorModal from "../auth/CreateLectorModal";
 import Link from "next/link";
 import SearchInput from "../SearchInput";
+import CreateStudentModal from "../auth/CreateStudentModal";
 // TODO: zapomnela jsem dat link i na mobilu (id lektor)
 // TODO: pagination
 
-interface Lector {
-  id: number;
-  firstName: string;
-  lastName: string;
-  username: string;
-  phone: string | null;
-  email: string | null;
-  createdAt: Date;
-  CoursesTaught?: Course[];
-}
-
 interface Props {
-  data: Lector[];
-  coursesWithoutLector: (Course & { group: Group | null })[];
+  data: (User & {
+    CoursesTaken?: (Course & { group?: Group | null })[];
+    StudentGroup?: (StudentGroup & {
+      group: Group & {
+        Course: Course[];
+      };
+    })[];
+  })[];
+  coursesWithoutStudent: (Course & { group: Group | null })[];
   roles?: string[];
 }
 
-export default function TableLector({
+export default function TableStudent({
   data,
-  coursesWithoutLector,
+  coursesWithoutStudent,
   roles,
 }: Props) {
   const [isOpen, setIsOpen] = useState(false);
@@ -39,10 +36,10 @@ export default function TableLector({
 
   const isAdmin = roles?.includes("admin");
 
-  const [selectedLector, setSelectedLector] = useState<Lector | null>(null);
+  const [selectedStudent, setSelectedStudent] = useState<User | null>(null);
   const [isOpenUpdate, setIsOpenUpdate] = useState(false);
-  const openModalUpdate = (lector: Lector) => {
-    setSelectedLector(lector);
+  const openModalUpdate = (student: User) => {
+    setSelectedStudent(student);
     setIsOpenUpdate(true);
   };
 
@@ -61,8 +58,8 @@ export default function TableLector({
     );
   };
 
-  const filteredData = sortedData.filter((lector) =>
-    `${lector.firstName} ${lector.lastName}`
+  const filteredData = sortedData.filter((student) =>
+    `${student.firstName} ${student.lastName}`
       .normalize("NFD")
       .replace(/[\u0300-\u036f]/g, "")
       .toLowerCase()
@@ -70,10 +67,10 @@ export default function TableLector({
   );
 
   const handleDelete = async (id: number) => {
-    const confirmed = confirm("Opravdu chcete smazat tohoto lektora?");
+    const confirmed = confirm("Opravdu chcete smazat tohoto studenta?");
     if (!confirmed) return;
 
-    const response = await fetch("/api/user/delete", {
+    const response = await fetch("/api/student/delete", {
       method: "PUT",
       body: JSON.stringify({ id }),
       headers: { "Content-Type": "application/json" },
@@ -82,7 +79,7 @@ export default function TableLector({
     if (response.ok) {
       window.location.reload();
     } else {
-      alert("Chyba při mazání lektora.");
+      alert("Chyba při mazání studenta.");
     }
   };
 
@@ -90,13 +87,13 @@ export default function TableLector({
     <>
       <div className="flex flex-col p-4">
         <div className="mb-4 flex items-center justify-between">
-          <h1 className="title mb-0">Přehled lektorů</h1>
+          <h1 className="title mb-0">Přehled studentů</h1>
           {isAdmin && (
             <button
               onClick={() => openModal()}
               className="cursor-pointer rounded-lg bg-orange-400 px-4 py-3 font-medium text-white transition-all hover:bg-orange-500"
             >
-              Přidat lektora
+              Přidat studenta
             </button>
           )}
         </div>
@@ -114,32 +111,44 @@ export default function TableLector({
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
-              {filteredData.map((lector) => (
-                <tr key={lector.id} className="odd:bg-gray-50 even:bg-white">
+              {filteredData.map((student) => (
+                <tr key={student.id} className="odd:bg-gray-50 even:bg-white">
                   <td className="px-3 py-2 font-semibold">
-                    {lector.firstName} {lector.lastName}
+                    {student.firstName} {student.lastName}
                   </td>
 
                   <td className="hidden px-3 py-2 md:table-cell">
-                    {lector.email}
+                    {student.email}
                   </td>
 
                   <td className="hidden px-3 py-2 md:table-cell">
                     <div className="flex flex-wrap gap-1">
-                      {lector.CoursesTaught?.map((course, index) => (
-                        <span
-                          key={index}
-                          className="inline-block rounded-full bg-[#FFE3C5] px-3 py-1 text-xs font-semibold"
-                        >
-                          {course.name}
-                        </span>
-                      ))}
+                      {student.CoursesTaken?.map(
+                        (course: Course, index: number) => (
+                          <span
+                            key={index}
+                            className="inline-block rounded-full bg-[#FFE3C5] px-3 py-1 text-xs font-semibold"
+                          >
+                            {course.name}
+                          </span>
+                        ),
+                      )}
+                      {student.StudentGroup?.flatMap((studentGroup) =>
+                        studentGroup.group.Course.map((course, index) => (
+                          <span
+                            key={course.id}
+                            className="inline-block rounded-full bg-[#FFE3C5] px-3 py-1 text-xs font-semibold"
+                          >
+                            {course.name}
+                          </span>
+                        )),
+                      )}
                     </div>
                   </td>
 
                   <td className="px-3 py-2">
                     <div className="flex flex-wrap justify-end gap-2">
-                      <Link href={`/seznam-lektoru/${lector.id}`}>
+                      <Link href={`/seznam-studentu/${student.id}`}>
                         <button className="transform cursor-pointer rounded-full px-2 py-2 transition-all duration-300 hover:bg-orange-200 md:hidden">
                           <Image
                             src="/user-circle.svg"
@@ -149,17 +158,16 @@ export default function TableLector({
                           />
                         </button>
                       </Link>
-                      <Link href={`/seznam-lektoru/${lector.id}`}>
+                      <Link href={`/seznam-studentu/${student.id}`}>
                         <button className="hidden transform cursor-pointer rounded-full bg-orange-100 px-3 py-2 text-xs font-semibold transition-all duration-300 hover:bg-[#FFE3C5] md:block">
                           Přejít na profil
                         </button>
                       </Link>
-
                       {isAdmin && (
                         <>
                           <button
                             className="transform cursor-pointer rounded-full px-2 py-2 transition-all duration-300 hover:bg-orange-200"
-                            onClick={() => openModalUpdate(lector)}
+                            onClick={() => openModalUpdate(student)}
                           >
                             <Image
                               src="/edit.svg"
@@ -168,11 +176,10 @@ export default function TableLector({
                               height={20}
                             />
                           </button>
-
                           <button
                             className="transform cursor-pointer rounded-full px-2 py-2 transition-all duration-300 hover:bg-red-300"
                             onClick={() => {
-                              handleDelete(lector.id);
+                              handleDelete(student.id);
                             }}
                           >
                             <Image
@@ -192,21 +199,21 @@ export default function TableLector({
           </table>
         </div>
       </div>
-      <CreateLectorModal
-        roleId={2}
+      <CreateStudentModal
+        roleId={3}
         isOpen={isOpen}
-        courses={coursesWithoutLector}
+        courses={coursesWithoutStudent}
         onClose={() => setIsOpen(false)}
         type="create"
       />
-      <CreateLectorModal
-        roleId={2}
+      <CreateStudentModal
+        roleId={3}
         isOpen={isOpenUpdate}
-        courses={coursesWithoutLector}
+        courses={coursesWithoutStudent}
         onClose={() => {
           setIsOpenUpdate(false);
         }}
-        data={selectedLector}
+        data={selectedStudent}
         type="update"
       />
     </>

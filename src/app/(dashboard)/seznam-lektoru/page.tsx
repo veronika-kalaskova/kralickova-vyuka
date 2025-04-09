@@ -1,5 +1,7 @@
 import TableLector from "@/components/table/TableLector";
+import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/db";
+import { getServerSession } from "next-auth";
 import React from "react";
 
 export default async function SeznamLektoru() {
@@ -35,7 +37,13 @@ export default async function SeznamLektoru() {
     },
   });
 
+  const session = await getServerSession(authOptions);
+
   return (
-    <TableLector data={allLectors} coursesWithoutLector={coursesWithoutLector} />
+    <TableLector
+      data={allLectors}
+      coursesWithoutLector={coursesWithoutLector}
+      roles={session?.user.roles}
+    />
   );
 }

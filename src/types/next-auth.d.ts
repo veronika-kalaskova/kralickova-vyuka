@@ -4,13 +4,15 @@ declare module "next-auth" {
     username: string;
     firstName: string;
     lastName: string;
+    roles: string[];
   }
   interface Session {
-    user: User & { username: string; firstName: string; lastName: string };
+    user: User & { username: string; firstName: string; lastName: string, roles: string[] };
     token: {
       username: string;
       firstName: string;
       lastName: string;
+      roles: string[];
     };
   }
 }

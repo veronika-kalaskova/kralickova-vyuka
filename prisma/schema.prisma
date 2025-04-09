@@ -24,13 +24,13 @@ model User {
   deletedAt   DateTime?
 
   UserRole       UserRole[]
-  Group          Group[]
+  Group          Group[] // jake skupiny lektor uci
   StudentGroup   StudentGroup[]
   Attendance     Attendance[]
   Comment        Comment[]
   Replacement    Replacement[]
   CoursesTaught  Course[] @relation("TeacherCourse")
-  CoursesTaken   Course[] @relation("StudentCourse")
+  CoursesTaken   Course[] @relation("StudentCourse") // individualni kurzy
 }
 
 model Role {

@@ -103,3 +103,103 @@ export async function POST(req: Request) {
     return NextResponse.json({ message: "Error" }, { status: 500 });
   }
 }
+
+export async function PUT(req: Request) {
+  try {
+    const body = await req.json();
+    const {
+      id,
+      username,
+      firstName,
+      lastName,
+      phone,
+      email,
+      courseIds,
+      roleId,
+      studentClass,
+      pickup,
+    } = body;
+
+    const existingUser = await db.user.findFirst({
+      where: {
+        AND: [
+          { id: { not: id } },
+          {
+            OR: [
+              { username: username, deletedAt: null },
+              { email: email, deletedAt: null },
+            ],
+          },
+        ],
+      },
+    });
+
+    if (existingUser) {
+      return NextResponse.json(
+        { message: "user exists" },
+        { status: 409 },
+      );
+    }
+
+    const updatedUser = await db.user.update({
+      where: { id: id },
+      data: {
+        username,
+        firstName,
+        lastName,
+        phone,
+        email,
+        class: studentClass,
+        pickup: pickup
+      },
+    });
+
+    const individualCourses = await db.course.findMany({
+      where: {
+        id: { in: courseIds },
+        isIndividual: true,
+      },
+    });
+
+    await db.user.update({
+      where: { id },
+      data: {
+        CoursesTaken: {
+          set: individualCourses.map((course) => ({ id: course.id })),
+        },
+      },
+    });
+
+    const groups = await db.group.findMany({
+      where: {
+        Course: {
+          some: {
+            id: { in: courseIds },
+          },
+        },
+      },
+      select: { id: true },
+    });
+
+    await db.studentGroup.deleteMany({
+      where: { studentId: id },
+    });
+
+    if (groups.length > 0) {
+      await db.studentGroup.createMany({
+        data: groups.map((group) => ({
+          studentId: id,
+          groupId: group.id,
+        })),
+      });
+    }
+
+    return NextResponse.json(
+      { user: updatedUser, message: "uzivatel upraven" },
+      { status: 200 },
+    );
+  } catch (error) {
+    console.error(error);
+    return NextResponse.json({ message: "Error" }, { status: 500 });
+  }
+}

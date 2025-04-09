@@ -145,7 +145,7 @@ export async function PUT(req: Request) {
       { status: 200 },
     );
   } catch (error) {
-    console.error(error); // Pro lepší debugování
+    console.error(error);
     return NextResponse.json({ message: "Error" }, { status: 500 });
   }
 }

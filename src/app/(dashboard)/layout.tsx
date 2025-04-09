@@ -33,6 +33,7 @@ export default async function DashboardLayout({
     redirect("/prihlaseni");
   }
   
+  // TODO: zmena kodu, ted uz uchovavam role primo v session
   let userRole = null;
 
   if (session?.user?.id) {

@@ -2,27 +2,17 @@ import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { Course, Group } from "@prisma/client";
+import { Course, Group, User } from "@prisma/client";
 
-const FormSchema = z.object({
-  firstName: z.string().min(1, "Jméno je povinné"),
-  lastName: z.string().min(1, "Příjmení je povinné"),
-  username: z.string().min(1, "Uživatelské jméno je povinné"),
-  password: z.string().min(1, "Heslo je povinné"),
-  phone: z.string().min(1, "Telefon je povinný"),
-  email: z.string().email("Neplatná e-mailová adresa"),
-  courseType: z.enum(["individual", "pair", "group"]).optional(),
-  courseIds: z.array(z.string()).optional(),
-  groupIds: z.array(z.string()).optional(),
-  class: z.string(),
-  pickup: z.boolean(),
-});
+// TODO: prejmenovat na createUpdateModal a presunout do forms slozky
 
 interface Props {
   roleId: number;
   isOpen: boolean;
   onClose: () => void;
   courses: (Course & { group: Group | null })[];
+  data?: (User & { CoursesTaken?: Course[] }) | null;
+  type?: string;
 }
 
 export default function CreateStudentModal({
@@ -30,18 +20,36 @@ export default function CreateStudentModal({
   isOpen,
   onClose,
   courses,
+  data,
+  type,
 }: Props) {
+  const FormSchema = z.object({
+    firstName: z.string().min(1, "Jméno je povinné"),
+    lastName: z.string().min(1, "Příjmení je povinné"),
+    username: z.string().min(1, "Uživatelské jméno je povinné"),
+    password:
+      type === "create"
+        ? z.string().min(1, "Heslo je povinné")
+        : z.string().optional(),
+    phone: z.string().min(1, "Telefon je povinný"),
+    email: z.string().email("Neplatná e-mailová adresa"),
+    courseType: z.enum(["individual", "pair", "group"]).optional(),
+    courseIds: z.array(z.string()).optional(),
+    groupIds: z.array(z.string()).optional(),
+    class: z.string(),
+    pickup: z.boolean(),
+  });
+
   const {
     register,
     handleSubmit,
     formState: { errors },
     watch,
     setValue,
+    reset,
   } = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
     defaultValues: {
-      username: "",
-      password: "",
       courseType: "individual",
       pickup: false,
     },
@@ -56,7 +64,7 @@ export default function CreateStudentModal({
   const selectedCourses = watch("courseIds") || [];
 
   useEffect(() => {
-    if (firstName && lastName) {
+    if (firstName && lastName && type === "create") {
       const suggestedUsername = `${firstName.toLowerCase()}.${lastName
         .toLowerCase()
         .normalize("NFD")
@@ -99,12 +107,35 @@ export default function CreateStudentModal({
     setValue("password", password);
   };
 
+  useEffect(() => {
+    if (data && isOpen) {
+      reset({
+        firstName: data.firstName || "",
+        lastName: data.lastName || "",
+        username: data.username || "",
+        phone: data.phone || "",
+        email: data.email || "",
+        class: data.class || "",
+        pickup: data.pickup || false,
+        courseIds:
+          data.CoursesTaken?.map((course) => course.id.toString()) || [],
+      });
+    }
+  }, [data, isOpen, reset]);
+
   const onSubmit = async (values: z.infer<typeof FormSchema>) => {
     const courseIds = values.courseIds?.map((id) => parseInt(id, 10));
 
+    const body =
+      type === "update"
+        ? JSON.stringify({ ...values, id: data?.id, roleId, courseIds })
+        : JSON.stringify({ ...values, roleId, courseIds });
+
+    const method = type === "update" ? "PUT" : "POST";
+
     const response = await fetch("/api/student", {
-      method: "POST",
-      body: JSON.stringify({ ...values, roleId: roleId, courseIds: courseIds }),
+      method,
+      body,
       headers: { "Content-Type": "application/json" },
     });
 
@@ -116,7 +147,11 @@ export default function CreateStudentModal({
       if (errorData.message === "User exists") {
         setMessage("Uživatel s tímto jménem nebo e-mailem již existuje.");
       } else {
-        setMessage("Chyba při vytváření uživatele.");
+        setMessage(
+          type === "update"
+            ? "Chyba při úpravě uživatele."
+            : "Chyba při vytváření uživatele.",
+        );
       }
     }
   };
@@ -150,7 +185,8 @@ export default function CreateStudentModal({
   return (
     <div className="fixed inset-0 z-10 flex items-center justify-center bg-[#0000007e]">
       <div className="h-full w-full overflow-auto bg-white p-6 shadow-md md:h-auto md:max-h-screen md:max-w-2xl md:rounded-md">
-        <h2 className="title">Vytvořit studenta</h2>
+        {type === "update" && <h2 className="title">Upravit studenta</h2>}
+        {type === "create" && <h2 className="title">Vytvořit studenta</h2>}
         <form onSubmit={handleSubmit(onSubmit)}>
           <div className="grid w-full grid-cols-2 gap-4 md:grid-cols-3">
             <div className="mb-4 flex flex-col gap-2">
@@ -229,6 +265,7 @@ export default function CreateStudentModal({
               )}
             </div>
 
+            {type==="create" && (
             <div className="col-span-2 mb-4 flex flex-col gap-2 md:col-span-3">
               <label className="text-xs text-gray-500">Typ kurzu</label>
               <select
@@ -246,21 +283,50 @@ export default function CreateStudentModal({
               )}
             </div>
 
-            {courseType === "group" && (
+            )}
+
+            {courseType === "group" && type === "create" && (
               <CourseSelector
                 filter={(course) => !course.isIndividual && !course.isPair}
               />
             )}
-            {courseType === "individual" && (
+            {courseType === "individual" && type === "create" && (
               <CourseSelector
                 filter={(course) => course.isIndividual && !course.isPair}
                 message="Jedná se o kurzy, které již nemají přiřazeného studenta"
               />
             )}
-            {courseType === "pair" && (
+            {courseType === "pair" && type === "create" && (
               <CourseSelector
                 filter={(course) => !course.isIndividual && course.isPair}
               />
+            )}
+
+            {type === "update" && data?.CoursesTaken && (
+              <div className="col-span-3 mb-4 flex w-full flex-col gap-2">
+                <label className="text-xs text-gray-500">Kurzy studenta</label>
+                <select
+                  multiple
+                  {...register("courseIds")}
+                  className="rounded-md border-[1.5px] border-gray-300 p-2 focus:border-orange-300"
+                >
+                  {data?.CoursesTaken.map((course) => (
+                    <option key={course.id} value={course.id}>
+                      {course.name}
+                    </option>
+                  ))}
+                  {courses.map((course) => (
+                    <option key={course.id} value={course.id}>
+                      {course.name}
+                    </option>
+                  ))}
+                </select>
+                {errors.courseIds && (
+                  <p className="text-xs text-red-500">
+                    {errors.courseIds.message}
+                  </p>
+                )}
+              </div>
             )}
 
             <div className="col-span-2 mb-4 flex flex-col gap-2 md:col-span-1">
@@ -278,31 +344,35 @@ export default function CreateStudentModal({
               )}
             </div>
 
-            <div className="col-span-2 flex flex-col gap-2">
-              <label className="text-xs text-gray-500">Heslo*</label>
-              <div className="flex gap-2">
-                <input
-                  type="text"
-                  {...register("password")}
-                  className="flex-1 rounded-md border-[1.5px] border-gray-300 p-2 focus:border-orange-300"
-                />
-                <button
-                  type="button"
-                  onClick={generatePassword}
-                  className="cursor-pointer rounded-lg bg-gray-100 px-3 py-2 font-medium text-gray-800 transition-all hover:bg-orange-100"
-                >
-                  Generovat
-                </button>
-              </div>
-              {errors.password && (
-                <p className="text-xs text-red-500">
-                  {errors.password.message}
+            {type === "create" && (
+              <div className="col-span-2 flex flex-col gap-2">
+                <label className="text-xs text-gray-500">Heslo*</label>
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    {...register("password")}
+                    className="flex-1 rounded-md border-[1.5px] border-gray-300 p-2 focus:border-orange-300"
+                  />
+
+                  <button
+                    type="button"
+                    onClick={generatePassword}
+                    className="cursor-pointer rounded-lg bg-gray-100 px-3 py-2 font-medium text-gray-800 transition-all hover:bg-orange-100"
+                  >
+                    Generovat
+                  </button>
+                </div>
+                {errors.password && (
+                  <p className="text-xs text-red-500">
+                    {errors.password.message}
+                  </p>
+                )}
+                <p className="text-xs text-gray-500">
+                  Nezapomeňte heslo a uživatelské jméno uložit a předat
+                  uživateli.
                 </p>
-              )}
-              <p className="text-xs text-gray-500">
-                Nezapomeňte heslo a uživatelské jméno uložit a předat uživateli.
-              </p>
-            </div>
+              </div>
+            )}
 
             {message && (
               <div className="col-span-2 mt-2 text-xs text-red-500 md:col-span-3">
@@ -322,7 +392,7 @@ export default function CreateStudentModal({
                 type="submit"
                 className="cursor-pointer rounded-lg bg-orange-400 px-4 py-3 font-medium text-white transition-all hover:bg-orange-500"
               >
-                Vytvořit
+                {type === "update" ? "Upravit" : "Vytvořit"}
               </button>
             </div>
           </div>

@@ -141,7 +141,7 @@ export default function CreateLectorModal({
       headers: { "Content-Type": "application/json" },
     });
 
-    console.log(response);
+
 
     if (response.ok) {
       onClose();
@@ -156,7 +156,7 @@ export default function CreateLectorModal({
             ? "Chyba při úpravě uživatele."
             : "Chyba při vytváření uživatele.",
         );
-        console.log(errorData);
+       
       }
     }
   };

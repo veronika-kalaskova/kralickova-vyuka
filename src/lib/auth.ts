@@ -29,6 +29,13 @@ export const authOptions: NextAuthOptions = {
           where: {
             username: credentials?.username,
           },
+          include: {
+            UserRole: {
+              include: {
+                role: true,
+              },
+            },
+          },
         });
 
         if (!existingUser || existingUser.deletedAt) {
@@ -44,11 +51,14 @@ export const authOptions: NextAuthOptions = {
           return null;
         }
 
+        const roles = existingUser.UserRole.map((r) => r.role.name);
+
         return {
           id: `${existingUser.id}`,
           username: existingUser.username,
           firstName: existingUser.firstName,
           lastName: existingUser.lastName,
+          roles: roles,
         };
       },
     }),
@@ -62,6 +72,7 @@ export const authOptions: NextAuthOptions = {
           username: user.username,
           firstName: user.firstName,
           lastName: user.lastName,
+          roles: user.roles
         };
       }
 
@@ -76,6 +87,7 @@ export const authOptions: NextAuthOptions = {
           username: token.username,
           firstName: token.firstName,
           lastName: token.lastName,
+          roles: token.roles,
         },
       };
     },
