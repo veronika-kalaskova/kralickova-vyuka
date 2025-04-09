@@ -22,6 +22,24 @@ export default async function Home() {
     }
   });
 
+  const coursesWithoutGroup = await prisma.course.findMany({
+    where: {
+      groupId: null,
+      isIndividual: false
+    }
+  })
+
+  const allLectors = await prisma.user.findMany({
+    where: {
+      deletedAt: null,
+      UserRole: {
+        some: {
+          roleId: 2,
+        },
+      },
+    }
+  });
+
   // const groups = await prisma.group.findMany({
   //   include: {
   //     Course: true,
@@ -36,7 +54,7 @@ export default async function Home() {
         <CalendarComponent />
       </div>
 
-      <QuickActions coursesWithoutLector={coursesWithoutLector} coursesWithoutStudent={coursesWithoutStudent} />
+      <QuickActions coursesWithoutLector={coursesWithoutLector} coursesWithoutStudent={coursesWithoutStudent} coursesWithoutGroup={coursesWithoutGroup} allLectors={allLectors} />
     </div>
   );
 }

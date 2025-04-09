@@ -53,6 +53,8 @@ model Group {
   id        Int    @id @default(autoincrement())
   teacherId Int?
   name      String
+  createdAt   DateTime @default(now())
+  deletedAt   DateTime?
 
   teacher       User?           @relation(fields: [teacherId], references: [id])
   StudentGroup  StudentGroup[]

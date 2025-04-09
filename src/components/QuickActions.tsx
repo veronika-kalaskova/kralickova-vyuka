@@ -3,20 +3,36 @@ import React, { useState } from "react";
 import Button from "./Button";
 import CreateLectorModal from "./auth/CreateLectorModal";
 import CreateStudentModal from "./auth/CreateStudentModal";
-import { Course, Group } from "@prisma/client";
+import { Course, Group, User } from "@prisma/client";
+import CreateUpdateGroupModal from "./forms/CreateUpdateGroupModal";
 
 interface Props {
   coursesWithoutLector: (Course & { group: Group | null })[];
   coursesWithoutStudent: (Course & { group: Group | null })[];
+  coursesWithoutGroup: Course[],
+  allLectors: User[];
 }
 
-export default function QuickActions({ coursesWithoutLector, coursesWithoutStudent }: Props) {
+export default function QuickActions({
+  coursesWithoutLector,
+  coursesWithoutStudent,
+  coursesWithoutGroup,
+  allLectors
+}: Props) {
   const [isOpen, setIsOpen] = useState(false);
   const [roleId, setRoleId] = useState(0);
+  const [modal, setModal] = useState("");
 
-  const openModal = (id: number) => {
+  const openUserModal = (id: number) => {
+    setModal("")
     setIsOpen(true);
     setRoleId(id);
+  };
+
+  const openModal = (name: string) => {
+    setRoleId(0)
+    setIsOpen(true);
+    setModal(name);
   };
 
   return (
@@ -26,9 +42,9 @@ export default function QuickActions({ coursesWithoutLector, coursesWithoutStude
         <h2 className="title">Rychlé akce</h2>
         <div className="flex flex-col gap-3">
           <Button title="Přidat lekci" />
-          <Button title="Vytvořit lektora" onClick={() => openModal(2)} />
-          <Button title="Vytvořit studenta" onClick={() => openModal(3)} />
-          <Button title="Přidat kurz" />
+          <Button title="Vytvořit lektora" onClick={() => openUserModal(2)} />
+          <Button title="Vytvořit studenta" onClick={() => openUserModal(3)} />
+          <Button title="Vytvořit skupinu" onClick={() => openModal("group")} />
         </div>
       </div>
 
@@ -49,6 +65,16 @@ export default function QuickActions({ coursesWithoutLector, coursesWithoutStude
           isOpen={isOpen}
           courses={coursesWithoutStudent}
           onClose={() => setIsOpen(false)}
+          type="create"
+        />
+      )}
+
+      {modal === "group" && (
+        <CreateUpdateGroupModal
+          isOpen={isOpen}
+          onClose={() => setIsOpen(false)}
+          courses={coursesWithoutGroup}
+          lectors={allLectors}
           type="create"
         />
       )}
