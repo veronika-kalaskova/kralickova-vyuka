@@ -35,6 +35,24 @@ export async function POST(req: Request) {
       );
     }
 
+    const invalidCourses = await db.course.findMany({
+      where: {
+        id: { in: courseIds },
+        OR: [{ isIndividual: false }, { isPair: true }],
+        groupId: null,
+      },
+    });
+
+    if (invalidCourses.length > 0) {
+      return NextResponse.json(
+        {
+          invalidCourses: invalidCourses,
+          message: "Group course without groupId.",
+        },
+        { status: 400 },
+      );
+    }
+
     const newUser = await db.user.create({
       data: {
         username,
@@ -135,9 +153,27 @@ export async function PUT(req: Request) {
     });
 
     if (existingUser) {
+      return NextResponse.json({ message: "user exists" }, { status: 409 });
+    }
+
+    const invalidCourses = await db.course.findMany({
+      where: {
+        id: { in: courseIds },
+        OR: [{ isIndividual: false }, { isPair: true }],
+        groupId: null,
+      },
+    });
+
+    console.log("asdho");
+    console.log(invalidCourses);
+
+    if (invalidCourses.length > 0) {
       return NextResponse.json(
-        { message: "user exists" },
-        { status: 409 },
+        {
+          invalidCourses: invalidCourses,
+          message: "Group course without groupId.",
+        },
+        { status: 400 },
       );
     }
 
@@ -150,7 +186,7 @@ export async function PUT(req: Request) {
         phone,
         email,
         class: studentClass,
-        pickup: pickup
+        pickup: pickup,
       },
     });
 

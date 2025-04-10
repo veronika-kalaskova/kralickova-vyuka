@@ -1,8 +1,12 @@
 import CalendarComponent from "@/components/Calendar";
 import QuickActions from "@/components/QuickActions";
+import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/db";
+import { getServerSession } from "next-auth";
 
 export default async function Home() {
+
+  const session = await getServerSession(authOptions);
 
   const coursesWithoutLector = await prisma.course.findMany({
     where: {
@@ -54,7 +58,7 @@ export default async function Home() {
         <CalendarComponent />
       </div>
 
-      <QuickActions coursesWithoutLector={coursesWithoutLector} coursesWithoutStudent={coursesWithoutStudent} coursesWithoutGroup={coursesWithoutGroup} allLectors={allLectors} />
+      <QuickActions roles={session?.user.roles} coursesWithoutLector={coursesWithoutLector} coursesWithoutStudent={coursesWithoutStudent} coursesWithoutGroup={coursesWithoutGroup} allLectors={allLectors} />
     </div>
   );
 }

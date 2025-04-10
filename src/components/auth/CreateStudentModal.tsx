@@ -146,6 +146,13 @@ export default function CreateStudentModal({
       const errorData = await response.json();
       if (errorData.message === "User exists") {
         setMessage("Uživatel s tímto jménem nebo e-mailem již existuje.");
+      } else if (errorData.message === "Group course without groupId.") {
+        const invalidCoursesNames = errorData.invalidCourses.map(
+          (course: Course) => course.name,
+        );
+        setMessage(
+          `Pro kurz ${invalidCoursesNames.join(", ")} není vytvořena skupina.`,
+        );
       } else {
         setMessage(
           type === "update"
@@ -265,24 +272,23 @@ export default function CreateStudentModal({
               )}
             </div>
 
-            {type==="create" && (
-            <div className="col-span-2 mb-4 flex flex-col gap-2 md:col-span-3">
-              <label className="text-xs text-gray-500">Typ kurzu</label>
-              <select
-                {...register("courseType")}
-                className="rounded-md border-[1.5px] border-gray-300 p-2 focus:border-orange-300"
-              >
-                <option value="individual">Individuální</option>
-                <option value="pair">Dvojice</option>
-                <option value="group">Skupinový</option>
-              </select>
-              {errors.courseType && (
-                <p className="text-xs text-red-500">
-                  {errors.courseType.message}
-                </p>
-              )}
-            </div>
-
+            {type === "create" && (
+              <div className="col-span-2 mb-4 flex flex-col gap-2 md:col-span-3">
+                <label className="text-xs text-gray-500">Typ kurzu</label>
+                <select
+                  {...register("courseType")}
+                  className="rounded-md border-[1.5px] border-gray-300 p-2 focus:border-orange-300"
+                >
+                  <option value="individual">Individuální</option>
+                  <option value="pair">Párový</option>
+                  <option value="group">Skupinový</option>
+                </select>
+                {errors.courseType && (
+                  <p className="text-xs text-red-500">
+                    {errors.courseType.message}
+                  </p>
+                )}
+              </div>
             )}
 
             {courseType === "group" && type === "create" && (
