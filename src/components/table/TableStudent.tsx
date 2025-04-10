@@ -147,22 +147,22 @@ export default function TableStudent({
                   </td>
 
                   <td className="px-3 py-2">
-                    <div className="flex flex-wrap justify-end gap-2">
+                    <div className="flex justify-end gap-2">
                       <Link href={`/seznam-studentu/${student.id}`}>
-                        <button className="transform cursor-pointer rounded-full px-2 py-2 transition-all duration-300 hover:bg-orange-200 md:hidden">
+                        <button className="transform cursor-pointer rounded-full px-2 py-2 transition-all duration-300 hover:bg-orange-200">
                           <Image
-                            src="/user-circle.svg"
+                            src="/arrow-right.svg"
                             alt="profile"
                             width={20}
                             height={20}
                           />
                         </button>
                       </Link>
-                      <Link href={`/seznam-studentu/${student.id}`}>
+                      {/* <Link href={`/seznam-studentu/${student.id}`}>
                         <button className="hidden transform cursor-pointer rounded-full bg-orange-100 px-3 py-2 text-xs font-semibold transition-all duration-300 hover:bg-[#FFE3C5] md:block">
                           Přejít na profil
                         </button>
-                      </Link>
+                      </Link> */}
                       {isAdmin && (
                         <>
                           <button

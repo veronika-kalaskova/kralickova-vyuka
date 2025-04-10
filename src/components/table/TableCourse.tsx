@@ -1,36 +1,24 @@
 "use client";
-import { Group, User, Course } from "@prisma/client";
+import { Group, User, Course, StudentGroup } from "@prisma/client";
 import React, { useState } from "react";
 import Image from "next/image";
 import Button from "../Button";
 import CreateLectorModal from "../auth/CreateLectorModal";
 import Link from "next/link";
 import SearchInput from "../SearchInput";
-// TODO: zapomnela jsem dat link i na mobilu (id lektor)
+import CreateStudentModal from "../auth/CreateStudentModal";
+import CreateUpdateCourseModal from "../forms/CreateUpdateCourseModal";
+import { select } from "framer-motion/client";
+
 // TODO: pagination
 
-interface Lector {
-  id: number;
-  firstName: string;
-  lastName: string;
-  username: string;
-  phone: string | null;
-  email: string | null;
-  createdAt: Date;
-  CoursesTaught?: Course[];
-}
-
 interface Props {
-  data: Lector[];
-  coursesWithoutLector: (Course & { group: Group | null })[];
+  data: (Course & { teacher: User | null } & { group: Group | null })[];
+  lectors: User[];
   roles?: string[];
 }
 
-export default function TableLector({
-  data,
-  coursesWithoutLector,
-  roles,
-}: Props) {
+export default function TableCourse({ data, roles, lectors }: Props) {
   const [isOpen, setIsOpen] = useState(false);
 
   const openModal = () => {
@@ -39,10 +27,12 @@ export default function TableLector({
 
   const isAdmin = roles?.includes("admin");
 
-  const [selectedLector, setSelectedLector] = useState<Lector | null>(null);
+  const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
+
   const [isOpenUpdate, setIsOpenUpdate] = useState(false);
-  const openModalUpdate = (lector: Lector) => {
-    setSelectedLector(lector);
+
+  const openModalUpdate = (course: Course) => {
+    setSelectedCourse(course);
     setIsOpenUpdate(true);
   };
 
@@ -61,8 +51,8 @@ export default function TableLector({
     );
   };
 
-  const filteredData = sortedData.filter((lector) =>
-    `${lector.firstName} ${lector.lastName}`
+  const filteredData = sortedData.filter((course) =>
+    `${course.name}`
       .normalize("NFD")
       .replace(/[\u0300-\u036f]/g, "")
       .toLowerCase()
@@ -70,10 +60,10 @@ export default function TableLector({
   );
 
   const handleDelete = async (id: number) => {
-    const confirmed = confirm("Opravdu chcete smazat tohoto lektora?");
+    const confirmed = confirm("Opravdu chcete smazat tento kurz?");
     if (!confirmed) return;
 
-    const response = await fetch("/api/user/delete", {
+    const response = await fetch("/api/course/delete", {
       method: "PUT",
       body: JSON.stringify({ id }),
       headers: { "Content-Type": "application/json" },
@@ -82,7 +72,7 @@ export default function TableLector({
     if (response.ok) {
       window.location.reload();
     } else {
-      alert("Chyba při mazání lektora.");
+      alert("Chyba při mazání kurzu.");
     }
   };
 
@@ -90,13 +80,13 @@ export default function TableLector({
     <>
       <div className="flex flex-col p-4">
         <div className="mb-4 flex items-center justify-between">
-          <h1 className="title mb-0">Přehled lektorů</h1>
+          <h1 className="title mb-0">Přehled kurzů</h1>
           {isAdmin && (
             <button
               onClick={() => openModal()}
               className="cursor-pointer rounded-lg bg-orange-400 px-4 py-3 font-medium text-white transition-all hover:bg-orange-500"
             >
-              Přidat lektora
+              Přidat kurz
             </button>
           )}
         </div>
@@ -108,38 +98,38 @@ export default function TableLector({
             <thead className="text-left text-xs text-gray-500 uppercase">
               <tr>
                 <th className="px-3 py-2">Jméno</th>
-                <th className="hidden px-3 py-2 md:table-cell">Email</th>
-                <th className="hidden px-3 py-2 md:table-cell">Kurzy</th>
+                <th className="hidden px-3 py-2 md:table-cell">Typ</th>
+                <th className="hidden px-3 py-2 md:table-cell">Lektor</th>
+                <th className="hidden px-3 py-2 md:table-cell">Skupina</th>
                 <th className="px-3 py-2"></th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
-              {filteredData.map((lector) => (
-                <tr key={lector.id} className="odd:bg-gray-50 even:bg-white">
-                  <td className="px-3 py-2 font-semibold">
-                    {lector.firstName} {lector.lastName}
-                  </td>
+              {filteredData.map((course) => (
+                <tr key={course.id} className="odd:bg-gray-50 even:bg-white">
+                  <td className="px-3 py-2 font-semibold">{course.name}</td>
 
                   <td className="hidden px-3 py-2 md:table-cell">
-                    {lector.email}
+                    {course.isIndividual
+                      ? "Individuální"
+                      : course.isPair
+                        ? "Párový"
+                        : "Skupinový"}
                   </td>
 
                   <td className="hidden px-3 py-2 md:table-cell">
                     <div className="flex flex-wrap gap-1">
-                      {lector.CoursesTaught?.map((course, index) => (
-                        <span
-                          key={index}
-                          className="inline-block rounded-full bg-[#FFE3C5] px-3 py-1 text-xs font-semibold"
-                        >
-                          {course.name}
-                        </span>
-                      ))}
+                      {course.teacher?.firstName} {course.teacher?.lastName}
                     </div>
+                  </td>
+
+                  <td className="hidden px-3 py-2 md:table-cell">
+                    {course.group?.name}
                   </td>
 
                   <td className="px-3 py-2">
                     <div className="flex justify-end gap-2">
-                      <Link href={`/seznam-lektoru/${lector.id}`}>
+                      <Link href={`/seznam-kurzu/${course.id}`}>
                         <button className="transform cursor-pointer rounded-full px-2 py-2 transition-all duration-300 hover:bg-orange-200">
                           <Image
                             src="/arrow-right.svg"
@@ -149,12 +139,11 @@ export default function TableLector({
                           />
                         </button>
                       </Link>
-
                       {isAdmin && (
                         <>
                           <button
                             className="transform cursor-pointer rounded-full px-2 py-2 transition-all duration-300 hover:bg-orange-200"
-                            onClick={() => openModalUpdate(lector)}
+                            onClick={() => openModalUpdate(course)}
                           >
                             <Image
                               src="/edit.svg"
@@ -163,11 +152,10 @@ export default function TableLector({
                               height={20}
                             />
                           </button>
-
                           <button
                             className="transform cursor-pointer rounded-full px-2 py-2 transition-all duration-300 hover:bg-red-300"
                             onClick={() => {
-                              handleDelete(lector.id);
+                              handleDelete(course.id);
                             }}
                           >
                             <Image
@@ -187,21 +175,17 @@ export default function TableLector({
           </table>
         </div>
       </div>
-      <CreateLectorModal
-        roleId={2}
+      <CreateUpdateCourseModal
         isOpen={isOpen}
-        courses={coursesWithoutLector}
         onClose={() => setIsOpen(false)}
         type="create"
+        lectors={lectors}
       />
-      <CreateLectorModal
-        roleId={2}
+      <CreateUpdateCourseModal
         isOpen={isOpenUpdate}
-        courses={coursesWithoutLector}
-        onClose={() => {
-          setIsOpenUpdate(false);
-        }}
-        data={selectedLector}
+        onClose={() => setIsOpen(false)}
+        lectors={lectors}
+        data={selectedCourse}
         type="update"
       />
     </>
