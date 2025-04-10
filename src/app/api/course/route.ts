@@ -55,3 +55,45 @@ export async function POST(req: Request) {
     );
   }
 }
+
+export async function PUT(req: Request) {
+  try {
+    const body = await req.json();
+    const { id, name, description, textbook, teacherId, startDate, endDate } =
+      body;
+
+    const existingCourse = await db.course.findFirst({
+      where: {
+        name,
+        deletedAt: null,
+        id: {
+          not: id,
+        },
+      },
+    });
+
+    if (existingCourse) {
+      return NextResponse.json({ message: "Course exists" }, { status: 409 });
+    }
+
+    const updatedCourse = await db.course.update({
+      where: { id: id },
+      data: {
+        name,
+        description,
+        textbook,
+        teacherId: parseInt(teacherId),
+        startDate: new Date(startDate),
+        endDate: new Date(endDate),
+      },
+    });
+
+    return NextResponse.json(
+      { course: updatedCourse, message: "kurz upraven" },
+      { status: 200 },
+    );
+  } catch (error) {
+    console.error(error);
+    return NextResponse.json({ message: "Error" }, { status: 500 });
+  }
+}

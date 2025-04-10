@@ -22,11 +22,17 @@ export default async function SeznamStudentu() {
         },
       },
       CoursesTaken: {
+        where: {
+          deletedAt: null,
+        },
         include: {
           group: true,
         },
       },
       StudentGroup: {
+        where: {
+          deletedAt: null,
+        },
         include: {
           group: {
             include: {

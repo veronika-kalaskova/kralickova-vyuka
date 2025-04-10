@@ -183,7 +183,7 @@ export default function TableCourse({ data, roles, lectors }: Props) {
       />
       <CreateUpdateCourseModal
         isOpen={isOpenUpdate}
-        onClose={() => setIsOpen(false)}
+        onClose={() => setIsOpenUpdate(false)}
         lectors={lectors}
         data={selectedCourse}
         type="update"

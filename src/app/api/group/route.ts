@@ -58,65 +58,42 @@ export async function POST(req: Request) {
 //     const body = await req.json();
 //     const {
 //       id,
-//       username,
-//       firstName,
-//       lastName,
-//       phone,
-//       email,
-//       courseIds,
-//       roleId,
+//       name,
+//       description,
+//       textbook,
+//       teacherId,
+//       startDate,
+//       endDate,
 //     } = body;
 
-//     const existingUser = await db.user.findFirst({
+//     const existingCourse = await db.course.findFirst({
 //       where: {
-//         AND: [
-//           { id: { not: id } },
-
-//           {
-//             OR: [
-//               { username: username, deletedAt: null },
-//               { email: email, deletedAt: null },
-//             ],
-//           },
-//         ],
+//         name,
+//         deletedAt: null,
+//         id: {
+//           not: id,
+//         },
 //       },
 //     });
 
-//     if (existingUser) {
-//       return NextResponse.json(
-//         {
-//           message: "User exists",
-//         },
-//         { status: 409 },
-//       );
+//     if (existingCourse) {
+//       return NextResponse.json({ message: "Course exists" }, { status: 409 });
 //     }
 
-//     await db.group.updateMany({
-//       where: { teacherId: id },
-//       data: { teacherId: null },
-//     });
-
-//     const updatedUser = await db.user.update({
+//     const updatedCourse = await db.course.update({
 //       where: { id: id },
 //       data: {
-//         username,
-//         firstName,
-//         lastName,
-//         phone,
-//         email,
-//         CoursesTaught: {
-//           set: courseIds.map((courseId: number) => ({ id: courseId })),
-//         },
+//         name,
+//         description,
+//         textbook,
+//         teacherId: parseInt(teacherId),
+//         startDate: new Date(startDate),
+//         endDate: new Date(endDate),
 //       },
-//     });
-
-//     await db.group.updateMany({
-//       where: { Course: { some: { id: { in: courseIds } } } },
-//       data: { teacherId: id },
 //     });
 
 //     return NextResponse.json(
-//       { user: updatedUser, message: "uzivatel upraven" },
+//       { course: updatedCourse, message: "kurz upraven" },
 //       { status: 200 },
 //     );
 //   } catch (error) {

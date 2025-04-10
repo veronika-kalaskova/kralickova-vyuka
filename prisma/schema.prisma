@@ -11,61 +11,61 @@ datasource db {
 }
 
 model User {
-  id          Int       @id @default(autoincrement())
-  username    String    
-  password    String
-  firstName   String
-  lastName    String
-  phone       String?
-  email       String?
-  class       String?
-  pickup      Boolean?
-  createdAt   DateTime @default(now())
-  deletedAt   DateTime?
+  id        Int       @id @default(autoincrement())
+  username  String
+  password  String
+  firstName String
+  lastName  String
+  phone     String?
+  email     String?
+  class     String?
+  pickup    Boolean?
+  createdAt DateTime  @default(now())
+  deletedAt DateTime?
 
-  UserRole       UserRole[]
-  Group          Group[] // jake skupiny lektor uci
-  StudentGroup   StudentGroup[]
-  Attendance     Attendance[]
-  Comment        Comment[]
-  Replacement    Replacement[]
-  CoursesTaught  Course[] @relation("TeacherCourse")
-  CoursesTaken   Course[] @relation("StudentCourse") // individualni kurzy
+  UserRole      UserRole[]
+  Group         Group[] // jake skupiny lektor uci
+  StudentGroup  StudentGroup[]
+  Attendance    Attendance[]
+  Comment       Comment[]
+  Replacement   Replacement[]
+  CoursesTaught Course[]       @relation("TeacherCourse")
+  CoursesTaken  Course[]       @relation("StudentCourse") // individualni kurzy
 }
 
 model Role {
-  id    Int    @id @default(autoincrement())
-  name  String
+  id   Int    @id @default(autoincrement())
+  name String
 
   UserRole UserRole[]
 }
 
 model UserRole {
-  id       Int @id @default(autoincrement())
-  userId   Int
-  roleId   Int
+  id     Int @id @default(autoincrement())
+  userId Int
+  roleId Int
 
   user User @relation(fields: [userId], references: [id])
   role Role @relation(fields: [roleId], references: [id])
 }
 
 model Group {
-  id        Int    @id @default(autoincrement())
+  id        Int       @id @default(autoincrement())
   teacherId Int?
   name      String
-  createdAt   DateTime @default(now())
-  deletedAt   DateTime?
+  createdAt DateTime  @default(now())
+  deletedAt DateTime?
 
-  teacher       User?           @relation(fields: [teacherId], references: [id])
-  StudentGroup  StudentGroup[]
-  Course        Course[]
+  teacher      User?          @relation(fields: [teacherId], references: [id])
+  StudentGroup StudentGroup[]
+  Course       Course[]
 }
 
 model StudentGroup {
   id        Int       @id @default(autoincrement())
   studentId Int
   groupId   Int
-  createdAt DateTime @default(now())
+  createdAt DateTime  @default(now())
   deletedAt DateTime?
 
   student User  @relation(fields: [studentId], references: [id])
@@ -73,64 +73,66 @@ model StudentGroup {
 }
 
 model Lesson {
-  id         Int      @id @default(autoincrement())
-  courseId   Int
-  date       DateTime 
-  duration   Int
+  id        Int       @id @default(autoincrement())
+  courseId  Int
+  date      DateTime
+  duration  Int
+  createdAt DateTime  @default(now())
+  deletedAt DateTime?
 
-  course          Course          @relation(fields: [courseId], references: [id])
-  Attendance      Attendance[]
-  StudyMaterial   StudyMaterial[]
-  Comment         Comment[]
-  OriginalReplacement Replacement[] @relation("OriginalLesson")
-  SubstituteReplacement Replacement[] @relation("SubstituteLesson")
+  course                Course          @relation(fields: [courseId], references: [id])
+  Attendance            Attendance[]
+  StudyMaterial         StudyMaterial[]
+  Comment               Comment[]
+  OriginalReplacement   Replacement[]   @relation("OriginalLesson")
+  SubstituteReplacement Replacement[]   @relation("SubstituteLesson")
 }
 
 model Attendance {
-  id         Int      @id @default(autoincrement())
-  lessonId   Int
-  userId     Int
-  text       String
-  date       DateTime
-  type       String
+  id       Int      @id @default(autoincrement())
+  lessonId Int
+  userId   Int
+  text     String
+  date     DateTime
+  type     String
 
   lesson Lesson @relation(fields: [lessonId], references: [id])
   user   User   @relation(fields: [userId], references: [id])
 }
 
 model StudyMaterial {
-  id            Int      @id @default(autoincrement())
-  lessonId      Int
-  name          String
-  filePath      String
-  fileType      String
-  uploadedAt    DateTime
+  id         Int      @id @default(autoincrement())
+  lessonId   Int
+  name       String
+  filePath   String
+  fileType   String
+  uploadedAt DateTime
 
   lesson Lesson @relation(fields: [lessonId], references: [id])
 }
 
 model Comment {
-  id           Int      @id @default(autoincrement())
-  lessonId     Int
-  userId       Int
-  text         String
-  createdAt    DateTime
+  id        Int      @id @default(autoincrement())
+  lessonId  Int
+  userId    Int
+  text      String
+  createdAt DateTime
 
   lesson Lesson @relation(fields: [lessonId], references: [id])
   user   User   @relation(fields: [userId], references: [id])
 }
 
 model Replacement {
-  id                Int      @id @default(autoincrement())
-  originalLessonId  Int
+  id                 Int      @id @default(autoincrement())
+  originalLessonId   Int
   substituteLessonId Int
-  studentId         Int
-  date             DateTime
-  note             String
+  studentId          Int
+  date               DateTime
+  note               String
 
-  originalLesson   Lesson  @relation("OriginalLesson", fields: [originalLessonId], references: [id])
-  substituteLesson Lesson  @relation("SubstituteLesson", fields: [substituteLessonId], references: [id])
-  student          User    @relation(fields: [studentId], references: [id])
+  originalLesson   Lesson @relation("OriginalLesson", fields: [originalLessonId], references: [id])
+  substituteLesson Lesson @relation("SubstituteLesson", fields: [substituteLessonId], references: [id])
+  student          User   @relation(fields: [studentId], references: [id])
 }
 
 model Course {
@@ -143,13 +145,13 @@ model Course {
   endDate      DateTime
   description  String?
   textbook     String?
-  isIndividual   Boolean
-  isPair Boolean?
-  createdAt    DateTime @default(now())
+  isIndividual Boolean
+  isPair       Boolean?
+  createdAt    DateTime  @default(now())
   deletedAt    DateTime?
 
-  teacher User?  @relation("TeacherCourse", fields: [teacherId], references: [id])
-  student User?  @relation("StudentCourse", fields: [studentId], references: [id])
-  group   Group? @relation(fields: [groupId], references: [id])
+  teacher User?    @relation("TeacherCourse", fields: [teacherId], references: [id])
+  student User?    @relation("StudentCourse", fields: [studentId], references: [id])
+  group   Group?   @relation(fields: [groupId], references: [id])
   Lesson  Lesson[]
 }

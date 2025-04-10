@@ -26,7 +26,9 @@ export default function CreateLectorModal({
     teacherId: z.string().min(1, "Lektor je povinný"),
     description: z.string().optional(),
     textbook: z.string().optional(),
-    courseType: z.enum(["individual", "pair", "group"]),
+    courseType: type === "create"
+    ? z.enum(["individual", "pair", "group"], { required_error: "Typ kurzu je povinný" })
+    : z.enum(["individual", "pair", "group"]).optional(),
     startDate: z.string().min(1, "Začátek je povinný"),
     endDate: z.string().min(1, "Konec je povinný"),
   });
@@ -39,6 +41,9 @@ export default function CreateLectorModal({
     reset,
   } = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
+    defaultValues: {
+        courseType: "individual"
+    }
   });
 
   const [message, setMessage] = useState("");
@@ -49,14 +54,23 @@ export default function CreateLectorModal({
         name: data.name || "",
         description: data.description || "",
         textbook: data.textbook || "",
-        courseType: "individual",
         teacherId: data.teacherId?.toString() || "",
+        startDate: data.startDate
+          ? new Date(data.startDate).toISOString().split("T")[0]
+          : "",
+        endDate: data.endDate
+          ? new Date(data.endDate).toISOString().split("T")[0]
+          : "",
       });
     }
   }, [data, isOpen, reset]);
 
+
   const onSubmit = async (values: z.infer<typeof FormSchema>) => {
     const { courseType, ...rest } = values;
+
+    console.log("haloo")
+    console.log(values)
 
     const courseData: any = {
       ...rest,
@@ -109,7 +123,9 @@ export default function CreateLectorModal({
       <div className="max-h-screen w-full overflow-y-auto bg-white p-6 shadow-md sm:h-auto sm:max-w-xl md:rounded-md">
         {type === "update" && <h2 className="title">Upravit kurz</h2>}
         {type === "create" && <h2 className="title">Vytvořit kurz</h2>}
-        <form onSubmit={handleSubmit(onSubmit)}>
+        <form onSubmit={handleSubmit(onSubmit, (errors) => {
+  console.log("formulář má chyby", errors);
+})}>
           <div className="grid w-full grid-cols-2 gap-4">
             <div className="mb-4 flex flex-col gap-2">
               <label className="text-xs text-gray-500">Jméno kurzu*</label>
@@ -168,26 +184,24 @@ export default function CreateLectorModal({
               </div>
             )}
 
-            {type === "create" && (
-              <div className="col-span-2 mb-4 flex w-full flex-col gap-2">
-                <label className="text-xs text-gray-500">Vyberte lektora*</label>
-                <select
-                  {...register("teacherId")}
-                  className="rounded-md border-[1.5px] border-gray-300 p-2 focus:border-orange-300"
-                >
-                  {lectors.map((lector) => (
-                    <option key={lector.id} value={lector.id}>
-                      {lector.firstName} {lector.lastName}
-                    </option>
-                  ))}
-                </select>
-                {errors.teacherId && (
-                  <p className="text-xs text-red-500">
-                    {errors.teacherId.message}
-                  </p>
-                )}
-              </div>
-            )}
+            <div className="col-span-2 mb-4 flex w-full flex-col gap-2">
+              <label className="text-xs text-gray-500">Vyberte lektora*</label>
+              <select
+                {...register("teacherId")}
+                className="rounded-md border-[1.5px] border-gray-300 p-2 focus:border-orange-300"
+              >
+                {lectors.map((lector) => (
+                  <option key={lector.id} value={lector.id}>
+                    {lector.firstName} {lector.lastName}
+                  </option>
+                ))}
+              </select>
+              {errors.teacherId && (
+                <p className="text-xs text-red-500">
+                  {errors.teacherId.message}
+                </p>
+              )}
+            </div>
 
             <div className="mb-4 flex flex-col gap-2">
               <label className="text-xs text-gray-500">Začátek kurzu*</label>

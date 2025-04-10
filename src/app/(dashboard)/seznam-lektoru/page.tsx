@@ -21,6 +21,9 @@ export default async function SeznamLektoru() {
         },
       },
       CoursesTaught: {
+        where: {
+          deletedAt: null, 
+        },
         include: {
           group: true,
         },
