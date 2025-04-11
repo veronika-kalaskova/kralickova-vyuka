@@ -76,6 +76,9 @@ model Lesson {
   id        Int       @id @default(autoincrement())
   courseId  Int
   date      DateTime
+  startDate DateTime
+  endDate   DateTime
+  repeat    String
   duration  Int
   createdAt DateTime  @default(now())
   deletedAt DateTime?

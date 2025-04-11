@@ -1,0 +1,76 @@
+import { db } from "@/lib/db";
+import { NextResponse } from "next/server";
+
+export async function POST(req: Request) {
+  try {
+    const body = await req.json();
+    const { courseId, date, startDate, endDate, repeat } = body;
+
+    const parsedDate = new Date(date);
+    const parsedStart = new Date(startDate);
+    const parsedEnd = new Date(endDate);
+
+    const course = await db.course.findFirst({
+      where: { id: courseId },
+    });
+
+    if (!course) {
+      return NextResponse.json({ message: "Kurz nenalezen" }, { status: 404 });
+    }
+
+    const lessons = [];
+
+    // Výpočet trvání lekce v minutách
+    const duration = Math.round((parsedEnd.getTime() - parsedStart.getTime()) / 60000); // milisekundy na minuty
+
+    if (repeat === "weekly") {
+      const courseEnd = new Date(course.endDate);
+      let currentStart = new Date(parsedStart);
+      let currentEnd = new Date(parsedEnd);
+      let currentDate = new Date(parsedDate);
+
+      while (currentStart <= courseEnd) {
+        lessons.push({
+          courseId,
+          date: new Date(currentDate),
+          startDate: new Date(currentStart),
+          endDate: new Date(currentEnd),
+          repeat: "weekly",
+          duration: duration,
+        });
+
+        currentStart.setDate(currentStart.getDate() + 7);
+        currentEnd.setDate(currentEnd.getDate() + 7);
+        currentDate.setDate(currentDate.getDate() + 7);
+      }
+
+      await db.lesson.createMany({
+        data: lessons,
+      });
+    } else {
+      const lesson = await db.lesson.create({
+        data: {
+          courseId,
+          date: parsedDate,
+          startDate: parsedStart,
+          endDate: parsedEnd,
+          repeat: "none",
+          duration: duration,
+        },
+      });
+
+      lessons.push(lesson);
+    }
+
+    return NextResponse.json(
+      { message: "Lekce vytvořena", lessons },
+      { status: 201 }
+    );
+  } catch (error) {
+    console.error(error);
+    return NextResponse.json(
+      { message: "Chyba při vytváření lekce" },
+      { status: 500 }
+    );
+  }
+}

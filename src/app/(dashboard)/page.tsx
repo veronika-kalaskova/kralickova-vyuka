@@ -44,6 +44,20 @@ export default async function Home() {
     }
   });
 
+  const allLessons = await prisma.lesson.findMany({
+    where: {
+      deletedAt: null,
+    },
+    include: {
+      course: {
+        include: {
+          teacher: true
+        }
+      }
+    }
+  });
+  
+
   // const groups = await prisma.group.findMany({
   //   include: {
   //     Course: true,
@@ -53,9 +67,9 @@ export default async function Home() {
   return (
     <div className="flex flex-col items-center justify-center gap-8 p-4 md:flex-row md:items-start">
       {/* PREHLED LEKCI */}
-      <div className="w-full md:w-3/4">
+      <div className="w-full">
         <h1 className="title">Přehled lekcí</h1>
-        <CalendarComponent />
+        <CalendarComponent lessons={allLessons} />
       </div>
 
       <QuickActions roles={session?.user.roles} coursesWithoutLector={coursesWithoutLector} coursesWithoutStudent={coursesWithoutStudent} coursesWithoutGroup={coursesWithoutGroup} allLectors={allLectors} />

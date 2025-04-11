@@ -14,7 +14,7 @@ interface Props {
   type?: string;
 }
 
-export default function CreateLectorModal({
+export default function CreateUpdateCourseModal({
   isOpen,
   onClose,
   lectors,
@@ -26,9 +26,12 @@ export default function CreateLectorModal({
     teacherId: z.string().min(1, "Lektor je povinný"),
     description: z.string().optional(),
     textbook: z.string().optional(),
-    courseType: type === "create"
-    ? z.enum(["individual", "pair", "group"], { required_error: "Typ kurzu je povinný" })
-    : z.enum(["individual", "pair", "group"]).optional(),
+    courseType:
+      type === "create"
+        ? z.enum(["individual", "pair", "group"], {
+            required_error: "Typ kurzu je povinný",
+          })
+        : z.enum(["individual", "pair", "group"]).optional(),
     startDate: z.string().min(1, "Začátek je povinný"),
     endDate: z.string().min(1, "Konec je povinný"),
   });
@@ -42,8 +45,8 @@ export default function CreateLectorModal({
   } = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
     defaultValues: {
-        courseType: "individual"
-    }
+      courseType: "individual",
+    },
   });
 
   const [message, setMessage] = useState("");
@@ -65,46 +68,47 @@ export default function CreateLectorModal({
     }
   }, [data, isOpen, reset]);
 
-
   const onSubmit = async (values: z.infer<typeof FormSchema>) => {
-    const { courseType, ...rest } = values;
+    try {
+      const { courseType, ...rest } = values;
 
-    console.log("haloo")
-    console.log(values)
+      const courseData: any = {
+        ...rest,
+        isIndividual: courseType === "individual",
+        isPair: courseType === "pair",
+      };
 
-    const courseData: any = {
-      ...rest,
-      isIndividual: courseType === "individual",
-      isPair: courseType === "pair",
-    };
+      const body =
+        type === "update"
+          ? JSON.stringify({ ...courseData, id: data?.id })
+          : JSON.stringify(courseData);
 
-    const body =
-      type === "update"
-        ? JSON.stringify({ ...courseData, id: data?.id })
-        : JSON.stringify(courseData);
+      const method = type === "update" ? "PUT" : "POST";
 
-    const method = type === "update" ? "PUT" : "POST";
+      const response = await fetch("/api/course", {
+        method,
+        body,
+        headers: { "Content-Type": "application/json" },
+      });
 
-    const response = await fetch("/api/course", {
-      method,
-      body,
-      headers: { "Content-Type": "application/json" },
-    });
-
-    if (response.ok) {
-      onClose();
-      window.location.reload();
-    } else {
-      const errorData = await response.json();
-      if (errorData.message === "Course exists") {
-        setMessage("Kurz s tímto jménem již existuje.");
+      if (response.ok) {
+        onClose();
+        window.location.reload();
       } else {
-        setMessage(
-          type === "update"
-            ? "Chyba při úpravě kurzu."
-            : "Chyba při vytváření kurzu.",
-        );
+        const errorData = await response.json();
+        if (errorData.message === "Course exists") {
+          setMessage("Kurz s tímto jménem již existuje.");
+        } else {
+          setMessage(
+            type === "update"
+              ? "Chyba při úpravě kurzu."
+              : "Chyba při vytváření kurzu.",
+          );
+        }
       }
+    } catch (error) {
+      console.error("Chyba při odesílání formuláře:", error);
+      setMessage("Nastala neočekávaná chyba.");
     }
   };
 
@@ -123,9 +127,11 @@ export default function CreateLectorModal({
       <div className="max-h-screen w-full overflow-y-auto bg-white p-6 shadow-md sm:h-auto sm:max-w-xl md:rounded-md">
         {type === "update" && <h2 className="title">Upravit kurz</h2>}
         {type === "create" && <h2 className="title">Vytvořit kurz</h2>}
-        <form onSubmit={handleSubmit(onSubmit, (errors) => {
-  console.log("formulář má chyby", errors);
-})}>
+        <form
+          onSubmit={handleSubmit(onSubmit, (errors) => {
+            console.log("formulář má chyby", errors);
+          })}
+        >
           <div className="grid w-full grid-cols-2 gap-4">
             <div className="mb-4 flex flex-col gap-2">
               <label className="text-xs text-gray-500">Jméno kurzu*</label>

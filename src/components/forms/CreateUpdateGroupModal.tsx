@@ -13,7 +13,7 @@ interface Props {
   lectors: User[];
 }
 
-export default function CreateLectorModal({
+export default function CreateUpdateGroupModal({
   isOpen,
   onClose,
   courses,

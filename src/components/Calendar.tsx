@@ -4,6 +4,7 @@ import { Calendar, momentLocalizer, View, Views } from "react-big-calendar";
 import "react-big-calendar/lib/css/react-big-calendar.css";
 import moment from "moment";
 import { useState } from "react";
+import { Course, Lesson, User } from "@prisma/client";
 
 // TODO: cestina
 // TODO: cesky timezone
@@ -15,12 +16,15 @@ import { useState } from "react";
 
 const localizer = momentLocalizer(moment);
 
-// interface props {
-//   users: Uzivatel[];
-//   roles: UzivatelRole[];
-// }
+interface Props {
+  lessons: (Lesson & {
+    course: Course & {
+      teacher: User | null;
+    };
+  })[];
+}
 
-export default function CalendarComponent() {
+export default function CalendarComponent({ lessons }: Props) {
   const [view, setView] = useState<View>(Views.WORK_WEEK);
 
   const handleOnChangeView = (selectedView: View) => {
@@ -30,13 +34,18 @@ export default function CalendarComponent() {
   return (
     <Calendar
       localizer={localizer}
-      events={[]}
+      events={lessons}
       views={["work_week", "day"]}
       view={view}
       onView={handleOnChangeView}
-      startAccessor="start"
-      endAccessor="end"
-      style={{ height: 500 }}
+      startAccessor="startDate"
+      endAccessor="endDate"
+      titleAccessor={(event) => event.course.name}
+      min={new Date(1970, 1, 1, 10, 0)}
+      max={new Date(1970, 1, 1, 19, 0)}
+      culture="cs"
+      step={30} 
+      timeslots={1} 
     />
   );
 }
