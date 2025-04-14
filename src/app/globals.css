@@ -12,8 +12,17 @@ body {
 }
 
 input {
-	outline: inherit;
+  outline: inherit;
 }
+
+/* CALENDAR */
+.rbc-event {
+  background-color: #ff8903 !important;
+  color: #fff !important;
+  border-radius: 0.25rem !important;
+  font-weight: 500 !important;
+}
+
 
 @layer components {
   .title {
