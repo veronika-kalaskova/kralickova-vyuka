@@ -40,7 +40,6 @@ const SignInForm = () => {
     if (signInData?.error) {
       setFailedLogin(true);
     } else {
-      router.refresh();
       router.push("/");
     }
   };

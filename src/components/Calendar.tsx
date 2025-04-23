@@ -17,10 +17,18 @@ interface Props {
       teacher: User | null;
     };
   })[];
+  defaultView?: View; 
+  availableViews?: View[];
+  classNameProp?: string;
 }
 
-export default function CalendarComponent({ lessons }: Props) {
-  const [view, setView] = useState<View>(Views.MONTH);
+export default function CalendarComponent({
+  lessons,
+  defaultView = Views.MONTH,
+  availableViews = ["month", "work_week", "day", "agenda"],
+  classNameProp = "h-[700px] w-full"
+}: Props) {
+  const [view, setView] = useState<View>(defaultView);
   const [selectedLesson, setSelectedLesson] = useState<
     (typeof lessons)[0] | null
   >(null);
@@ -56,17 +64,17 @@ export default function CalendarComponent({ lessons }: Props) {
   };
 
   return (
-    <div className="h-[700px] w-full">
+    <div className={`${classNameProp}`}>
       <Calendar
         localizer={localizer}
         events={lessons}
-        views={["month", "work_week", "day", "agenda"]}
+        views={availableViews}
         view={view}
         onView={handleOnChangeView}
         startAccessor="startDate"
         endAccessor="endDate"
         titleAccessor={(event) =>
-          `${event.course.name} (${event.course.teacher?.firstName || "lektor neznámý"})`
+          `${event.course.name} (${event.course.teacher?.lastName || "lektor neznámý"})`
         }
         min={new Date(1970, 1, 1, 8, 0)}
         max={new Date(1970, 1, 1, 20, 0)}
@@ -76,10 +84,11 @@ export default function CalendarComponent({ lessons }: Props) {
         popup
         messages={messages}
         onSelectEvent={handleSelectedEvent}
+        doShowMoreDrillDown
+        style={{height: '100%'}}
         components={{
           toolbar: CalendarToolbar,
         }}
-     
       />
 
       {/* MODAL */}
@@ -102,7 +111,7 @@ export default function CalendarComponent({ lessons }: Props) {
               {moment(selectedLesson.endDate).format("D. M. YYYY HH:mm")}
             </p>
 
-            <div className="mt-6 flex gap-2 justify-end">
+            <div className="mt-6 flex justify-end gap-2">
               <button
                 type="button"
                 onClick={closeModal}
