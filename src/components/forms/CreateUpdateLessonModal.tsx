@@ -44,7 +44,6 @@ export default function CreateUpdateLessonModal({
   useEffect(() => {
     if (data && isOpen) {
       reset({
-        date: data.date.toISOString().split("T")[0],
         startTime: data.startDate.toISOString().split("T")[1].slice(0, 5),
         endTime: data.endDate.toISOString().split("T")[1].slice(0, 5),
         repeat: data.repeat === "weekly" ? "weekly" : "none",
