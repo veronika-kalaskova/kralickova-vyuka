@@ -67,10 +67,10 @@ export default async function MujProfil() {
   });
 
   return (
-    <div className="flex flex-col lg:flex-row gap-8 p-4">
+    <div className="flex flex-col gap-8 p-4 lg:flex-row">
       {/* LEFT */}
       <div className="w-full lg:w-1/2">
-        <h1 className="title mb-2">Můj profil</h1>
+        <h1 className="title mb-6">Můj profil</h1>
 
         <div className="flex flex-col gap-2">
           <div className="mt-2 mb-6 flex flex-col gap-4 text-sm text-gray-700 sm:flex-row sm:items-center sm:gap-8">
@@ -97,11 +97,8 @@ export default async function MujProfil() {
 
       {/* RIGHT */}
       <div className="w-full lg:w-1/2">
- 
-        <div className="bg-white mb-5">
-          <h2 className="mb-6 text-xl font-semibold text-gray-800">
-            Vyučované kurzy
-          </h2>
+        <div className="mb-5 bg-white">
+          <h2 className="title mb-6">Vyučované kurzy</h2>
           <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
             {loggedUser?.CoursesTaught.map((course, index) => (
               <Link
@@ -125,11 +122,8 @@ export default async function MujProfil() {
             ))}
           </div>
         </div>
-      <div>
-        kalkulacka
+        <div>kalkulacka</div>
       </div>
-      </div>
-
     </div>
   );
 }

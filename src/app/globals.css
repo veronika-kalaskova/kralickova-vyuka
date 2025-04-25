@@ -42,7 +42,9 @@ input {
   background-color: #F9FAFB;
 }
 
-
+.rbc-timeslot-group {
+  min-height: 60px !important;
+}
 
 
 @layer components {

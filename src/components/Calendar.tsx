@@ -17,6 +17,7 @@ import withDragAndDrop, {
   EventInteractionArgs,
 } from "react-big-calendar/lib/addons/dragAndDrop";
 import "react-big-calendar/lib/addons/dragAndDrop/styles.css";
+import Link from "next/link";
 
 const localizer = momentLocalizer(moment);
 moment.locale("cs");
@@ -84,7 +85,7 @@ export default function CalendarComponent({
     async ({ event, start, end }: EventInteractionArgs<LessonType>) => {
       const response = await fetch("/api/calendar", {
         method: "PUT",
-        body: JSON.stringify({ id: event.id, startDate: start, endDate: end  }),
+        body: JSON.stringify({ id: event.id, startDate: start, endDate: end }),
         headers: { "Content-Type": "application/json" },
       });
 
@@ -204,9 +205,11 @@ export default function CalendarComponent({
               >
                 Zavřít
               </button>
-              <button className="cursor-pointer rounded-lg bg-orange-400 px-4 py-3 font-medium text-white transition-all hover:bg-orange-500">
-                Upravit
-              </button>
+              <Link href={`/lekce/${selectedLesson.id}`}>
+                <button className="cursor-pointer rounded-lg bg-orange-400 px-4 py-3 font-medium text-white transition-all hover:bg-orange-500">
+                  Přejít na detail
+                </button>
+              </Link>
             </div>
           </div>
         </div>
