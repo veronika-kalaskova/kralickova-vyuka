@@ -18,14 +18,14 @@ export async function POST(req: Request) {
       );
     }
 
-    const buffer = Buffer.from(await file.arrayBuffer());
+    // const buffer = Buffer.from(await file.arrayBuffer());
     const fileName = `${Date.now()}_${file.name.replaceAll(" ", "_")}`;
-    const filePath = path.join(process.cwd(), "public/uploads", fileName);
+    // const filePath = path.join(process.cwd(), "public/uploads", fileName);
 
     const publicUrl = `/uploads/${fileName}`;
 
     try {
-      await writeFile(filePath, buffer);
+    //   await writeFile(filePath, buffer);
 
       const newMaterial = await db.studyMaterial.create({
         data: {
