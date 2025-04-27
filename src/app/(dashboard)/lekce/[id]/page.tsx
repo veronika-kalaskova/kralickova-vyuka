@@ -96,8 +96,23 @@ export default async function Lekce({
   });
 
   function formatTime(start: Date, end: Date): string {
-    const formatStart = `${start.getDate()}. ${start.getMonth() + 1}. ${start.getHours().toString().padStart(2, "0")}:${start.getMinutes().toString().padStart(2, "0")}`;
-    const formatEnd = `${end.getDate()}. ${end.getMonth() + 1}. ${end.getHours().toString().padStart(2, "0")}:${end.getMinutes().toString().padStart(2, "0")}`;
+    const formatStart = start.toLocaleString("cs-CZ", {
+      day: "2-digit",
+      month: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false,
+      timeZone: "Europe/Prague",
+    });
+
+    const formatEnd = end.toLocaleString("cs-CZ", {
+      day: "2-digit",
+      month: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false,
+      timeZone: "Europe/Prague",
+    });
 
     return `${formatStart} - ${formatEnd}`;
   }
