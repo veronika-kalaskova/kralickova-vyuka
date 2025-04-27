@@ -140,8 +140,6 @@ export default function CalendarComponent({
     [events],
   );
 
-
-
   return (
     <div className={classNameProp}>
       <DragAndDropCalendar
@@ -153,11 +151,20 @@ export default function CalendarComponent({
         onView={handleOnChangeView}
         onEventDrop={onEventDrop}
         onEventResize={onEventResize}
+        // In your Calendar component, modify the accessors to handle DST consistently
         titleAccessor={(event) =>
           `${event.course.name} (${event.course.teacher?.lastName || "lektor neznámý"})`
         }
-        startAccessor={(event) => new Date(event.startDate)}
-        endAccessor={(event) => new Date(event.endDate)}
+        startAccessor={(event) => {
+          const date = new Date(event.startDate);
+          // Ensure the time is preserved exactly as stored
+          return date;
+        }}
+        endAccessor={(event) => {
+          const date = new Date(event.endDate);
+          // Ensure the time is preserved exactly as stored
+          return date;
+        }}
         min={new Date(new Date().setHours(8, 0, 0, 0))}
         max={new Date(new Date().setHours(20, 0, 0, 0))}
         culture="cs"

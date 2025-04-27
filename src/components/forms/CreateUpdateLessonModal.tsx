@@ -54,15 +54,18 @@ export default function CreateUpdateLessonModal({
   const onSubmit = async (values: z.infer<typeof FormSchema>) => {
     try {
       const { date, startTime, endTime, repeat } = values;
-
+  
       const startDateParts = startTime.split(":").map(Number);
       const endDateParts = endTime.split(":").map(Number);
       const dateParts = date.split("-").map(Number);
       
-      const startDate = new Date(dateParts[0], dateParts[1] - 1, dateParts[2], startDateParts[0], startDateParts[1]);
-      const endDate = new Date(dateParts[0], dateParts[1] - 1, dateParts[2], endDateParts[0], endDateParts[1]);
+      const startDate = new Date(dateParts[0], dateParts[1] - 1, dateParts[2]);
+      const endDate = new Date(dateParts[0], dateParts[1] - 1, dateParts[2]);
       
 
+      startDate.setHours(startDateParts[0], startDateParts[1], 0, 0);
+      endDate.setHours(endDateParts[0], endDateParts[1], 0, 0);
+  
       const lessonData = {
         courseId: course.id,
         date: new Date(date),
@@ -70,20 +73,20 @@ export default function CreateUpdateLessonModal({
         endDate,
         repeat,
       };
-
+  
       const body =
         type === "update"
           ? JSON.stringify({ ...lessonData, id: data?.id })
           : JSON.stringify(lessonData);
-
+  
       const method = type === "update" ? "PUT" : "POST";
-
+  
       const response = await fetch("/api/lesson", {
         method,
         body,
         headers: { "Content-Type": "application/json" },
       });
-
+  
       if (response.ok) {
         onClose();
         window.location.reload();

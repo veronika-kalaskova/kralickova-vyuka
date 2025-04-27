@@ -8,6 +8,12 @@ export async function POST(req: Request) {
 
     const parsedStart = new Date(startDate);
     const parsedEnd = new Date(endDate);
+    
+    // Store the original hours and minutes
+    const startHours = parsedStart.getHours();
+    const startMinutes = parsedStart.getMinutes();
+    const endHours = parsedEnd.getHours();
+    const endMinutes = parsedEnd.getMinutes();
 
     const course = await db.course.findFirst({
       where: { id: courseId },
@@ -24,26 +30,13 @@ export async function POST(req: Request) {
       const courseEnd = new Date(course.endDate);
       let currentDate = new Date(parsedStart);
 
-      const startHours = parsedStart.getHours();
-      const startMinutes = parsedStart.getMinutes();
-      const endHours = parsedEnd.getHours();
-      const endMinutes = parsedEnd.getMinutes();
-
       while (currentDate <= courseEnd) {
-        const start = new Date(
-          currentDate.getFullYear(),
-          currentDate.getMonth(),
-          currentDate.getDate(),
-          startHours,
-          startMinutes
-        );
-        const end = new Date(
-          currentDate.getFullYear(),
-          currentDate.getMonth(),
-          currentDate.getDate(),
-          endHours,
-          endMinutes
-        );
+
+        const start = new Date(currentDate);
+        start.setHours(startHours, startMinutes, 0, 0);
+        
+        const end = new Date(currentDate);
+        end.setHours(endHours, endMinutes, 0, 0);
 
         lessons.push({
           courseId,
@@ -53,11 +46,16 @@ export async function POST(req: Request) {
           duration: duration,
         });
 
+        // Move to next week
         currentDate.setDate(currentDate.getDate() + 7);
       }
 
       await db.lesson.createMany({ data: lessons });
     } else {
+      // For non-repeating lessons, ensure consistent time
+      parsedStart.setHours(startHours, startMinutes, 0, 0);
+      parsedEnd.setHours(endHours, endMinutes, 0, 0);
+      
       const lesson = await db.lesson.create({
         data: {
           courseId,
