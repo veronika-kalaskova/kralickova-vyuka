@@ -18,31 +18,45 @@ export async function POST(req: Request) {
     }
 
     const lessons = [];
-
-    // Výpočet trvání lekce v minutách
-    const duration = Math.round((parsedEnd.getTime() - parsedStart.getTime()) / 60000); // milisekundy na minuty
+    const duration = Math.round((parsedEnd.getTime() - parsedStart.getTime()) / 60000);
 
     if (repeat === "weekly") {
       const courseEnd = new Date(course.endDate);
-      let currentStart = new Date(parsedStart);
-      let currentEnd = new Date(parsedEnd);
+      let currentDate = new Date(parsedStart);
 
-      while (currentStart <= courseEnd) {
+      const startHours = parsedStart.getHours();
+      const startMinutes = parsedStart.getMinutes();
+      const endHours = parsedEnd.getHours();
+      const endMinutes = parsedEnd.getMinutes();
+
+      while (currentDate <= courseEnd) {
+        const start = new Date(
+          currentDate.getFullYear(),
+          currentDate.getMonth(),
+          currentDate.getDate(),
+          startHours,
+          startMinutes
+        );
+        const end = new Date(
+          currentDate.getFullYear(),
+          currentDate.getMonth(),
+          currentDate.getDate(),
+          endHours,
+          endMinutes
+        );
+
         lessons.push({
           courseId,
-          startDate: new Date(currentStart),
-          endDate: new Date(currentEnd),
+          startDate: start,
+          endDate: end,
           repeat: "weekly",
           duration: duration,
         });
 
-        currentStart.setDate(currentStart.getDate() + 7);
-        currentEnd.setDate(currentEnd.getDate() + 7);
+        currentDate.setDate(currentDate.getDate() + 7);
       }
 
-      await db.lesson.createMany({
-        data: lessons,
-      });
+      await db.lesson.createMany({ data: lessons });
     } else {
       const lesson = await db.lesson.create({
         data: {
