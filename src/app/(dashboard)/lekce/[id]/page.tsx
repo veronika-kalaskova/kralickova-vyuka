@@ -182,7 +182,7 @@ export default async function Lekce({
         <div className="w-full lg:w-1/2">
           <div className="mb-5 bg-white">
             <h2 className="title mb-6">Seznam studentů</h2>
-            <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
+            <div className="grid grid-cols-1 gap-4">
               {students.map((student) => (
                 <Link
                   href={`/seznam-studentu/${student.id}`}
