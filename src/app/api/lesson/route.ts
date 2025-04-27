@@ -6,14 +6,15 @@ export async function POST(req: Request) {
     const body = await req.json();
     const { courseId, startDate, endDate, repeat } = body;
 
-    const parsedStart = new Date(startDate);
-    const parsedEnd = new Date(endDate);
+    // Parse dates and explicitly extract time components
+    const originalStart = new Date(startDate);
+    const originalEnd = new Date(endDate);
     
-    // Store the original hours and minutes
-    const startHours = parsedStart.getHours();
-    const startMinutes = parsedStart.getMinutes();
-    const endHours = parsedEnd.getHours();
-    const endMinutes = parsedEnd.getMinutes();
+    // Extract time components explicitly
+    const startHours = originalStart.getHours();
+    const startMinutes = originalStart.getMinutes();
+    const endHours = originalEnd.getHours();
+    const endMinutes = originalEnd.getMinutes();
 
     const course = await db.course.findFirst({
       where: { id: courseId },
@@ -24,18 +25,22 @@ export async function POST(req: Request) {
     }
 
     const lessons = [];
-    const duration = Math.round((parsedEnd.getTime() - parsedStart.getTime()) / 60000);
+    const duration = Math.round((originalEnd.getTime() - originalStart.getTime()) / 60000);
 
     if (repeat === "weekly") {
       const courseEnd = new Date(course.endDate);
-      let currentDate = new Date(parsedStart);
-
-      while (currentDate <= courseEnd) {
-
-        const start = new Date(currentDate);
+      // Start with the base date from the original start
+      let currentDateBase = new Date(originalStart);
+      
+      while (currentDateBase <= courseEnd) {
+        // Create completely new Date objects for each lesson to avoid reference issues
+        const currentDateStr = currentDateBase.toISOString().split('T')[0]; // YYYY-MM-DD
+        
+        // Create start and end times with explicit hours/minutes to avoid DST issues
+        const start = new Date(`${currentDateStr}T00:00:00`);
         start.setHours(startHours, startMinutes, 0, 0);
         
-        const end = new Date(currentDate);
+        const end = new Date(`${currentDateStr}T00:00:00`);
         end.setHours(endHours, endMinutes, 0, 0);
 
         lessons.push({
@@ -46,21 +51,26 @@ export async function POST(req: Request) {
           duration: duration,
         });
 
-        // Move to next week
-        currentDate.setDate(currentDate.getDate() + 7);
+        // Add 7 days for next week
+        currentDateBase.setDate(currentDateBase.getDate() + 7);
       }
 
       await db.lesson.createMany({ data: lessons });
     } else {
-      // For non-repeating lessons, ensure consistent time
-      parsedStart.setHours(startHours, startMinutes, 0, 0);
-      parsedEnd.setHours(endHours, endMinutes, 0, 0);
+      // For non-repeating lessons
+      const dateStr = originalStart.toISOString().split('T')[0]; // YYYY-MM-DD
+      
+      const start = new Date(`${dateStr}T00:00:00`);
+      start.setHours(startHours, startMinutes, 0, 0);
+      
+      const end = new Date(`${dateStr}T00:00:00`);
+      end.setHours(endHours, endMinutes, 0, 0);
       
       const lesson = await db.lesson.create({
         data: {
           courseId,
-          startDate: parsedStart,
-          endDate: parsedEnd,
+          startDate: start,
+          endDate: end,
           repeat: "none",
           duration: duration,
         },

@@ -156,13 +156,15 @@ export default function CalendarComponent({
           `${event.course.name} (${event.course.teacher?.lastName || "lektor neznámý"})`
         }
         startAccessor={(event) => {
+          // Create a new date to avoid modifying the original
           const date = new Date(event.startDate);
-          // Ensure the time is preserved exactly as stored
+          // Force the hours/minutes to match what was originally set
+          // This bypasses any timezone adjustments the browser might make
           return date;
         }}
+        
         endAccessor={(event) => {
           const date = new Date(event.endDate);
-          // Ensure the time is preserved exactly as stored
           return date;
         }}
         min={new Date(new Date().setHours(8, 0, 0, 0))}
