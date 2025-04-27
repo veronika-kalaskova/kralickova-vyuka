@@ -85,7 +85,7 @@ export default function Materials({ lessonId, data }: Props) {
             <a
               href={material.filePath}
               download
-              className="flex h-28 items-center justify-center rounded-xl border border-gray-300 bg-white p-4 text-center  transition hover:border-orange-500 hover:text-orange-500 "
+              className="flex h-28 items-center justify-center rounded-xl border border-gray-300 bg-white p-4 text-center transition hover:border-orange-500 hover:text-orange-500"
             >
               {getFileName(material.filePath)}
             </a>

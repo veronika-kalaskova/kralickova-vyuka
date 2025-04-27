@@ -1,6 +1,9 @@
 import CalendarComponent from "@/components/Calendar";
+import Comments from "@/components/Comments";
 import Materials from "@/components/Materials";
+import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/db";
+import { getServerSession } from "next-auth";
 import Link from "next/link";
 import React from "react";
 
@@ -57,6 +60,26 @@ export default async function Lekce({
     },
   });
 
+  const comments = await prisma.comment.findMany({
+    where: {
+      lessonId: parseInt(id),
+    },
+    include: {
+      user: true,
+    },
+  });
+
+  const session = await getServerSession(authOptions);
+
+  const loggedUser = await prisma.user.findFirst({
+    where: {
+      username: session?.user.username,
+    },
+    include: {
+      UserRole: true,
+    },
+  });
+
   function formatTime(start: Date, end: Date): string {
     const formatStart = `${start.getDate()}. ${start.getMonth() + 1}. ${start.getHours().toString().padStart(2, "0")}:${start.getMinutes().toString().padStart(2, "0")}`;
     const formatEnd = `${end.getDate()}. ${end.getMonth() + 1}. ${end.getHours().toString().padStart(2, "0")}:${end.getMinutes().toString().padStart(2, "0")}`;
@@ -106,7 +129,11 @@ export default async function Lekce({
             </div>
             <div className="flex items-center gap-1">
               <span className="font-semibold">Učebnice:</span>
-              <span>{lesson.course.textbook ? lesson.course.textbook : "Učebnice není nastavena"} </span>
+              <span>
+                {lesson.course.textbook
+                  ? lesson.course.textbook
+                  : "Není nastavena"}{" "}
+              </span>
             </div>
           </div>
         </div>
@@ -131,7 +158,7 @@ export default async function Lekce({
                       {student.firstName} {student.lastName}
                     </h3>
                     <span className="text-sm text-gray-500">
-                      {student.class ? student.class : "Třída není nastavena"} 
+                      {student.class ? student.class : "Třída není nastavena"}
                     </span>
                   </div>
                   {student.pickup && (
@@ -144,6 +171,10 @@ export default async function Lekce({
             ))}
           </div>
         </div>
+
+        {loggedUser && (
+          <Comments data={comments} lessonId={lesson.id} user={loggedUser} />
+        )}
       </div>
     </div>
   );

@@ -47,7 +47,7 @@ export default function Navbar({ session, userRole }: Props) {
         onClick={() => setIsMenuOpen(true)}
         className="block cursor-pointer sm:hidden"
       >
-        <Image src="menu.svg" alt="menu" width={30} height={30} />
+        <Image src="/menu.svg" alt="menu" width={30} height={30} />
       </button>
 
       {/* NAVIGATION ON MOBILE */}
@@ -64,7 +64,7 @@ export default function Navbar({ session, userRole }: Props) {
               onClick={() => setIsMenuOpen(false)}
               className="cursor-pointer self-end"
             >
-              <Image src="close.svg" alt="close" width={30} height={30} />
+              <Image src="/close.svg" alt="close" width={30} height={30} />
             </button>
             <ul className="mt-10 flex h-[90%] flex-col">
               <SidebarItems closeMenu={closeMenu} />
