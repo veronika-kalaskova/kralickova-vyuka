@@ -55,8 +55,13 @@ export default function CreateUpdateLessonModal({
     try {
       const { date, startTime, endTime, repeat } = values;
 
-      const startDate = new Date(`${date}T${startTime}`);
-      const endDate = new Date(`${date}T${endTime}`);
+      const startDateParts = startTime.split(":").map(Number);
+      const endDateParts = endTime.split(":").map(Number);
+      const dateParts = date.split("-").map(Number);
+      
+      const startDate = new Date(dateParts[0], dateParts[1] - 1, dateParts[2], startDateParts[0], startDateParts[1]);
+      const endDate = new Date(dateParts[0], dateParts[1] - 1, dateParts[2], endDateParts[0], endDateParts[1]);
+      
 
       const lessonData = {
         courseId: course.id,

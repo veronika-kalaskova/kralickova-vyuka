@@ -140,6 +140,8 @@ export default function CalendarComponent({
     [events],
   );
 
+
+
   return (
     <div className={classNameProp}>
       <DragAndDropCalendar
@@ -156,8 +158,8 @@ export default function CalendarComponent({
         }
         startAccessor={(event) => new Date(event.startDate)}
         endAccessor={(event) => new Date(event.endDate)}
-        min={new Date(1970, 1, 1, 8, 0)}
-        max={new Date(1970, 1, 1, 20, 0)}
+        min={new Date(new Date().setHours(8, 0, 0, 0))}
+        max={new Date(new Date().setHours(20, 0, 0, 0))}
         culture="cs"
         step={30}
         timeslots={1}
