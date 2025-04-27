@@ -128,9 +128,7 @@ export default function CreateUpdateCourseModal({
         {type === "update" && <h2 className="title">Upravit kurz</h2>}
         {type === "create" && <h2 className="title">Vytvořit kurz</h2>}
         <form
-          onSubmit={handleSubmit(onSubmit, (errors) => {
-            console.log("formulář má chyby", errors);
-          })}
+          onSubmit={handleSubmit(onSubmit)}
         >
           <div className="grid w-full grid-cols-2 gap-4">
             <div className="mb-4 flex flex-col gap-2">

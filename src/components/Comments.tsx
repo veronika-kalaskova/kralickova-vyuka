@@ -89,13 +89,14 @@ export default function Comments({ data, lessonId, user }: Props) {
         {sortedComments.map((comment) => (
           <div
             key={comment.id}
-            className="relative mb-6 rounded-lg border border-gray-100 bg-gray-50 p-4 shadow-sm"
+            className="mb-6 rounded-lg border-1 border-gray-100 bg-gray-50 p-4 transition-all"
           >
             <div className="mb-2 flex items-center gap-2">
-              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#ff8904] text-center text-sm font-bold text-white">
-                {comment.user
-                  ? comment.user.firstName.charAt(0).toUpperCase()
-                  : "?"}
+              <div className="flex items-center">
+                <div className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-[#ff8904] text-white text-xs font-medium ">
+                  {comment.user.firstName.charAt(0)}
+                  {comment.user.lastName.charAt(0)}
+                </div>
               </div>
               <div className="text-sm font-semibold text-gray-800">
                 {comment.user
@@ -119,7 +120,7 @@ export default function Comments({ data, lessonId, user }: Props) {
               <div className="mt-4 flex justify-end">
                 <button
                   onClick={() => deleteComment(comment.id)}
-                  className="cursor-pointer text-xs text-red-500"
+                  className="cursor-pointer text-xs text-red-400 hover:text-red-500"
                 >
                   Smazat
                 </button>
@@ -142,7 +143,7 @@ export default function Comments({ data, lessonId, user }: Props) {
         <div className="mt-2 flex justify-end">
           <button
             type="submit"
-            className="cursor-pointer rounded-lg bg-orange-400 px-2 py-1 text-sm font-semibold text-white transition-all hover:bg-orange-500"
+            className="cursor-pointer rounded-md bg-orange-400 px-2 py-1 text-sm font-semibold text-white transition-all hover:bg-orange-500"
           >
             Přidat komentář
           </button>

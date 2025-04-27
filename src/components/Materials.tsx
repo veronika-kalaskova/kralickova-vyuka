@@ -76,7 +76,7 @@ export default function Materials({ lessonId, data }: Props) {
   };
 
   return (
-    <div className="max-w-4xl">
+    <div className="mb-6 rounded-md border border-gray-200 p-4 shadow-sm">
       <h2 className="mb-6 text-xl font-semibold">Materiály</h2>
 
       <div className="grid grid-cols-2 gap-4 md:grid-cols-3">

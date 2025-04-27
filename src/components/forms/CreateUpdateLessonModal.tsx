@@ -105,9 +105,7 @@ export default function CreateUpdateLessonModal({
         <p className="text-xs font-normal mt-4 text-gray-500">Tento kurz učí {course.teacher?.firstName} {course.teacher?.lastName} a trvá od {course.startDate.toLocaleDateString()} do {course.endDate.toLocaleDateString()}</p>
         </h2>
         <form
-          onSubmit={handleSubmit(onSubmit, (errors) => {
-            console.log("formulář má chyby", errors);
-          })}
+          onSubmit={handleSubmit(onSubmit)}
         >
           <div className="grid w-full grid-cols-2 gap-4">
             <div className="col-span-2 mb-4 flex flex-col gap-2">

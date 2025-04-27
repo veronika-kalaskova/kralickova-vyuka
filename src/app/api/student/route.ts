@@ -164,9 +164,6 @@ export async function PUT(req: Request) {
       },
     });
 
-    console.log("asdho");
-    console.log(invalidCourses);
-
     if (invalidCourses.length > 0) {
       return NextResponse.json(
         {

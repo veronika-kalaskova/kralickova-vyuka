@@ -105,7 +105,6 @@ export default function CalendarComponent({
       );
 
       setEvents(updatedEvents);
-      console.log("Event moved:", { event, start, end });
     },
     [events],
   );

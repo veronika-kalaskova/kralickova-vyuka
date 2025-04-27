@@ -94,7 +94,6 @@ model Attendance {
   id       Int      @id @default(autoincrement())
   lessonId Int
   userId   Int
-  text     String
   date     DateTime
   type     String
 
