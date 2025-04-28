@@ -196,7 +196,7 @@ export default function CalendarComponent({
             </h2>
             <p className="mb-2">
               <strong>Lektor:</strong>{" "}
-              {selectedLesson.course.teacher?.firstName ?? "neznámý"}
+              {selectedLesson.course.teacher?.firstName ?? "neznámý"} {selectedLesson.course.teacher?.lastName ?? "neznámý"}
             </p>
             <p className="mb-2">
               <strong>Začátek:</strong>{" "}
