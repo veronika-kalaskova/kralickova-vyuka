@@ -88,9 +88,9 @@ export default async function MujProfil() {
 
           <CalendarComponent
             lessons={lessons}
-            defaultView={"agenda"}
-            availableViews={["agenda"]}
-            classNameProp="h-[500px] w-full"
+            defaultView={"work_week"}
+            availableViews={["work_week"]}
+            classNameProp="h-[700px] w-full"
           />
         </div>
       </div>
