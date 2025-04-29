@@ -125,7 +125,7 @@ export default function TableLector({
                   </td>
 
                   <td className="hidden px-3 py-2 md:table-cell">
-                    <div className="flex flex-wrap gap-1">
+                    <div className="flex flex-wrap gap-1 max-w-[400px]">
                       {lector.CoursesTaught?.map((course, index) => (
                         <span
                           key={index}

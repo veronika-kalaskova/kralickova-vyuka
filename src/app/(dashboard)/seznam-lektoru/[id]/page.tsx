@@ -5,7 +5,7 @@ import React from "react";
 export default async function Lektor({
   params,
 }: {
-  params: Promise<{ id: string }>;
+  params: { id: string };
 }) {
   const { id } = await params;
 

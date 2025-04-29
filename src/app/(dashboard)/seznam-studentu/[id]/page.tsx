@@ -5,7 +5,7 @@ import React from "react";
 export default async function Student({
   params,
 }: {
-  params: Promise<{ id: string }>;
+  params: { id: string };
 }) {
   const { id } = await params;
 

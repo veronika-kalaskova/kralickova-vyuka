@@ -12,6 +12,7 @@ interface Props {
   course: Course & { teacher: User | null };
   data?: Lesson | null;
   type?: string;
+  lectors?: User[];
 }
 
 export default function CreateUpdateLessonModal({
@@ -20,12 +21,19 @@ export default function CreateUpdateLessonModal({
   course,
   data,
   type,
+  lectors
 }: Props) {
   const FormSchema = z.object({
     date: z.string().min(1, "Zadejte datum"),
     startTime: z.string().min(1, "Zadejte čas začátku"),
     endTime: z.string().min(1, "Zadejte čas konce"),
-    repeat: z.enum(["none", "weekly"]),
+    teacherId: z.string().optional(),
+    repeat:
+      type === "create"
+        ? z.enum(["none", "weekly"], {
+            required_error: "Opakování je povinné",
+          })
+        : z.enum(["none", "weekly"]).optional(),
   });
 
   const {
@@ -41,52 +49,63 @@ export default function CreateUpdateLessonModal({
 
   const [message, setMessage] = useState("");
 
+  function formatDate(date: Date) {
+    return date.toISOString().split("T")[0];
+  }
+  
+  function formatTime(date: Date) {
+    return date.toTimeString().slice(0, 5); 
+  }
+
   useEffect(() => {
     if (data && isOpen) {
       reset({
-        startTime: data.startDate.toISOString().split("T")[1].slice(0, 5),
-        endTime: data.endDate.toISOString().split("T")[1].slice(0, 5),
+        date: formatDate(data.startDate),
+        startTime: formatTime(data.startDate),
+        endTime: formatTime(data.endDate),
         repeat: data.repeat === "weekly" ? "weekly" : "none",
+        teacherId: data.teacherId?.toString() || "",
       });
+      
     }
   }, [data, isOpen, reset]);
+
+
 
   const onSubmit = async (values: z.infer<typeof FormSchema>) => {
     try {
       const { date, startTime, endTime, repeat } = values;
-  
-      const startDateParts = startTime.split(":").map(Number);
-      const endDateParts = endTime.split(":").map(Number);
-      const dateParts = date.split("-").map(Number);
+
+      const [year, month, day] = values.date.split("-").map(Number);
+      const [startHour, startMinute] = values.startTime.split(":").map(Number);
+      const [endHour, endMinute] = values.endTime.split(":").map(Number);
       
-      const startDate = new Date(dateParts[0], dateParts[1] - 1, dateParts[2]);
-      const endDate = new Date(dateParts[0], dateParts[1] - 1, dateParts[2]);
+      const startDate = new Date(year, month - 1, day, startHour, startMinute);
+      const endDate = new Date(year, month - 1, day, endHour, endMinute);
       
 
-      startDate.setHours(startDateParts[0], startDateParts[1], 0, 0);
-      endDate.setHours(endDateParts[0], endDateParts[1], 0, 0);
-  
       const lessonData = {
         courseId: course.id,
         date: new Date(date),
+        teacherId: type === "create" ? course.teacher?.id : values.teacherId,
         startDate,
         endDate,
         repeat,
       };
-  
+
       const body =
         type === "update"
           ? JSON.stringify({ ...lessonData, id: data?.id })
           : JSON.stringify(lessonData);
-  
+
       const method = type === "update" ? "PUT" : "POST";
-  
+
       const response = await fetch("/api/lesson", {
         method,
         body,
         headers: { "Content-Type": "application/json" },
       });
-  
+
       if (response.ok) {
         onClose();
         window.location.reload();
@@ -110,11 +129,14 @@ export default function CreateUpdateLessonModal({
       <div className="max-h-screen w-full overflow-y-auto bg-white p-6 shadow-md sm:h-auto sm:max-w-xl md:rounded-md">
         <h2 className="title">
           {type === "update" ? "Upravit lekci" : "Vytvořit lekci"}
-        <p className="text-xs font-normal mt-4 text-gray-500">Tento kurz učí {course.teacher?.firstName} {course.teacher?.lastName} a trvá od {course.startDate.toLocaleDateString()} do {course.endDate.toLocaleDateString()}</p>
+          <p className="mt-4 text-xs font-normal text-gray-500">
+            Tento kurz učí {course.teacher?.firstName}{" "}
+            {course.teacher?.lastName} a trvá od{" "}
+            {course.startDate.toLocaleDateString()} do{" "}
+            {course.endDate.toLocaleDateString()}
+          </p>
         </h2>
-        <form
-          onSubmit={handleSubmit(onSubmit)}
-        >
+        <form onSubmit={handleSubmit(onSubmit)}>
           <div className="grid w-full grid-cols-2 gap-4">
             <div className="col-span-2 mb-4 flex flex-col gap-2">
               <label className="text-xs text-gray-500">Datum lekce*</label>
@@ -154,6 +176,7 @@ export default function CreateUpdateLessonModal({
               )}
             </div>
 
+            {type === "create" && (
             <div className="col-span-2 mb-4 flex flex-col gap-2">
               <label className="text-xs text-gray-500">Opakování*</label>
               <select
@@ -167,6 +190,28 @@ export default function CreateUpdateLessonModal({
                 <p className="text-xs text-red-500">{errors.repeat.message}</p>
               )}
             </div>
+            )}
+
+{type === "update" && (
+            <div className="col-span-2 mb-4 flex w-full flex-col gap-2">
+            <label className="text-xs text-gray-500">Vyberte lektora pro konktrétní lekci*</label>
+            <select
+              {...register("teacherId")}
+              className="rounded-md border-[1.5px] border-gray-300 p-2 focus:border-orange-300"
+            >
+              {lectors?.map((lector) => (
+                <option key={lector.id} value={lector.id}>
+                  {lector.firstName} {lector.lastName}
+                </option>
+              ))}
+            </select>
+            {errors.teacherId && (
+              <p className="text-xs text-red-500">
+                {errors.teacherId.message}
+              </p>
+            )}
+          </div>
+            )}
 
             {message && (
               <div className="col-span-2 mt-2 text-xs text-red-500">

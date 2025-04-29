@@ -23,7 +23,18 @@ export default function CourseDetail({ roles, course }: Props) {
   };
   return (
     <div>
-      <Button title="Vytvořit lekci" onClick={() => openModal()} />
+      <div className="flex justify-end gap-2">
+        {roles?.includes("admin") && (
+          <button
+            type="button"
+            onClick={openModal}
+            className="cursor-pointer rounded-lg bg-orange-400 px-4 py-3 font-medium text-white transition-all hover:bg-orange-500"
+          >
+            Vytvořit lekci
+          </button>
+        )}
+      </div>
+
       <CreateUpdateLessonModal
         isOpen={isOpen}
         onClose={() => setIsOpen(false)}

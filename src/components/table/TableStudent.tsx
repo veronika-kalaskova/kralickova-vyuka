@@ -122,7 +122,7 @@ export default function TableStudent({
                   </td>
 
                   <td className="hidden px-3 py-2 md:table-cell">
-                    <div className="flex flex-wrap gap-1">
+                    <div className="flex flex-wrap gap-1 max-w-[400px]">
                       {student.CoursesTaken?.map(
                         (course: Course, index: number) => (
                           <span

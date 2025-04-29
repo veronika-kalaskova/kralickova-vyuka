@@ -53,7 +53,8 @@ export default async function Home() {
         include: {
           teacher: true
         }
-      }
+      },
+      teacher: true,
     }
   });
   
@@ -69,7 +70,7 @@ export default async function Home() {
       {/* PREHLED LEKCI */}
       <div className="w-full">
         <h1 className="title">Přehled lekcí</h1>
-        <CalendarComponent lessons={allLessons} />
+        <CalendarComponent lessons={allLessons} roles={session?.user.roles} />
       </div>
 
       <QuickActions roles={session?.user.roles} coursesWithoutLector={coursesWithoutLector} coursesWithoutStudent={coursesWithoutStudent} coursesWithoutGroup={coursesWithoutGroup} allLectors={allLectors} />

@@ -52,9 +52,7 @@ export default async function MujProfil() {
 
   const lessons = await prisma.lesson.findMany({
     where: {
-      course: {
-        teacherId: loggedUser?.id,
-      },
+      teacherId: loggedUser?.id,
       deletedAt: null,
     },
     include: {
@@ -63,6 +61,7 @@ export default async function MujProfil() {
           teacher: true,
         },
       },
+      teacher: true,
     },
   });
 

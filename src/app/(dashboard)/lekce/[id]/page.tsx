@@ -9,11 +9,7 @@ import Link from "next/link";
 import React from "react";
 import { User, BookOpen, Users, School } from "lucide-react";
 
-export default async function Lekce({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
+export default async function Lekce({ params }: { params: { id: string } }) {
   const { id } = await params;
 
   const lesson = await prisma.lesson.findFirst({
@@ -24,6 +20,7 @@ export default async function Lekce({
           teacher: true,
         },
       },
+      teacher: true,
     },
   });
 
@@ -54,6 +51,20 @@ export default async function Lekce({
           StudentGroup: true,
         },
       });
+
+  const lectors = await prisma.user.findMany({
+    where: {
+      deletedAt: null,
+      UserRole: {
+        some: {
+          roleId: 2,
+        },
+      },
+    },
+    include: {
+      UserRole: true,
+    },
+  });
 
   const materials = await prisma.studyMaterial.findMany({
     where: {
@@ -130,9 +141,17 @@ export default async function Lekce({
   return (
     <div className="p-4">
       <div className="mb-6 flex items-center justify-between">
-        <h1 className="title mb-0">
-          Lekce {formatTime(lesson.startDate, lesson.endDate)}
-        </h1>
+        <div>
+          <h1 className="title mb-0">
+            Lekce {formatTime(lesson.startDate, lesson.endDate)}
+          </h1>
+
+          {lesson.course.description && (
+            <p className="mt-3 text-sm text-gray-500">
+              {lesson.course.description}
+            </p>
+          )}
+        </div>
 
         <LessonDetailButtons
           lesson={lesson}
@@ -140,6 +159,7 @@ export default async function Lekce({
           roles={roles}
           isAttendanceDone={attendance.length > 0}
           attendance={attendance}
+          lectors={lectors}
         />
       </div>
 
@@ -153,8 +173,8 @@ export default async function Lekce({
                 <User className="h-4 w-4 text-orange-500" />
                 <span className="font-semibold">Lektor:</span>
                 <span>
-                  {lesson.course.teacher?.firstName}{" "}
-                  {lesson.course.teacher?.lastName}
+                  {lesson.teacher.firstName}{" "}
+                  {lesson.teacher.lastName}
                 </span>
               </div>
 

@@ -31,6 +31,7 @@ model User {
   Replacement   Replacement[]
   CoursesTaught Course[]       @relation("TeacherCourse")
   CoursesTaken  Course[]       @relation("StudentCourse") // individualni kurzy
+  LessonsTaught Lesson[]       @relation("TeacherLesson")
 }
 
 model Role {
@@ -75,6 +76,7 @@ model StudentGroup {
 model Lesson {
   id        Int       @id @default(autoincrement())
   courseId  Int
+  teacherId Int     
   startDate DateTime
   endDate   DateTime
   repeat    String
@@ -83,6 +85,7 @@ model Lesson {
   deletedAt DateTime?
 
   course                Course          @relation(fields: [courseId], references: [id])
+  teacher               User           @relation("TeacherLesson", fields: [teacherId], references: [id])
   Attendance            Attendance[]
   StudyMaterial         StudyMaterial[]
   Comment               Comment[]
@@ -107,6 +110,7 @@ model StudyMaterial {
   filePath   String
   fileType   String
   uploadedAt DateTime
+  fileData   Bytes
 
   lesson Lesson @relation(fields: [lessonId], references: [id])
 }

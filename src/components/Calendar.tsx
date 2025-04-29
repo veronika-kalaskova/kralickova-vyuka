@@ -26,6 +26,7 @@ type LessonType = Lesson & {
   course: Course & {
     teacher: User | null;
   };
+  teacher: User | null;
 };
 
 interface Props {
@@ -33,6 +34,7 @@ interface Props {
   defaultView?: View;
   availableViews?: View[];
   classNameProp?: string;
+  roles?: string[];
 }
 
 export default function CalendarComponent({
@@ -40,6 +42,7 @@ export default function CalendarComponent({
   defaultView = Views.MONTH,
   availableViews = ["month", "work_week", "day", "agenda"],
   classNameProp = "h-[700px] w-full",
+  roles = [],
 }: Props) {
   const [view, setView] = useState<View>(defaultView);
   const [date, setDate] = useState<Date>(new Date());
@@ -49,6 +52,8 @@ export default function CalendarComponent({
   const [selectedLesson, setSelectedLesson] = useState<LessonType | null>(null);
 
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+
+  const isAdmin = roles.includes("admin");
 
   const handleOnChangeView = (selectedView: View) => {
     setView(selectedView);
@@ -83,6 +88,11 @@ export default function CalendarComponent({
 
   const onEventDrop = useCallback(
     async ({ event, start, end }: EventInteractionArgs<LessonType>) => {
+      if (!isAdmin) {
+        alert("Pouze administrátor může přesouvat lekce.");
+        return;
+      }
+
       const response = await fetch("/api/calendar", {
         method: "PUT",
         body: JSON.stringify({ id: event.id, startDate: start, endDate: end }),
@@ -106,11 +116,16 @@ export default function CalendarComponent({
 
       setEvents(updatedEvents);
     },
-    [events],
+    [events, isAdmin],
   );
 
   const onEventResize = useCallback(
     async ({ event, start, end }: EventInteractionArgs<LessonType>) => {
+      if (!isAdmin) {
+        alert("Pouze administrátor může upravovat délku lekcí.");
+        return;
+      }
+
       const newStart = typeof start === "string" ? new Date(start) : start;
       const newEnd = typeof end === "string" ? new Date(end) : end;
 
@@ -137,7 +152,7 @@ export default function CalendarComponent({
 
       setEvents(updatedEvents);
     },
-    [events],
+    [events, isAdmin],
   );
 
   return (
@@ -151,27 +166,16 @@ export default function CalendarComponent({
         onView={handleOnChangeView}
         onEventDrop={onEventDrop}
         onEventResize={onEventResize}
-        // In your Calendar component, modify the accessors to handle DST consistently
         titleAccessor={(event) =>
-          `${event.course.name} (${event.course.teacher?.lastName || "lektor neznámý"})`
+          `${event.course.name} (${event.teacher?.lastName || "lektor neznámý"})`
         }
-        startAccessor={(event) => {
-          // Create a new date to avoid modifying the original
-          const date = new Date(event.startDate);
-          // Force the hours/minutes to match what was originally set
-          // This bypasses any timezone adjustments the browser might make
-          return date;
-        }}
-        
-        endAccessor={(event) => {
-          const date = new Date(event.endDate);
-          return date;
-        }}
+        startAccessor="startDate"
+        endAccessor="endDate"
         min={new Date(new Date().setHours(8, 0, 0, 0))}
         max={new Date(new Date().setHours(20, 0, 0, 0))}
         culture="cs"
-        step={30}
-        timeslots={1}
+        step={15}
+        timeslots={2}
         popup
         messages={messages}
         onSelectEvent={handleSelectedEvent}
@@ -183,9 +187,9 @@ export default function CalendarComponent({
         components={{
           toolbar: CalendarToolbar,
         }}
-        resizable
+        resizable={isAdmin}
         selectable
-        draggableAccessor={() => true}
+        draggableAccessor={() => isAdmin}
       />
 
       {isModalOpen && selectedLesson && (
@@ -196,7 +200,8 @@ export default function CalendarComponent({
             </h2>
             <p className="mb-2">
               <strong>Lektor:</strong>{" "}
-              {selectedLesson.course.teacher?.firstName ?? "neznámý"} {selectedLesson.course.teacher?.lastName ?? "neznámý"}
+              {selectedLesson.teacher?.firstName ?? "neznámý"}{" "}
+              {selectedLesson.teacher?.lastName ?? "neznámý"}
             </p>
             <p className="mb-2">
               <strong>Začátek:</strong>{" "}

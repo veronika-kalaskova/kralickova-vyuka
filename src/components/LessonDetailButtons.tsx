@@ -2,6 +2,7 @@
 import React, { useState } from "react";
 import CreateUpdateAttendanceModal from "./forms/CreateUpdateAttendance";
 import { Attendance, Course, Group, Lesson, User } from "@prisma/client";
+import CreateUpdateLessonModal from "./forms/CreateUpdateLessonModal";
 
 interface Props {
   lesson: Lesson & {
@@ -10,6 +11,7 @@ interface Props {
     };
   };
   students: User[];
+  lectors: User[];
   roles: string[] | undefined;
   isAttendanceDone: boolean;
   attendance: Attendance[];
@@ -21,12 +23,16 @@ export default function LessonDetailButtons({
   roles,
   isAttendanceDone,
   attendance,
+  lectors
 }: Props) {
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isAttendanceModalOpen, setIsAttendanceModalOpen] = useState(false);
+  const [isLessonModalOpen, setIsLessonModalOpen] = useState(false);
 
-  const openModal = () => setIsModalOpen(true);
-  const closeModal = () => setIsModalOpen(false);
+  const openAttendanceModal = () => setIsAttendanceModalOpen(true);
+  const closeAttendanceModal = () => setIsAttendanceModalOpen(false);
 
+  const openLessonModal = () => setIsLessonModalOpen(true);
+  const closeLessonModal = () => setIsLessonModalOpen(false);
 
   return (
     <>
@@ -34,6 +40,7 @@ export default function LessonDetailButtons({
         {roles?.includes("admin") && (
           <button
             type="button"
+            onClick={openLessonModal}
             className="cursor-pointer rounded-lg bg-gray-100 px-4 py-3 font-medium text-gray-800 transition-all hover:bg-orange-100"
           >
             Upravit lekci
@@ -43,7 +50,7 @@ export default function LessonDetailButtons({
         {(roles?.includes("admin") || roles?.includes("lektor")) && (
           <button
             type="button"
-            onClick={openModal}
+            onClick={openAttendanceModal}
             className="cursor-pointer rounded-lg bg-orange-400 px-4 py-3 font-medium text-white transition-all hover:bg-orange-500"
           >
             {isAttendanceDone ? "Upravit docházku" : "Zadat docházku"}
@@ -59,8 +66,8 @@ export default function LessonDetailButtons({
 
       {!isAttendanceDone && (
         <CreateUpdateAttendanceModal
-          isOpen={isModalOpen}
-          onClose={closeModal}
+          isOpen={isAttendanceModalOpen}
+          onClose={closeAttendanceModal}
           typeForm="create"
           lesson={lesson}
           students={students}
@@ -69,14 +76,23 @@ export default function LessonDetailButtons({
 
       {isAttendanceDone && (
         <CreateUpdateAttendanceModal
-          isOpen={isModalOpen}
-          onClose={closeModal}
+          isOpen={isAttendanceModalOpen}
+          onClose={closeAttendanceModal}
           typeForm="update"
           lesson={lesson}
           students={students}
           attendanceData={attendance}
         />
       )}
+
+      <CreateUpdateLessonModal
+        isOpen={isLessonModalOpen}
+        onClose={closeLessonModal}
+        data={lesson}
+        type="update"
+        course={lesson.course}
+        lectors={lectors}
+      />
     </>
   );
 }
