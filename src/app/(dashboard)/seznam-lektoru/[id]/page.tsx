@@ -110,7 +110,7 @@ export default async function Lektor({ params }: { params: { id: string } }) {
             lessons={lessons}
             defaultView={"work_week"}
             availableViews={["work_week"]}
-            classNameProp="h-[700px] w-full mb-6"
+            classNameProp="h-[700px] w-full mb-6 rounded-md border border-gray-200 p-4 shadow-sm"
             roles={session?.user.roles}
           />
           <TableLectorLessons lessons={upcomingLessons} />

@@ -218,7 +218,7 @@ export default function Calculator({ lessons }: Props) {
           </div>
 
           {filteredLessons.length > 0 && (
-            <div className="mb-8 rounded-md border border-gray-200 p-4 shadow-sm">
+            <div className="mb-8">
               <h2 className="mb-3 text-xl font-semibold">Seznam lekcí</h2>
               <div className="max-h-64 overflow-y-auto">
                 <table className="w-full">
