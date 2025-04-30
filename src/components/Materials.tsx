@@ -74,6 +74,33 @@ export default function Materials({ lessonId, data }: Props) {
       return name.join("_");
     }
   };
+  
+  const downloadFile = async (materialId: number, fileName: string) => {
+    try {
+      const response = await fetch(`/api/download?id=${materialId}`);
+      
+      if (!response.ok) {
+        throw new Error('Soubor nelze stáhnout');
+      }
+      
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      
+      // Vytvoření dočasného odkazu pro stažení
+      const a = document.createElement('a');
+      a.style.display = 'none';
+      a.href = url;
+      a.download = fileName.split('_').slice(1).join('_');
+      document.body.appendChild(a);
+      a.click();
+      
+      // Úklid
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+    } catch (err) {
+      setError("Nastala chyba při stahování souboru");
+    }
+  };
 
   return (
     <div className="mb-6 rounded-md border border-gray-200 p-4 shadow-sm">
@@ -82,13 +109,12 @@ export default function Materials({ lessonId, data }: Props) {
       <div className="grid grid-cols-2 gap-4 md:grid-cols-3">
         {materials.map((material) => (
           <div key={material.id} className="group relative">
-            <a
-              href={material.filePath}
-              download
-              className="flex h-28 items-center justify-center rounded-xl border border-gray-300 bg-white p-4 text-center transition hover:border-orange-500 hover:text-orange-500"
+            <button
+              onClick={() => downloadFile(material.id, getFileName(material.filePath))}
+              className="flex h-28 w-full cursor-pointer items-center justify-center rounded-xl border border-gray-300 bg-white p-4 text-center transition hover:border-orange-500 hover:text-orange-500"
             >
               {getFileName(material.filePath)}
-            </a>
+            </button>
 
             <button
               onClick={() => deleteMaterial(material.id)}
