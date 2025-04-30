@@ -77,7 +77,7 @@ export async function PUT(req: Request) {
     }
 
     const updatedCourse = await db.course.update({
-      where: { id: id },
+      where: { id },
       data: {
         name,
         description,
@@ -88,8 +88,17 @@ export async function PUT(req: Request) {
       },
     });
 
+    await db.lesson.updateMany({
+      where: {
+        courseId: id,
+      },
+      data: {
+        teacherId: parseInt(teacherId),
+      },
+    });
+
     return NextResponse.json(
-      { course: updatedCourse, message: "kurz upraven" },
+      { course: updatedCourse, message: "kurz upraven a lekce aktualizovány" },
       { status: 200 },
     );
   } catch (error) {
