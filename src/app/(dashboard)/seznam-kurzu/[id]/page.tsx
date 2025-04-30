@@ -6,8 +6,8 @@ import TableLessons from "@/components/table/TableLessons";
 import CourseDetail from "@/components/detail/CourseDetail";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
-export default async function Kurz({ params }: { params: { id: string } }) {
-  const { id } = params;
+export default async function Kurz({params}: {params: Promise<{ id: string }>}) {
+  const { id } = await params;
 
   const course = await prisma.course.findFirst({
     where: { id: parseInt(id) },

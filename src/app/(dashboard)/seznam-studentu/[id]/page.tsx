@@ -2,11 +2,7 @@ import { prisma } from "@/lib/db";
 import { User } from "@prisma/client";
 import React from "react";
 
-export default async function Student({
-  params,
-}: {
-  params: { id: string };
-}) {
+export default async function Student({params}: {params: Promise<{ id: string }>}) {
   const { id } = await params;
 
   const student: User | null = await prisma.user.findFirst({

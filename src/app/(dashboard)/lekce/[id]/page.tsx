@@ -9,7 +9,7 @@ import Link from "next/link";
 import React from "react";
 import { User, BookOpen, Users, School } from "lucide-react";
 
-export default async function Lekce({ params }: { params: { id: string } }) {
+export default async function Lekce({params}: {params: Promise<{ id: string }>}) {
   const { id } = await params;
 
   const lesson = await prisma.lesson.findFirst({

@@ -10,14 +10,14 @@ import TableLectorLessons from "@/components/table/TableLectorLessons";
 import Calculator from "@/components/Calculator";
 import CalendarComponent from "@/components/Calendar";
 
-export default async function Lektor({ params }: { params: { id: string } }) {
+export default async function Lektor({params}: {params: Promise<{ id: string }>}) {
   // INFO O LEKTOROVI
   // JEHO KURZY
   // JEHO LEKCE
   // KALEDNAR LEKCI
   // KALKULACKA
 
-  const { id } = params;
+  const { id } = await params;
 
   const lector = await prisma.user.findFirst({
     where: { id: parseInt(id) },
