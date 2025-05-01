@@ -13,6 +13,7 @@ interface Lector {
   username: string;
   email: string | null;
   phone: string | null;
+  color: string | null;
   createdAt: Date;
   CoursesTaught?: Course[];
 }
@@ -45,6 +46,7 @@ export default function CreateLectorModal({
     phone: z.string().min(1, "Telefon je povinný"),
     email: z.string().email("Neplatná e-mailová adresa"),
     courseIds: z.array(z.string()).optional(),
+    color: z.string().optional(),
   });
   const {
     register,
@@ -109,6 +111,7 @@ export default function CreateLectorModal({
         email: data.email || "",
         courseIds:
           data.CoursesTaught?.map((course) => course.id.toString()) || [],
+        color: data.color || "",
       });
     }
   }, [data, isOpen, reset]);
@@ -141,8 +144,6 @@ export default function CreateLectorModal({
       headers: { "Content-Type": "application/json" },
     });
 
-
-
     if (response.ok) {
       onClose();
       window.location.reload();
@@ -156,7 +157,6 @@ export default function CreateLectorModal({
             ? "Chyba při úpravě uživatele."
             : "Chyba při vytváření uživatele.",
         );
-       
       }
     }
   };
@@ -272,7 +272,7 @@ export default function CreateLectorModal({
               </div>
             )}
 
-            <div className="col-span-2 mb-4 flex flex-col gap-2">
+            <div className="mb-4 flex flex-col gap-2">
               <label className="text-xs text-gray-500">
                 Uživatelské jméno*
               </label>
@@ -284,6 +284,18 @@ export default function CreateLectorModal({
                 <p className="text-xs text-red-500">
                   {errors.username.message}
                 </p>
+              )}
+            </div>
+
+            <div className="mb-4 flex flex-col gap-2">
+              <label className="text-xs text-gray-500">Barva*</label>
+              <input
+                type="color"
+                {...register("color")}
+                className="h-10 w-14 rounded-md border-[1.5px] border-gray-300 p-1 focus:border-orange-300"
+              />
+              {errors.color && (
+                <p className="text-xs text-red-500">{errors.color.message}</p>
               )}
             </div>
 

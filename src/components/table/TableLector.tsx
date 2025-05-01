@@ -16,6 +16,7 @@ interface Lector {
   username: string;
   phone: string | null;
   email: string | null;
+  color: string | null;
   createdAt: Date;
   CoursesTaught?: Course[];
 }

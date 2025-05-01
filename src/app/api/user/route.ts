@@ -14,7 +14,10 @@ export async function POST(req: Request) {
       email,
       courseIds,
       roleId,
+      color
     } = body;
+
+    console.log(color)
 
     const hashedPassword = await hash(password, 10);
 
@@ -44,6 +47,7 @@ export async function POST(req: Request) {
         lastName: lastName,
         phone: phone,
         email: email,
+        color: color,
         UserRole: {
           create: {
             roleId: parseInt(roleId),
@@ -88,6 +92,7 @@ export async function PUT(req: Request) {
       email,
       courseIds,
       roleId,
+      color
     } = body;
 
     const existingUser = await db.user.findFirst({
@@ -127,6 +132,7 @@ export async function PUT(req: Request) {
         lastName,
         phone,
         email,
+        color,
         CoursesTaught: {
           set: courseIds.map((courseId: number) => ({ id: courseId })),
         },

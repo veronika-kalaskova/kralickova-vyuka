@@ -179,6 +179,15 @@ export default function CalendarComponent({
         popup
         messages={messages}
         onSelectEvent={handleSelectedEvent}
+        eventPropGetter={(event) => {
+          const backgroundColor = event.teacher?.color || "#ff8903";
+          return {
+            style: {
+              backgroundColor,
+              borderColor: backgroundColor,
+            },
+          };
+        }}
         doShowMoreDrillDown
         style={{ height: "100%" }}
         onNavigate={(date) => {
