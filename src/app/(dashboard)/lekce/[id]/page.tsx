@@ -66,10 +66,10 @@ export default async function Lekce({params}: {params: Promise<{ id: string }>})
     },
   });
 
-  const materials = await prisma.studyMaterial.findMany({
+  const materials = await prisma.studyMaterial.findFirst({
     where: {
       lessonId: parseInt(id),
-    },
+    }
   });
 
   const comments = await prisma.comment.findMany({

@@ -107,7 +107,7 @@ model Attendance {
 model StudyMaterial {
   id         Int      @id @default(autoincrement())
   lessonId   Int
-  filePath   String
+  fileName   String
   fileType   String
   uploadedAt DateTime
   fileData   Bytes

@@ -4,12 +4,11 @@ import React, { useState } from "react";
 
 interface Props {
   lessonId: number;
-  data: StudyMaterial[];
+  data: StudyMaterial | null;
 }
 
 export default function Materials({ lessonId, data }: Props) {
-  const [materials, setMaterials] = useState<StudyMaterial[]>(data);
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [material, setMaterial] = useState<StudyMaterial | null>(data);
   const [uploading, setUploading] = useState(false);
   const [uploadSuccess, setUploadSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -32,13 +31,16 @@ export default function Materials({ lessonId, data }: Props) {
         body: formData,
       });
 
-      const { material } = await response.json();
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Nastala chyba při nahrávání");
+      }
 
+      const result = await response.json();
       setUploadSuccess(true);
-      setSelectedFile(null);
-      setMaterials((prev) => [...prev, material]);
+      setMaterial(result.material);
     } catch (err) {
-      setError("Nastala chyba při nahrávání");
+      setError(err instanceof Error ? err.message : "Nastala chyba při nahrávání");
     } finally {
       setUploading(false);
     }
@@ -52,29 +54,12 @@ export default function Materials({ lessonId, data }: Props) {
         headers: { "Content-Type": "application/json" },
       });
 
-      setMaterials((prev) =>
-        prev.filter((material) => material.id !== materialId),
-      );
+      setMaterial(null);
     } catch (err) {
       setError("Nastala chyba při mazání materiálu");
     }
   };
 
-  const getFileName = (filePath: string) => {
-    const parts = filePath.split("/");
-
-    const fileName = parts[parts.length - 1];
-
-    const name = fileName.split("_");
-    name.shift();
-
-    if (name.join("_").length > 10) {
-      return `${name.join("_").slice(0, 10)}...`;
-    } else {
-      return name.join("_");
-    }
-  };
-  
   const downloadFile = async (materialId: number, fileName: string) => {
     try {
       const response = await fetch(`/api/download?id=${materialId}`);
@@ -86,15 +71,13 @@ export default function Materials({ lessonId, data }: Props) {
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
       
-      // Vytvoření dočasného odkazu pro stažení
       const a = document.createElement('a');
       a.style.display = 'none';
       a.href = url;
-      a.download = fileName.split('_').slice(1).join('_');
+      a.download = fileName;
       document.body.appendChild(a);
       a.click();
       
-      // Úklid
       window.URL.revokeObjectURL(url);
       document.body.removeChild(a);
     } catch (err) {
@@ -107,13 +90,13 @@ export default function Materials({ lessonId, data }: Props) {
       <h2 className="mb-6 text-xl font-semibold">Materiály</h2>
 
       <div className="grid grid-cols-2 gap-4 md:grid-cols-3">
-        {materials.map((material) => (
-          <div key={material.id} className="group relative">
+        {material ? (
+          <div className="group relative w-full max-w-md">
             <button
-              onClick={() => downloadFile(material.id, getFileName(material.filePath))}
+              onClick={() => downloadFile(material.id, material.fileName)}
               className="flex h-28 w-full cursor-pointer items-center justify-center rounded-xl border border-gray-300 bg-white p-4 text-center transition hover:border-orange-500 hover:text-orange-500"
             >
-              {getFileName(material.filePath)}
+              {material.fileName}
             </button>
 
             <button
@@ -123,12 +106,12 @@ export default function Materials({ lessonId, data }: Props) {
               &#10005;
             </button>
           </div>
-        ))}
-
-        <label className="flex h-28 cursor-pointer items-center justify-center rounded-xl border-2 border-dashed border-orange-400 bg-orange-50 p-4 text-center text-orange-500 transition hover:bg-orange-100 hover:text-orange-600">
-          <input type="file" onChange={uploadFile} className="hidden" />
-          {uploading ? "Nahrávám..." : "Přidat soubor"}
-        </label>
+        ) : (
+          <label className="flex h-28 w-full max-w-md cursor-pointer items-center justify-center rounded-xl border-2 border-dashed border-orange-400 bg-orange-50 p-4 text-center text-orange-500 transition hover:bg-orange-100 hover:text-orange-600">
+            <input type="file" onChange={uploadFile} className="hidden" />
+            {uploading ? "Nahrávám..." : "Přidat soubor"}
+          </label>
+        )}
       </div>
 
       {uploadSuccess && (

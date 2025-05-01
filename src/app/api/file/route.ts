@@ -1,6 +1,4 @@
 import { NextResponse } from "next/server";
-import path from "path";
-import { writeFile } from "fs/promises";
 import { db } from "@/lib/db";
 
 export async function POST(req: Request) {
@@ -17,20 +15,26 @@ export async function POST(req: Request) {
       );
     }
     
+    // Check if there's already a material for this lesson
+    const existingMaterial = await db.studyMaterial.findFirst({
+      where: { lessonId }
+    });
+    
+    // If there's an existing material, delete it
+    if (existingMaterial) {
+      await db.studyMaterial.delete({
+        where: { id: existingMaterial.id }
+      });
+    }
+    
     const buffer = Buffer.from(await file.arrayBuffer());
-    const fileName = `${Date.now()}_${file.name.replaceAll(" ", "_")}`;
-    // const filePath = path.join(process.cwd(), "public/uploads", fileName);
-    
-    const publicUrl = `/uploads/${fileName}`;
-    
+
     try {
-      // await writeFile(filePath, buffer);
-      
       const newMaterial = await db.studyMaterial.create({
         data: {
           lessonId: lessonId,
-          filePath: publicUrl,
           fileType: file.type,
+          fileName: file.name,
           uploadedAt: new Date(),
           fileData: buffer, 
         },

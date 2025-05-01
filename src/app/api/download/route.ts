@@ -35,7 +35,7 @@ export async function GET(req: Request) {
     }
     
     // Získání jména souboru z cesty
-    const fileName = material.filePath.split("/").pop() || "soubor";
+    const fileName = material.fileName.split("/").pop() || "soubor";
 
     // Nastavení správných hlaviček pro stažení
     const headers = new Headers();
