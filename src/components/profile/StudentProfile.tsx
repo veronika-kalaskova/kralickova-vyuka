@@ -17,13 +17,11 @@ import CalendarComponent from "@/components/Calendar";
 import TableStudentAttendance from "@/components/table/TableStudentAttendance";
 import TableUpcomingLessons from "@/components/table/TableUpcomingLessons";
 
-export default async function Student({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
-  const { id } = await params;
+interface Props {
+  id: string;
+}
 
+export default async function StudentProfile({ id }: Props) {
   const student = await prisma.user.findFirst({
     where: { id: parseInt(id) },
     include: {

@@ -53,7 +53,7 @@ export default function TableStudentAttendance({ courses }: Props) {
 
   return (
     <div className="space-y-8">
-      <h2 className="title mb-4 text-xl font-semibold">Docházka</h2>
+      <h2 className="title mb-6">Docházka</h2>
 
       {courses.length === 0 ? (
         <div className="rounded-md border border-gray-200 p-4 shadow-sm text-gray-500">
