@@ -6,16 +6,11 @@ import TableLessons from "@/components/table/TableLessons";
 import CourseDetail from "@/components/detail/CourseDetail";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
-import TableLectorLessons from "@/components/table/TableLectorLessons";
+import TableUpcomingLessons from "@/components/table/TableUpcomingLessons";
 import Calculator from "@/components/Calculator";
 import CalendarComponent from "@/components/Calendar";
 
 export default async function Lektor({params}: {params: Promise<{ id: string }>}) {
-  // INFO O LEKTOROVI
-  // JEHO KURZY
-  // JEHO LEKCE
-  // KALEDNAR LEKCI
-  // KALKULACKA
 
   const { id } = await params;
 
@@ -113,7 +108,7 @@ export default async function Lektor({params}: {params: Promise<{ id: string }>}
             classNameProp="h-[700px] w-full mb-6 rounded-md border border-gray-200 p-4 shadow-sm"
             roles={session?.user.roles}
           />
-          <TableLectorLessons lessons={upcomingLessons} />
+          <TableUpcomingLessons lessons={upcomingLessons} />
         </div>
 
         {/* RIGHT */}

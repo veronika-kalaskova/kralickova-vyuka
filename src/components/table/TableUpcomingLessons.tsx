@@ -11,7 +11,7 @@ interface Props {
   lessons: LessonWithCourseAndTeacher[];
 }
 
-export default function TableLectorLessons({ lessons }: Props) {
+export default function TableUpcomingLessons({ lessons }: Props) {
   const sortedLessons = [...lessons].sort(
     (a, b) => a.startDate.getTime() - b.startDate.getTime(),
   );
