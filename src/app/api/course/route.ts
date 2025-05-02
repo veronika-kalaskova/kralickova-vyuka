@@ -43,33 +43,37 @@ export async function POST(req: Request) {
       },
     });
 
-    const existingGroup = await db.group.findFirst({
-      where: {
-        name: name,
-        deletedAt: null,
-      },
-    });
-
-    if (existingGroup) {
-      return NextResponse.json(
-        {
-          message: "Group exists",
+    if (!newCourse.isIndividual) { 
+      const existingGroup = await db.group.findFirst({
+        where: {
+          name: name,
+          deletedAt: null,
         },
-        { status: 409 },
-      );
-    }
-
-    const newGroup = await db.group.create({
-      data: {
-        name,
-        teacherId: parseInt(teacherId),
-        Course: {
-          connect: {
-            id: newCourse.id,
+      });
+  
+      if (existingGroup) {
+        return NextResponse.json(
+          {
+            message: "Group exists",
+          },
+          { status: 409 },
+        );
+      }
+  
+      const newGroup = await db.group.create({
+        data: {
+          name,
+          teacherId: parseInt(teacherId),
+          Course: {
+            connect: {
+              id: newCourse.id,
+            },
           },
         },
-      },
-    });
+      });
+
+
+    }
 
     await db.user.update({
       where: { id: parseInt(teacherId) },
