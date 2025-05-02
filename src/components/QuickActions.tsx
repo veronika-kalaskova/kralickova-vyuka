@@ -6,6 +6,7 @@ import CreateStudentModal from "./auth/CreateStudentModal";
 import { Course, Group, User } from "@prisma/client";
 import CreateUpdateGroupModal from "./forms/CreateUpdateGroupModal";
 import CreateUpdateCourseModal from "./forms/CreateUpdateCourseModal";
+import CreateUpdateLessonModal from "./forms/CreateUpdateLessonModal";
 
 interface Props {
   coursesWithoutLector: (Course & { group: Group | null })[];
@@ -48,7 +49,6 @@ export default function QuickActions({
           <div className="w-full md:w-1/4">
             <h2 className="title">Rychlé akce</h2>
             <div className="flex flex-col gap-3">
-              <Button title="Přidat lekci" />
               <Button
                 title="Vytvořit lektora"
                 onClick={() => openUserModal(2)}
@@ -56,10 +56,6 @@ export default function QuickActions({
               <Button
                 title="Vytvořit studenta"
                 onClick={() => openUserModal(3)}
-              />
-              <Button
-                title="Vytvořit skupinu"
-                onClick={() => openModal("group")}
               />
               <Button
                 title="Vytvořit kurz"
@@ -85,16 +81,6 @@ export default function QuickActions({
               isOpen={isOpen}
               courses={coursesWithoutStudent}
               onClose={() => setIsOpen(false)}
-              type="create"
-            />
-          )}
-
-          {modal === "group" && (
-            <CreateUpdateGroupModal
-              isOpen={isOpen}
-              onClose={() => setIsOpen(false)}
-              courses={coursesWithoutGroup}
-              lectors={allLectors}
               type="create"
             />
           )}

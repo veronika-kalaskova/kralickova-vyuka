@@ -114,12 +114,6 @@ export default function CreateUpdateCourseModal({
 
   const courseType = watch("courseType");
 
-  useEffect(() => {
-    if (courseType === "group" || courseType === "pair") {
-      setMessage("Nezapomeňte přiřadit skupinu přes Vytvořit skupinu.");
-    }
-  }, [courseType]);
-
   if (!isOpen) return null;
 
   return (
@@ -127,9 +121,7 @@ export default function CreateUpdateCourseModal({
       <div className="max-h-screen w-full overflow-y-auto bg-white p-6 shadow-md sm:h-auto sm:max-w-xl md:rounded-md">
         {type === "update" && <h2 className="title">Upravit kurz</h2>}
         {type === "create" && <h2 className="title">Vytvořit kurz</h2>}
-        <form
-          onSubmit={handleSubmit(onSubmit)}
-        >
+        <form onSubmit={handleSubmit(onSubmit)}>
           <div className="grid w-full grid-cols-2 gap-4">
             <div className="mb-4 flex flex-col gap-2">
               <label className="text-xs text-gray-500">Jméno kurzu*</label>
@@ -228,6 +220,12 @@ export default function CreateUpdateCourseModal({
             {message && (
               <div className="col-span-2 mt-2 text-xs text-red-500">
                 {message}
+              </div>
+            )}
+
+            {(courseType === "group" || courseType === "pair") && (
+              <div className="col-span-2 mt-2 text-xs text-red-500">
+                K následujícímu kurzu bude automaticky vytvořena skupina.
               </div>
             )}
 
