@@ -17,6 +17,11 @@ export default async function Kurz({params}: {params: Promise<{ id: string }>}) 
       group: {
         include: {
           StudentGroup: {
+            where: {
+              student: {
+                deletedAt: null,
+              },
+            },
             include: {
               student: true,
             },
@@ -30,6 +35,7 @@ export default async function Kurz({params}: {params: Promise<{ id: string }>}) 
       },
     },
   });
+  
 
   const session = await getServerSession(authOptions);
 

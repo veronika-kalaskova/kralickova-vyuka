@@ -22,6 +22,7 @@ export async function POST(req: Request) {
 
     const existingUser = await db.user.findFirst({
       where: {
+        deletedAt: null,
         OR: [{ username: username }, { email: email }],
       },
     });
@@ -140,13 +141,11 @@ export async function PUT(req: Request) {
 
     const existingUser = await db.user.findFirst({
       where: {
+        deletedAt: null,
         AND: [
           { id: { not: id } },
           {
-            OR: [
-              { username: username, deletedAt: null },
-              { email: email, deletedAt: null },
-            ],
+            OR: [{ username: username }, { email: email }],
           },
         ],
       },
