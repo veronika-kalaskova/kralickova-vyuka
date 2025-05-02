@@ -91,7 +91,7 @@ export default function Materials({ lessonId, data }: Props) {
 
       <div className="flex">
         {material ? (
-          <div className="group relative w-full max-w-md">
+          <div className="group relative w-full">
             <button
               onClick={() => downloadFile(material.id, material.fileName)}
               className="flex h-28 w-full cursor-pointer items-center justify-center rounded-xl border border-gray-300 bg-white p-4 text-center transition hover:border-orange-500 hover:text-orange-500"
@@ -107,7 +107,7 @@ export default function Materials({ lessonId, data }: Props) {
             </button>
           </div>
         ) : (
-          <label className="flex h-28 w-full max-w-md cursor-pointer items-center justify-center rounded-xl border-2 border-dashed border-orange-400 bg-orange-50 p-4 text-center text-orange-500 transition hover:bg-orange-100 hover:text-orange-600">
+          <label className="flex h-28 w-full cursor-pointer items-center justify-center rounded-xl border-2 border-dashed border-orange-400 bg-orange-50 p-4 text-center text-orange-500 transition hover:bg-orange-100 hover:text-orange-600">
             <input type="file" onChange={uploadFile} className="hidden" />
             {uploading ? "Nahrávám..." : "Přidat soubor"}
           </label>

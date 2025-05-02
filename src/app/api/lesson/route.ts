@@ -44,7 +44,7 @@ export async function POST(req: Request) {
           courseId,
           startDate: start,
           endDate: end,
-          teacherId,
+          teacherId: parseInt(teacherId),
           repeat: "weekly",
           duration,
         });
@@ -62,7 +62,7 @@ export async function POST(req: Request) {
           courseId,
           startDate: start,
           endDate: end,
-          teacherId,
+          teacherId: parseInt(teacherId),
           repeat: "none",
           duration,
         },

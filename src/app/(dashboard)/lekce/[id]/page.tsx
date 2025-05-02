@@ -18,6 +18,7 @@ export default async function Lekce({params}: {params: Promise<{ id: string }>})
       course: {
         include: {
           teacher: true,
+          student: true
         },
       },
       teacher: true,
@@ -140,7 +141,7 @@ export default async function Lekce({params}: {params: Promise<{ id: string }>})
 
   return (
     <div className="p-4">
-      <div className="mb-6 flex items-center justify-between">
+      <div className="mb-6 flex gap-2 md:gap-0 flex-col md:flex-row md:items-center md:justify-between">
         <div>
           <h1 className="title mb-0">
             Lekce {formatTime(lesson.startDate, lesson.endDate)}
@@ -149,6 +150,12 @@ export default async function Lekce({params}: {params: Promise<{ id: string }>})
           {lesson.course.description && (
             <p className="mt-3 text-sm text-gray-500">
               {lesson.course.description}
+            </p>
+          )}
+
+          {lesson.deletedAt && (
+            <p className="mt-3 text-sm text-red-500">
+              Lekce byla nahrazena
             </p>
           )}
         </div>

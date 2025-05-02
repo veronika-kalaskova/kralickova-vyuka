@@ -41,7 +41,7 @@ export default function CalendarComponent({
   lessons,
   defaultView = Views.MONTH,
   availableViews = ["month", "work_week", "day", "agenda"],
-  classNameProp = "h-[700px] w-full",
+  classNameProp = "h-[700px]  w-full",
   roles = [],
 }: Props) {
   const [view, setView] = useState<View>(defaultView);

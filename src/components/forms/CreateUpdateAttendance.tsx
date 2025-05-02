@@ -68,7 +68,7 @@ export default function CreateUpdateAttendance({
           lessonId: lesson.id,
           userId: parseInt(studentId),
           type: isPresent ? "present" : "absent",
-          date: new Date(),
+          createdAt: new Date(),
         }),
       );
 

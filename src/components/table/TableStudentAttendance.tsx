@@ -30,6 +30,7 @@ export default function TableStudentAttendance({ courses }: Props) {
     }
 
     const latestAttendance = attendanceRecords[0];
+    console.log(latestAttendance.type);
 
     switch (latestAttendance.type) {
       case "present":
@@ -46,6 +47,13 @@ export default function TableStudentAttendance({ courses }: Props) {
             Nepřítomen
           </span>
         );
+      case "replacement":
+        return (
+          <span className="inline-flex items-center rounded bg-red-50 px-2 py-0.5 text-xs font-medium text-red-800">
+            <span className="mr-1.5 h-1.5 w-1.5 rounded-full bg-red-500" />
+            Nahrazeno
+          </span>
+        );
       default:
         return <span className="text-gray-500">Nezaznamenáno</span>;
     }
@@ -56,12 +64,15 @@ export default function TableStudentAttendance({ courses }: Props) {
       <h2 className="title mb-6">Docházka</h2>
 
       {courses.length === 0 ? (
-        <div className="rounded-md border border-gray-200 p-4 shadow-sm text-gray-500">
+        <div className="rounded-md border border-gray-200 p-4 text-gray-500 shadow-sm">
           Žádné kurzy k zobrazení.
         </div>
       ) : (
         courses.map((course) => (
-          <div key={course.id} className="rounded-md border border-gray-200 p-4 shadow-sm">
+          <div
+            key={course.id}
+            className="rounded-md border border-gray-200 p-4 shadow-sm"
+          >
             <h3 className="mb-3 text-lg font-semibold text-gray-800">
               Pro kurz: {course.name}
             </h3>
@@ -69,7 +80,7 @@ export default function TableStudentAttendance({ courses }: Props) {
             {course.Lesson && course.Lesson.length > 0 ? (
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="text-left text-xs uppercase text-gray-500">
+                  <tr className="text-left text-xs text-gray-500 uppercase">
                     <th className="py-2.5 text-center font-medium"></th>
                     <th className="py-2.5 font-medium">Datum a čas</th>
                     <th className="py-2.5 font-medium">Docházka</th>
@@ -88,7 +99,9 @@ export default function TableStudentAttendance({ courses }: Props) {
                       <td className="py-2.5 text-sm text-gray-800">
                         {formatDate(lesson.startDate)}
                       </td>
-                      <td className="py-2.5">{getAttendanceStatus(lesson.Attendance)}</td>
+                      <td className="py-2.5">
+                        {getAttendanceStatus(lesson.Attendance)}
+                      </td>
                     </tr>
                   ))}
                 </tbody>

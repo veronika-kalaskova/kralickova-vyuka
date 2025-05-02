@@ -24,15 +24,16 @@ model User {
   deletedAt DateTime?
   color     String?
 
-  UserRole      UserRole[]
-  Group         Group[] // jake skupiny lektor uci
-  StudentGroup  StudentGroup[]
-  Attendance    Attendance[]
-  Comment       Comment[]
-  Replacement   Replacement[]
-  CoursesTaught Course[]       @relation("TeacherCourse")
-  CoursesTaken  Course[]       @relation("StudentCourse") // individualni kurzy
-  LessonsTaught Lesson[]       @relation("TeacherLesson")
+  UserRole              UserRole[]
+  Group                 Group[] // jake skupiny lektor uci
+  StudentGroup          StudentGroup[]
+  Attendance            Attendance[]
+  Comment               Comment[]
+  ReplacementsAsStudent Replacement[]  @relation("StudentReplacement")
+  ReplacementsAsTeacher Replacement[]  @relation("TeacherReplacement")
+  CoursesTaught         Course[]       @relation("TeacherCourse")
+  CoursesTaken          Course[]       @relation("StudentCourse") // individualni kurzy
+  LessonsTaught         Lesson[]       @relation("TeacherLesson")
 }
 
 model Role {
@@ -95,11 +96,11 @@ model Lesson {
 }
 
 model Attendance {
-  id       Int      @id @default(autoincrement())
-  lessonId Int
-  userId   Int
-  date     DateTime
-  type     String
+  id        Int      @id @default(autoincrement())
+  lessonId  Int
+  userId    Int
+  createdAt DateTime
+  type      String
 
   lesson Lesson @relation(fields: [lessonId], references: [id])
   user   User   @relation(fields: [userId], references: [id])
@@ -132,12 +133,14 @@ model Replacement {
   originalLessonId   Int
   substituteLessonId Int
   studentId          Int
-  date               DateTime
-  note               String
+  teacherId          Int
+  createdAt          DateTime
+  note               String?
 
   originalLesson   Lesson @relation("OriginalLesson", fields: [originalLessonId], references: [id])
   substituteLesson Lesson @relation("SubstituteLesson", fields: [substituteLessonId], references: [id])
-  student          User   @relation(fields: [studentId], references: [id])
+  student          User   @relation("StudentReplacement", fields: [studentId], references: [id])
+  teacher          User   @relation("TeacherReplacement", fields: [teacherId], references: [id])
 }
 
 model Course {

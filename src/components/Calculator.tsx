@@ -149,7 +149,7 @@ export default function Calculator({ lessons }: Props) {
 
         <button
           onClick={filterLessons}
-          className="w-full rounded-md bg-orange-500 px-4 py-2 font-medium text-white transition-colors hover:bg-orange-600"
+          className="cursor-pointer w-full rounded-lg bg-orange-400 px-4 py-3 font-medium text-white transition-all hover:bg-orange-500"
         >
           Vypočítat odměnu
         </button>

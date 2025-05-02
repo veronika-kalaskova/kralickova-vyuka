@@ -3,11 +3,13 @@ import React, { useState } from "react";
 import CreateUpdateAttendanceModal from "./forms/CreateUpdateAttendance";
 import { Attendance, Course, Group, Lesson, User } from "@prisma/client";
 import CreateUpdateLessonModal from "./forms/CreateUpdateLessonModal";
+import CreateLessonReplacement from "./forms/CreateLessonReplacementModal";
 
 interface Props {
   lesson: Lesson & {
     course: Course & {
       teacher: User | null;
+      student: User | null;
     };
   };
   students: User[];
@@ -23,10 +25,11 @@ export default function LessonDetailButtons({
   roles,
   isAttendanceDone,
   attendance,
-  lectors
+  lectors,
 }: Props) {
   const [isAttendanceModalOpen, setIsAttendanceModalOpen] = useState(false);
   const [isLessonModalOpen, setIsLessonModalOpen] = useState(false);
+  const [isReplacementModalOpen, setIsReplacementModalOpen] = useState(false);
 
   const openAttendanceModal = () => setIsAttendanceModalOpen(true);
   const closeAttendanceModal = () => setIsAttendanceModalOpen(false);
@@ -34,9 +37,12 @@ export default function LessonDetailButtons({
   const openLessonModal = () => setIsLessonModalOpen(true);
   const closeLessonModal = () => setIsLessonModalOpen(false);
 
+  const openLessonReplacementModal = () => setIsReplacementModalOpen(true);
+  const closeLessonReplacementModal = () => setIsReplacementModalOpen(false);
+
   return (
     <>
-      <div className="flex justify-end gap-2">
+      <div className="flex justify-start md:justify-end gap-2">
         {roles?.includes("admin") && (
           <button
             type="button"
@@ -57,8 +63,11 @@ export default function LessonDetailButtons({
           </button>
         )}
 
-        {roles?.includes("admin") && (
-          <button className="cursor-pointer rounded-lg bg-red-400 px-4 py-3 font-medium text-white transition-all hover:bg-red-500">
+        {roles?.includes("admin") && lesson.course.isIndividual && (
+          <button
+            onClick={openLessonReplacementModal}
+            className="cursor-pointer rounded-lg bg-red-400 px-4 py-3 font-medium text-white transition-all hover:bg-red-500"
+          >
             Nahradit lekci
           </button>
         )}
@@ -91,6 +100,13 @@ export default function LessonDetailButtons({
         data={lesson}
         type="update"
         course={lesson.course}
+        lectors={lectors}
+      />
+
+      <CreateLessonReplacement
+        isOpen={isReplacementModalOpen}
+        onClose={closeLessonReplacementModal}
+        lesson={lesson}
         lectors={lectors}
       />
     </>

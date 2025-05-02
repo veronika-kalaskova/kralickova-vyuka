@@ -21,7 +21,7 @@ export default function CreateUpdateLessonModal({
   course,
   data,
   type,
-  lectors
+  lectors,
 }: Props) {
   const FormSchema = z.object({
     date: z.string().min(1, "Zadejte datum"),
@@ -52,9 +52,9 @@ export default function CreateUpdateLessonModal({
   function formatDate(date: Date) {
     return date.toISOString().split("T")[0];
   }
-  
+
   function formatTime(date: Date) {
-    return date.toTimeString().slice(0, 5); 
+    return date.toTimeString().slice(0, 5);
   }
 
   useEffect(() => {
@@ -66,11 +66,8 @@ export default function CreateUpdateLessonModal({
         repeat: data.repeat === "weekly" ? "weekly" : "none",
         teacherId: data.teacherId?.toString() || "",
       });
-      
     }
   }, [data, isOpen, reset]);
-
-
 
   const onSubmit = async (values: z.infer<typeof FormSchema>) => {
     try {
@@ -79,10 +76,9 @@ export default function CreateUpdateLessonModal({
       const [year, month, day] = values.date.split("-").map(Number);
       const [startHour, startMinute] = values.startTime.split(":").map(Number);
       const [endHour, endMinute] = values.endTime.split(":").map(Number);
-      
+
       const startDate = new Date(year, month - 1, day, startHour, startMinute);
       const endDate = new Date(year, month - 1, day, endHour, endMinute);
-      
 
       const lessonData = {
         courseId: course.id,
@@ -177,40 +173,44 @@ export default function CreateUpdateLessonModal({
             </div>
 
             {type === "create" && (
-            <div className="col-span-2 mb-4 flex flex-col gap-2">
-              <label className="text-xs text-gray-500">Opakování*</label>
-              <select
-                {...register("repeat")}
-                className="rounded-md border-[1.5px] border-gray-300 p-2 focus:border-orange-300"
-              >
-                <option value="none">Neopakovat</option>
-                <option value="weekly">Týdně</option>
-              </select>
-              {errors.repeat && (
-                <p className="text-xs text-red-500">{errors.repeat.message}</p>
-              )}
-            </div>
+              <div className="col-span-2 mb-4 flex flex-col gap-2">
+                <label className="text-xs text-gray-500">Opakování*</label>
+                <select
+                  {...register("repeat")}
+                  className="rounded-md border-[1.5px] border-gray-300 p-2 focus:border-orange-300"
+                >
+                  <option value="none">Neopakovat</option>
+                  <option value="weekly">Týdně</option>
+                </select>
+                {errors.repeat && (
+                  <p className="text-xs text-red-500">
+                    {errors.repeat.message}
+                  </p>
+                )}
+              </div>
             )}
 
-{type === "update" && (
-            <div className="col-span-2 mb-4 flex w-full flex-col gap-2">
-            <label className="text-xs text-gray-500">Vyberte lektora pro konktrétní lekci*</label>
-            <select
-              {...register("teacherId")}
-              className="rounded-md border-[1.5px] border-gray-300 p-2 focus:border-orange-300"
-            >
-              {lectors?.map((lector) => (
-                <option key={lector.id} value={lector.id}>
-                  {lector.firstName} {lector.lastName}
-                </option>
-              ))}
-            </select>
-            {errors.teacherId && (
-              <p className="text-xs text-red-500">
-                {errors.teacherId.message}
-              </p>
-            )}
-          </div>
+            {type === "update" && (
+              <div className="col-span-2 mb-4 flex w-full flex-col gap-2">
+                <label className="text-xs text-gray-500">
+                  Vyberte lektora pro konktrétní lekci*
+                </label>
+                <select
+                  {...register("teacherId")}
+                  className="rounded-md border-[1.5px] border-gray-300 p-2 focus:border-orange-300"
+                >
+                  {lectors?.map((lector) => (
+                    <option key={lector.id} value={lector.id}>
+                      {lector.firstName} {lector.lastName}
+                    </option>
+                  ))}
+                </select>
+                {errors.teacherId && (
+                  <p className="text-xs text-red-500">
+                    {errors.teacherId.message}
+                  </p>
+                )}
+              </div>
             )}
 
             {message && (
