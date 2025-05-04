@@ -155,6 +155,13 @@ export default async function Student({
     },
   });
 
+    const replacements = await prisma.replacement.findMany({
+      where: {
+        studentId: studentId,
+      }
+    })
+  
+
   const session = await getServerSession(authOptions);
 
   if (!student) {
@@ -265,7 +272,7 @@ export default async function Student({
               )}
             </div>
           </div>
-          <TableStudentAttendance courses={courses} />
+          <TableStudentAttendance courses={courses} replacements={replacements} />
         </div>
       </div>
     </div>

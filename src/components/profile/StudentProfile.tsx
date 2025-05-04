@@ -153,6 +153,12 @@ export default async function StudentProfile({ id }: Props) {
     },
   });
 
+  const replacements = await prisma.replacement.findMany({
+    where: {
+      studentId: studentId,
+    }
+  })
+
   const session = await getServerSession(authOptions);
 
   if (!student) {
@@ -263,7 +269,7 @@ export default async function StudentProfile({ id }: Props) {
               )}
             </div>
           </div>
-          <TableStudentAttendance courses={courses} />
+          <TableStudentAttendance courses={courses} replacements={replacements} />
         </div>
       </div>
     </div>

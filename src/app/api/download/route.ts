@@ -34,15 +34,12 @@ export async function GET(req: Request) {
       );
     }
     
-    // Získání jména souboru z cesty
     const fileName = material.fileName.split("/").pop() || "soubor";
 
-    // Nastavení správných hlaviček pro stažení
     const headers = new Headers();
     headers.set("Content-Type", material.fileType || "application/octet-stream");
     headers.set("Content-Disposition", `attachment; filename="${fileName}"`);
     
-    // Vrácení binárních dat jako odpověď
     return new Response(material.fileData as Buffer, {
       status: 200,
       headers: headers,

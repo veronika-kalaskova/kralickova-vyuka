@@ -46,7 +46,6 @@ export async function DELETE(req: Request) {
       { status: 200 },
     );
   } catch (error) {
-    console.error("Chyba při mazání komentaru:", error);
     return NextResponse.json(
       { error: "Chyba při mazání komentaru." },
       { status: 500 },

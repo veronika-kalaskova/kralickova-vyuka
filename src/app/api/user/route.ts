@@ -17,8 +17,6 @@ export async function POST(req: Request) {
       color
     } = body;
 
-    console.log(color)
-
     const hashedPassword = await hash(password, 10);
 
     const existingUser = await db.user.findFirst({
@@ -149,7 +147,6 @@ export async function PUT(req: Request) {
       { status: 200 },
     );
   } catch (error) {
-    console.error(error);
     return NextResponse.json({ message: "Error" }, { status: 500 });
   }
 }

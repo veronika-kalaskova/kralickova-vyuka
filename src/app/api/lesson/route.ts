@@ -76,7 +76,6 @@ export async function POST(req: Request) {
       { status: 201 },
     );
   } catch (error) {
-    console.error(error);
     return NextResponse.json(
       { message: "Chyba při vytváření lekce" },
       { status: 500 },
@@ -104,7 +103,6 @@ export async function PUT(req: Request) {
       );
     }
 
-    console.log(teacherId)
 
     const start = new Date(startDate);
     const end = new Date(endDate);
@@ -125,7 +123,6 @@ export async function PUT(req: Request) {
       { status: 200 },
     );
   } catch (error) {
-    console.error(error);
     return NextResponse.json(
       { message: "Chyba při úpravě lekce" },
       { status: 500 },

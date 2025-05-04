@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Course, Lesson, Attendance } from "@prisma/client";
+import { Course, Lesson, Attendance, Replacement } from "@prisma/client";
 
 interface Props {
   courses: (Course & {
@@ -9,9 +9,13 @@ interface Props {
       Attendance: Attendance[];
     })[];
   })[];
+  replacements: Replacement[];
 }
 
-export default function TableStudentAttendance({ courses }: Props) {
+export default function TableStudentAttendance({
+  courses,
+  replacements,
+}: Props) {
   const formatDate = (date: Date) => {
     return new Date(date).toLocaleString("cs-CZ", {
       day: "2-digit",
@@ -30,7 +34,6 @@ export default function TableStudentAttendance({ courses }: Props) {
     }
 
     const latestAttendance = attendanceRecords[0];
-    console.log(latestAttendance.type);
 
     switch (latestAttendance.type) {
       case "present":
@@ -59,6 +62,14 @@ export default function TableStudentAttendance({ courses }: Props) {
     }
   };
 
+  const getReplacementNote = (lessonId: number) => {
+    if (!replacements) return null;
+    const replacement = replacements.find(
+      (r) => r.originalLessonId === lessonId,
+    );
+    return replacement?.note ?? null;
+  };
+
   return (
     <div className="space-y-8">
       <h2 className="title mb-6">Docházka</h2>
@@ -84,6 +95,9 @@ export default function TableStudentAttendance({ courses }: Props) {
                     <th className="py-2.5 text-center font-medium"></th>
                     <th className="py-2.5 font-medium">Datum a čas</th>
                     <th className="py-2.5 font-medium">Docházka</th>
+                    {replacements.length > 0 && (
+                      <th className="py-2.5 font-medium">Poznámka</th>
+                    )}
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-50">
@@ -101,6 +115,15 @@ export default function TableStudentAttendance({ courses }: Props) {
                       </td>
                       <td className="py-2.5">
                         {getAttendanceStatus(lesson.Attendance)}
+                      </td>
+                      <td className="py-2.5 text-sm text-gray-800">
+                        {getReplacementNote(lesson.id) ? (
+                          <span className="italic">
+                            {getReplacementNote(lesson.id)}
+                          </span>
+                        ) : (
+                          <span></span>
+                        )}
                       </td>
                     </tr>
                   ))}
