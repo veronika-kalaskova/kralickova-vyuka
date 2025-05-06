@@ -6,8 +6,6 @@ import Button from "../Button";
 import CreateLectorModal from "../auth/CreateLectorModal";
 import Link from "next/link";
 import SearchInput from "../SearchInput";
-// TODO: zapomnela jsem dat link i na mobilu (id lektor)
-// TODO: pagination
 
 interface Lector {
   id: number;

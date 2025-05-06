@@ -4,7 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Course, Group, User } from "@prisma/client";
 
-// TODO: podminka u datumu
+
 
 interface Props {
   isOpen: boolean;

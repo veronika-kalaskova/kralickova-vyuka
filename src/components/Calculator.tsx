@@ -149,7 +149,7 @@ export default function Calculator({ lessons }: Props) {
 
         <button
           onClick={filterLessons}
-          className="cursor-pointer w-full rounded-lg bg-orange-400 px-4 py-3 font-medium text-white transition-all hover:bg-orange-500"
+          className="w-full cursor-pointer rounded-lg bg-orange-400 px-4 py-3 font-medium text-white transition-all hover:bg-orange-500"
         >
           Vypočítat odměnu
         </button>
@@ -220,7 +220,7 @@ export default function Calculator({ lessons }: Props) {
           {filteredLessons.length > 0 && (
             <div className="mb-8">
               <h2 className="mb-3 text-xl font-semibold">Seznam lekcí</h2>
-              <div className="max-h-64 overflow-y-auto">
+              <div className="">
                 <table className="w-full">
                   <thead>
                     <tr className="text-left text-xs text-gray-500 uppercase">

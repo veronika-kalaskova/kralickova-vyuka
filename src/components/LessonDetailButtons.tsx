@@ -11,6 +11,8 @@ interface Props {
       teacher: User | null;
       student: User | null;
     };
+  } & {
+    teacher: User;
   };
   students: User[];
   lectors: User[];
@@ -42,7 +44,7 @@ export default function LessonDetailButtons({
 
   return (
     <>
-      <div className="flex justify-start md:justify-end gap-2">
+      <div className="flex justify-start gap-2 md:justify-end">
         {roles?.includes("admin") && (
           <button
             type="button"
@@ -63,7 +65,7 @@ export default function LessonDetailButtons({
           </button>
         )}
 
-        {roles?.includes("admin") && lesson.course.isIndividual && (
+        {roles?.includes("admin") && lesson.course.isIndividual && !lesson.deletedAt && (
           <button
             onClick={openLessonReplacementModal}
             className="cursor-pointer rounded-lg bg-red-400 px-4 py-3 font-medium text-white transition-all hover:bg-red-500"
@@ -103,12 +105,15 @@ export default function LessonDetailButtons({
         lectors={lectors}
       />
 
+
+      {!lesson.deletedAt && (
       <CreateLessonReplacement
         isOpen={isReplacementModalOpen}
         onClose={closeLessonReplacementModal}
         lesson={lesson}
         lectors={lectors}
       />
+      )}
     </>
   );
 }

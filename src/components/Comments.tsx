@@ -18,13 +18,13 @@ export default function Comments({ data, lessonId, user }: Props) {
   const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    // Validace textu - musí být delší než 2 znaky
+
     if (text.length <= 2) {
       setError("Komentář musí mít alespoň 3 znaky.");
       return;
     }
 
-    setError(null); // Vymazání chyby, pokud je validní text
+    setError(null); 
 
     try {
       const response = await fetch("/api/comments", {
@@ -44,7 +44,7 @@ export default function Comments({ data, lessonId, user }: Props) {
         const responseData = await response.json();
         const newComment: CommentType = responseData.comment;
 
-        // Přidání nového komentáře na začátek seznamu
+
         setComments((prevComments) => [newComment, ...prevComments]);
         setText("");
       } else {
@@ -76,7 +76,7 @@ export default function Comments({ data, lessonId, user }: Props) {
     );
   };
 
-  // Seřazení komentářů od nejnovějšího
+
   const sortedComments = comments.sort(
     (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
   );

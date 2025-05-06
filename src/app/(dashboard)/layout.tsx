@@ -8,7 +8,6 @@ import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { redirect } from "next/navigation";
 
-// TODO: pridat favicon
 
 const poppinsSans = Poppins({
   variable: "--font-poppins",
@@ -33,7 +32,6 @@ export default async function DashboardLayout({
     redirect("/prihlaseni");
   }
   
-  // TODO: zmena kodu, ted uz uchovavam role primo v session
   let userRole = null;
 
   if (session?.user?.id) {

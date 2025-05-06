@@ -58,12 +58,6 @@ export default async function Home() {
     }
   });
   
-
-  // const groups = await prisma.group.findMany({
-  //   include: {
-  //     Course: true,
-  //   },
-  // });
   
   return (
     <div className="flex flex-col items-center justify-center gap-8 p-4 md:flex-row md:items-start">

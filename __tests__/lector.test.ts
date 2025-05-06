@@ -1,4 +1,4 @@
-import { POST, PUT } from "@/app/api/user/route"; // Adjust according to actual path
+import { POST, PUT } from "@/app/api/user/route"; 
 import { db } from "@/lib/db";
 
 jest.mock("@/lib/db", () => ({
@@ -128,7 +128,7 @@ describe("PUT /api/teacher", () => {
     });
   
     it("upravení existujícího lektora", async () => {
-      (db.user.findFirst as jest.Mock).mockResolvedValue(null); // Ujistíme se, že jiný uživatel neexistuje
+      (db.user.findFirst as jest.Mock).mockResolvedValue(null); 
       (db.user.update as jest.Mock).mockResolvedValue({ ...validUpdateData, id: validUpdateData.id });
       (db.group.updateMany as jest.Mock).mockResolvedValue({ count: 1 });
   
@@ -155,7 +155,7 @@ describe("PUT /api/teacher", () => {
           CoursesTaught: { set: validUpdateData.courseIds.map((id) => ({ id })) },
         },
       });
-      expect(db.group.updateMany).toHaveBeenCalledTimes(2); // Dvakrát voláno v obslužné funkci
+      expect(db.group.updateMany).toHaveBeenCalledTimes(2); 
     });
   
     it("vrácení 409, pokud uživatel s daným jménem nebo e-mailem již existuje", async () => {

@@ -14,7 +14,6 @@ interface Props {
 export default function AttendanceTable({ data, roles }: Props) {
   const [searchTerm, setSearchTerm] = useState("");
 
-  // Filtrování dat
   const filteredData = data.filter((record) => {
     const studentName =
       `${record.user.firstName} ${record.user.lastName}`.toLowerCase();
@@ -28,7 +27,6 @@ export default function AttendanceTable({ data, roles }: Props) {
       .includes(searchLower);
   });
 
-  // Seřazení podle jména
   const sortedRecords = [...filteredData].sort((a, b) =>
     `${a.user.lastName} ${a.user.firstName}`.localeCompare(
       `${b.user.lastName} ${b.user.firstName}`,
@@ -67,6 +65,11 @@ export default function AttendanceTable({ data, roles }: Props) {
                       <span className="inline-flex items-center rounded bg-green-50 px-2 py-0.5 text-xs font-medium text-green-800">
                         <span className="mr-1.5 h-1.5 w-1.5 rounded-full bg-green-500"></span>
                         Přítomen
+                      </span>
+                    ) : record.type === "replacement" ? (
+                      <span className="inline-flex items-center rounded bg-red-50 px-2 py-0.5 text-xs font-medium text-red-800">
+                        <span className="mr-1.5 h-1.5 w-1.5 rounded-full bg-red-500"></span>
+                        Nahrazeno
                       </span>
                     ) : (
                       <span className="inline-flex items-center rounded bg-red-50 px-2 py-0.5 text-xs font-medium text-red-800">

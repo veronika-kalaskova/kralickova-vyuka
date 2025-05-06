@@ -7,8 +7,6 @@ import CreateLectorModal from "../auth/CreateLectorModal";
 import Link from "next/link";
 import SearchInput from "../SearchInput";
 import CreateStudentModal from "../auth/CreateStudentModal";
-// TODO: zapomnela jsem dat link i na mobilu (id lektor)
-// TODO: pagination
 
 interface Props {
   data: (User & {

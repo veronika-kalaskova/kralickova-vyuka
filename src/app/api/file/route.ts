@@ -15,12 +15,10 @@ export async function POST(req: Request) {
       );
     }
     
-    // Check if there's already a material for this lesson
     const existingMaterial = await db.studyMaterial.findFirst({
       where: { lessonId }
     });
     
-    // If there's an existing material, delete it
     if (existingMaterial) {
       await db.studyMaterial.delete({
         where: { id: existingMaterial.id }

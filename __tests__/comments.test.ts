@@ -34,7 +34,7 @@ const mockUser = {
 function setupRequest(data: any, method: "POST" | "DELETE" = "POST") {
   return new Request("http://localhost/api/comments", {
     method,
-    body: method === "POST" ? JSON.stringify(data) : JSON.stringify(data), // DELETE také posílá body s commentId
+    body: method === "POST" ? JSON.stringify(data) : JSON.stringify(data),
     headers: {
       "Content-Type": "application/json",
     },
@@ -77,8 +77,6 @@ describe("POST /api/comments", () => {
     const response = await POST(setupRequest(validCommentData));
     const data = await response.json();
 
-    // V aktuální implementaci POST se existence lekce nekontroluje, takže tento test by selhal.
-    // Pokud chcete tuto kontrolu, musíte ji přidat do vaší obslužné funkce.
     expect(response.status).toBe(201);
     expect(data.message).toBe("komentar vytvoren");
   });
@@ -89,8 +87,6 @@ describe("POST /api/comments", () => {
     const response = await POST(setupRequest(validCommentData));
     const data = await response.json();
 
-    // V aktuální implementaci POST se existence uživatele nekontroluje, takže tento test by selhal.
-    // Pokud chcete tuto kontrolu, musíte ji přidat do vaší obslužné funkce.
     expect(response.status).toBe(201);
     expect(data.message).toBe("komentar vytvoren");
   });

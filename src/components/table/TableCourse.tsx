@@ -10,7 +10,7 @@ import CreateStudentModal from "../auth/CreateStudentModal";
 import CreateUpdateCourseModal from "../forms/CreateUpdateCourseModal";
 import { select } from "framer-motion/client";
 
-// TODO: pagination
+
 
 interface Props {
   data: (Course & { teacher: User | null } & { group: Group | null })[];

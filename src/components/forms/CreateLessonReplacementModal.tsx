@@ -5,11 +5,15 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { useState } from "react";
 import { Course, Lesson, User } from "@prisma/client";
+import emailjs from "@emailjs/browser";
+import nextConfig from "../../../next.config";
 
 interface Props {
   isOpen: boolean;
   onClose: () => void;
-  lesson: Lesson & { course: Course & { student: User | null } };
+  lesson: Lesson & { course: Course & { student: User | null } } & {
+    teacher: User;
+  };
   lectors: User[];
 }
 
@@ -40,46 +44,67 @@ export default function CreateLessonReplacement({
 
   const onSubmit = async (values: z.infer<typeof FormSchema>) => {
     try {
-        const [year, month, day] = values.date.split("-").map(Number);
-        const [startHour, startMinute] = values.startTime.split(":").map(Number);
-        const [endHour, endMinute] = values.endTime.split(":").map(Number);
-  
-        const startDate = new Date(year, month - 1, day, startHour, startMinute);
-        const endDate = new Date(year, month - 1, day, endHour, endMinute);
-  
-        const data = {
-          courseId: lesson.course.id,
-          date: new Date(values.date),
-          startDate: startDate,
-          endDate: endDate,
-          teacherId: values.teacherId,
-          repeat: "none",
-          originalLessonId: lesson.id,
-          note: values.note,
-          studentId: lesson.course.student?.id,
-        };
-  
-        const body =  JSON.stringify(data);
+      const [year, month, day] = values.date.split("-").map(Number);
+      const [startHour, startMinute] = values.startTime.split(":").map(Number);
+      const [endHour, endMinute] = values.endTime.split(":").map(Number);
 
-        const response = await fetch("/api/replacement", {
-          method: "POST",
-          body,
-          headers: { "Content-Type": "application/json" },
-        });
-  
-        if (response.ok) {
-          onClose();
-          window.location.reload();
-        } else {
-          setMessage(
-              "Chyba při vytváření náhrady.",
-          );
-        }
-      } catch (error) {
-        console.error("Chyba při odesílání formuláře:", error);
-        setMessage("Nastala neočekávaná chyba.");
+      const startDate = new Date(year, month - 1, day, startHour, startMinute);
+      const endDate = new Date(year, month - 1, day, endHour, endMinute);
+
+      const data = {
+        courseId: lesson.course.id,
+        date: new Date(values.date),
+        startDate: startDate,
+        endDate: endDate,
+        teacherId: values.teacherId,
+        repeat: "none",
+        originalLessonId: lesson.id,
+        note: values.note,
+        studentId: lesson.course.student?.id,
+      };
+
+      const body = JSON.stringify(data);
+
+      const response = await fetch("/api/replacement", {
+        method: "POST",
+        body,
+        headers: { "Content-Type": "application/json" },
+      });
+
+      const templateParams = {
+        oldLesson: formatTime(lesson.startDate, lesson.endDate).toString(),
+        newLesson: formatTime(startDate, endDate).toString(),
+        to_email: lesson.teacher.email,
+        lessonName: lesson.course.name.toString(),
+      };
+
+      emailjs
+        .send(
+          process.env.NEXT_PUBLIC_SERVICE_KEY!,
+          process.env.NEXT_PUBLIC_TEMPLATE_KEY!,
+          templateParams,
+          process.env.NEXT_PUBLIC_PUBLIC_KEY!,
+        )
+        .then(
+          () => {
+            console.log("SUCCESS!");
+          },
+          (error: any) => {
+            console.log("FAILED...", error.text);
+          },
+        );
+
+      if (response.ok) {
+        onClose();
+        window.location.reload();
+      } else {
+        setMessage("Chyba při vytváření náhrady.");
       }
-    };
+    } catch (error) {
+      console.error("Chyba při odesílání formuláře:", error);
+      setMessage("Nastala neočekávaná chyba.");
+    }
+  };
 
   function formatTime(start: Date, end: Date): string {
     const formatStart = start.toLocaleString("cs-CZ", {
@@ -180,7 +205,6 @@ export default function CreateLessonReplacement({
 
           {message && <p className="text-xs text-red-500">{message}</p>}
 
-        
           <p className="mb-4 text-xs text-gray-500">
             Studentovi {lesson.course.student?.firstName}{" "}
             {lesson.course.student?.lastName} bude nahrazena lekce a bude mu za
@@ -192,20 +216,20 @@ export default function CreateLessonReplacement({
           </p>
 
           <div className="flex justify-end gap-2">
-              <button
-                type="button"
-                onClick={onClose}
-                className="cursor-pointer rounded-lg bg-gray-100 px-4 py-3 font-medium text-gray-800 transition-all hover:bg-orange-100"
-              >
-                Zavřít
-              </button>
-              <button
-                type="submit"
-                className="cursor-pointer rounded-lg bg-orange-400 px-4 py-3 font-medium text-white transition-all hover:bg-orange-500"
-              >
-                Zadat náhradu
-              </button>
-            </div>
+            <button
+              type="button"
+              onClick={onClose}
+              className="cursor-pointer rounded-lg bg-gray-100 px-4 py-3 font-medium text-gray-800 transition-all hover:bg-orange-100"
+            >
+              Zavřít
+            </button>
+            <button
+              type="submit"
+              className="cursor-pointer rounded-lg bg-orange-400 px-4 py-3 font-medium text-white transition-all hover:bg-orange-500"
+            >
+              Zadat náhradu
+            </button>
+          </div>
         </form>
       </div>
     </div>
