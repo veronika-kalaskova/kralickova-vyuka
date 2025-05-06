@@ -5,6 +5,8 @@ import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { getServerSession } from "next-auth";
 import React from "react";
+import Lektor from "../seznam-lektoru/[id]/page";
+import Student from "../seznam-studentu/[id]/page";
 
 export default async function MujProfil() {
   const session = await getServerSession(authOptions);
@@ -34,12 +36,16 @@ export default async function MujProfil() {
 
   const isStudent = roles.includes("student");
 
+  const lektorParams = Promise.resolve({ id: loggedUser.id.toString() });
+
+  const studentParams = Promise.resolve({ id: loggedUser.id.toString() });
+
   return (
     <>
       {isStudent ? (
-        <StudentProfile id={loggedUser.id.toString()} />
+        <Student params={studentParams} />
       ) : (
-        <LectorProfile id={loggedUser.id.toString()} />
+        <Lektor params={lektorParams} />
       )}
     </>
   );
