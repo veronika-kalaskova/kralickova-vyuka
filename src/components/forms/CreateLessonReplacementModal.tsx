@@ -96,7 +96,7 @@ export default function CreateLessonReplacement({
 
       if (response.ok) {
         onClose();
-        window.location.reload();
+        // window.location.reload();
       } else {
         setMessage("Chyba při vytváření náhrady.");
       }
