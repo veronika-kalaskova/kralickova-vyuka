@@ -204,7 +204,7 @@ export default function CalendarComponent({
           const backgroundColor =
             view !== "agenda"
               ? event.teacher?.color || "#ff8903"
-              : isMobile
+              : isMobile && view !== "agenda"
                 ? "#ccc"
                 : "";
 
