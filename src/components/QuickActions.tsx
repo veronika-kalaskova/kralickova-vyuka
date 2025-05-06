@@ -43,7 +43,7 @@ export default function QuickActions({
       {isAdmin && (
         <>
           {/* RYCHLE AKCE */}
-          <div className="w-full md:w-1/4">
+          <div className="w-full xl:w-1/4">
             <h2 className="title">Rychlé akce</h2>
             <div className="flex flex-col gap-3">
               <Button

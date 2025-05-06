@@ -4,19 +4,13 @@ import CreateUpdateAttendanceModal from "./forms/CreateUpdateAttendance";
 import { Attendance, Course, Group, Lesson, User } from "@prisma/client";
 import CreateUpdateLessonModal from "./forms/CreateUpdateLessonModal";
 import CreateLessonReplacement from "./forms/CreateLessonReplacementModal";
+import { LessonWithCourseAndTeacher } from "@/types/LessonType";
 
 interface Props {
-  lesson: Lesson & {
-    course: Course & {
-      teacher: User | null;
-      student: User | null;
-    };
-  } & {
-    teacher: User;
-  };
+  lesson: LessonWithCourseAndTeacher;
   students: User[];
   lectors: User[];
-  roles: string[] | undefined;
+  roles?: string[];
   isAttendanceDone: boolean;
   attendance: Attendance[];
 }
@@ -65,14 +59,16 @@ export default function LessonDetailButtons({
           </button>
         )}
 
-        {roles?.includes("admin") && lesson.course.isIndividual && !lesson.deletedAt && (
-          <button
-            onClick={openLessonReplacementModal}
-            className="cursor-pointer rounded-lg bg-red-400 px-4 py-3 font-medium text-white transition-all hover:bg-red-500"
-          >
-            Nahradit lekci
-          </button>
-        )}
+        {roles?.includes("admin") &&
+          lesson.course.isIndividual &&
+          !lesson.deletedAt && (
+            <button
+              onClick={openLessonReplacementModal}
+              className="cursor-pointer rounded-lg bg-red-400 px-4 py-3 font-medium text-white transition-all hover:bg-red-500"
+            >
+              Nahradit lekci
+            </button>
+          )}
       </div>
 
       {!isAttendanceDone && (
@@ -105,14 +101,13 @@ export default function LessonDetailButtons({
         lectors={lectors}
       />
 
-
       {!lesson.deletedAt && (
-      <CreateLessonReplacement
-        isOpen={isReplacementModalOpen}
-        onClose={closeLessonReplacementModal}
-        lesson={lesson}
-        lectors={lectors}
-      />
+        <CreateLessonReplacement
+          isOpen={isReplacementModalOpen}
+          onClose={closeLessonReplacementModal}
+          lesson={lesson}
+          lectors={lectors}
+        />
       )}
     </>
   );

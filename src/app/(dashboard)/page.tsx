@@ -51,7 +51,8 @@ export default async function Home() {
     include: {
       course: {
         include: {
-          teacher: true
+          teacher: true,
+          student: true
         }
       },
       teacher: true,
@@ -60,7 +61,7 @@ export default async function Home() {
   
   
   return (
-    <div className="flex flex-col items-center justify-center gap-8 p-4 md:flex-row md:items-start">
+    <div className="flex flex-col items-center justify-center gap-8 p-4 xl:flex-row xl:items-start">
       {/* PREHLED LEKCI */}
       <div className="w-full">
         <h1 className="title">Přehled lekcí</h1>

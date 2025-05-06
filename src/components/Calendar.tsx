@@ -1,16 +1,10 @@
 "use client";
 
-import {
-  Calendar,
-  momentLocalizer,
-  View,
-  Views,
-  stringOrDate,
-} from "react-big-calendar";
+import { Calendar, momentLocalizer, View, Views } from "react-big-calendar";
 import "react-big-calendar/lib/css/react-big-calendar.css";
 import moment from "moment";
 import "moment/locale/cs";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Course, Lesson, User } from "@prisma/client";
 import CalendarToolbar from "./CalendarToolbar";
 import withDragAndDrop, {
@@ -18,19 +12,13 @@ import withDragAndDrop, {
 } from "react-big-calendar/lib/addons/dragAndDrop";
 import "react-big-calendar/lib/addons/dragAndDrop/styles.css";
 import Link from "next/link";
+import { LessonWithCourseAndTeacher } from "@/types/LessonType";
 
 const localizer = momentLocalizer(moment);
-moment.locale("cs");
-
-type LessonType = Lesson & {
-  course: Course & {
-    teacher: User | null;
-  };
-  teacher: User | null;
-};
+moment.locale("cs"); // kalendar do cestiny
 
 interface Props {
-  lessons: LessonType[];
+  lessons: LessonWithCourseAndTeacher[];
   defaultView?: View;
   availableViews?: View[];
   classNameProp?: string;
@@ -41,15 +29,18 @@ export default function CalendarComponent({
   lessons,
   defaultView = Views.MONTH,
   availableViews = ["month", "work_week", "day", "agenda"],
-  classNameProp = "h-[700px]  w-full",
+  classNameProp = "h-[700px] w-full",
   roles = [],
 }: Props) {
   const [view, setView] = useState<View>(defaultView);
+  const [filteredViews, setFilteredViews] = useState<View[]>(availableViews);
+
   const [date, setDate] = useState<Date>(new Date());
 
-  const [events, setEvents] = useState<LessonType[]>(lessons);
+  const [events, setEvents] = useState<LessonWithCourseAndTeacher[]>(lessons);
 
-  const [selectedLesson, setSelectedLesson] = useState<LessonType | null>(null);
+  const [selectedLesson, setSelectedLesson] =
+    useState<LessonWithCourseAndTeacher | null>(null);
 
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
 
@@ -59,7 +50,7 @@ export default function CalendarComponent({
     setView(selectedView);
   };
 
-  const handleSelectedEvent = (event: LessonType) => {
+  const handleSelectedEvent = (event: LessonWithCourseAndTeacher) => {
     setSelectedLesson(event);
     setIsModalOpen(true);
   };
@@ -84,10 +75,15 @@ export default function CalendarComponent({
     noEventsInRange: "Žádné události v tomto období",
   };
 
-  const DragAndDropCalendar = withDragAndDrop<LessonType>(Calendar);
+  const DragAndDropCalendar =
+    withDragAndDrop<LessonWithCourseAndTeacher>(Calendar);
 
   const onEventDrop = useCallback(
-    async ({ event, start, end }: EventInteractionArgs<LessonType>) => {
+    async ({
+      event,
+      start,
+      end,
+    }: EventInteractionArgs<LessonWithCourseAndTeacher>) => {
       if (!isAdmin) {
         alert("Pouze administrátor může přesouvat lekce.");
         return;
@@ -120,21 +116,22 @@ export default function CalendarComponent({
   );
 
   const onEventResize = useCallback(
-    async ({ event, start, end }: EventInteractionArgs<LessonType>) => {
+    async ({
+      event,
+      start,
+      end,
+    }: EventInteractionArgs<LessonWithCourseAndTeacher>) => {
       if (!isAdmin) {
         alert("Pouze administrátor může upravovat délku lekcí.");
         return;
       }
 
-      const newStart = typeof start === "string" ? new Date(start) : start;
-      const newEnd = typeof end === "string" ? new Date(end) : end;
-
       const response = await fetch("/api/calendar", {
         method: "PUT",
         body: JSON.stringify({
           id: event.id,
-          startDate: newStart,
-          endDate: newEnd,
+          startDate: start,
+          endDate: end,
         }),
         headers: { "Content-Type": "application/json" },
       });
@@ -146,7 +143,7 @@ export default function CalendarComponent({
 
       const updatedEvents = events.map((existingEvent) =>
         existingEvent.id === event.id
-          ? { ...existingEvent, startDate: newStart, endDate: newEnd }
+          ? { ...existingEvent, startDate: start as Date, endDate: end as Date }
           : existingEvent,
       );
 
@@ -155,32 +152,62 @@ export default function CalendarComponent({
     [events, isAdmin],
   );
 
+  const getCourseType = (course: Course) => {
+    if (course.isIndividual) {
+      return "Individuální";
+    } else if (course.isPair) {
+      return "Párový";
+    } else {
+      return "Skupinový";
+    }
+  };
+
+  const [isMobile, setIsMobile] = useState<boolean>(false);
+
+  useEffect(() => {
+    const isMobile = window.innerWidth < 768;
+    if (isMobile) {
+      setView("work_week");
+      setFilteredViews(["agenda", "work_week", "day"]);
+      setIsMobile(true);
+    } else {
+      setFilteredViews(availableViews);
+      setIsMobile(false);
+    }
+  }, []);
+
   return (
     <div className={classNameProp}>
       <DragAndDropCalendar
         localizer={localizer}
         events={events}
-        views={availableViews}
+        views={filteredViews}
         view={view}
         date={date}
         onView={handleOnChangeView}
         onEventDrop={onEventDrop}
         onEventResize={onEventResize}
         titleAccessor={(event) =>
-          `${event.course.name} (${event.teacher?.lastName || "lektor neznámý"})`
+          `${event.course.name} (${event.teacher?.lastName || "lektor neznámý"}) \n ${getCourseType(event.course)}`
         }
-        startAccessor="startDate"
+        startAccessor="startDate" // vlastnost startDate se bere jako zacatek
         endAccessor="endDate"
         min={new Date(new Date().setHours(8, 0, 0, 0))}
         max={new Date(new Date().setHours(20, 0, 0, 0))}
         culture="cs"
         step={15}
-        timeslots={2}
+        timeslots={2} // 2 bloky po 15 minutach - pro drag and drop
         popup
         messages={messages}
         onSelectEvent={handleSelectedEvent}
         eventPropGetter={(event) => {
-          const backgroundColor = event.teacher?.color || "#ff8903";
+          const backgroundColor =
+            view !== "agenda"
+              ? event.teacher?.color || "#ff8903"
+              : isMobile
+                ? "#ccc"
+                : "";
+
           return {
             style: {
               backgroundColor,

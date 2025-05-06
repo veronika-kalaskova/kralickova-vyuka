@@ -18,13 +18,12 @@ export default function Comments({ data, lessonId, user }: Props) {
   const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-
     if (text.length <= 2) {
       setError("Komentář musí mít alespoň 3 znaky.");
       return;
     }
 
-    setError(null); 
+    setError(null);
 
     try {
       const response = await fetch("/api/comments", {
@@ -44,7 +43,6 @@ export default function Comments({ data, lessonId, user }: Props) {
         const responseData = await response.json();
         const newComment: CommentType = responseData.comment;
 
-
         setComments((prevComments) => [newComment, ...prevComments]);
         setText("");
       } else {
@@ -57,7 +55,7 @@ export default function Comments({ data, lessonId, user }: Props) {
 
   const deleteComment = async (commentId: number) => {
     try {
-      const response = await fetch("/api/comments", {
+      await fetch("/api/comments", {
         method: "DELETE",
         body: JSON.stringify({ commentId }),
         headers: { "Content-Type": "application/json" },
@@ -76,9 +74,8 @@ export default function Comments({ data, lessonId, user }: Props) {
     );
   };
 
-
   const sortedComments = comments.sort(
-    (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+    (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(), // nejnovejsi komentare budou nahore
   );
 
   return (
@@ -93,7 +90,7 @@ export default function Comments({ data, lessonId, user }: Props) {
           >
             <div className="mb-2 flex items-center gap-2">
               <div className="flex items-center">
-                <div className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-[#ff8904] text-white text-xs font-medium ">
+                <div className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-[#ff8904] text-xs font-medium text-white">
                   {comment.user.firstName.charAt(0)}
                   {comment.user.lastName.charAt(0)}
                 </div>
@@ -132,7 +129,7 @@ export default function Comments({ data, lessonId, user }: Props) {
 
       {error && <div className="mb-2 text-sm text-red-500">{error}</div>}
 
-      <form className="" onSubmit={onSubmit}>
+      <form onSubmit={onSubmit}>
         <textarea
           value={text}
           onChange={(e) => setText(e.target.value)}

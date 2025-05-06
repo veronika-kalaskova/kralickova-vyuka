@@ -27,6 +27,7 @@ export default async function Lektor({params}: {params: Promise<{ id: string }>}
       course: {
         include: {
           teacher: true,
+          student: true
         },
       },
       teacher: true,

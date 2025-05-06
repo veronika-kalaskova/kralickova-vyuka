@@ -69,17 +69,12 @@ export default function Materials({ lessonId, data }: Props) {
       const blob = await response.blob(); // prevedeni na binarni objekt
       const url = window.URL.createObjectURL(blob); // vytvoreni odkazu na stazeni
 
-      console.log(blob)
-      console.log(url)
-
       const a = document.createElement("a"); // vytvoreni elementtu pro odkaz
       a.style.display = "none";
       a.href = url; // nastaveni odkazu na stazeni
       a.download = fileName; // atribut pro nastaveni jmena souboru
       document.body.appendChild(a);
       a.click(); // spusti stazeni
-
-      (console.log(a))
 
       window.URL.revokeObjectURL(url); // odstraneni odkazu na stazeni
       document.body.removeChild(a);
