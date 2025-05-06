@@ -14,12 +14,11 @@ export default function Materials({ lessonId, data }: Props) {
   const [error, setError] = useState<string | null>(null);
 
   const uploadFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
+    const file = e.target.files?.[0]; // soubor z inputu
     if (!file) return;
 
     setUploading(true);
     setUploadSuccess(false);
-    setError(null);
 
     const formData = new FormData();
     formData.append("file", file);
@@ -28,19 +27,18 @@ export default function Materials({ lessonId, data }: Props) {
     try {
       const response = await fetch("/api/file", {
         method: "POST",
-        body: formData,
+        body: formData, // posilam do api soubor a id lekce ke ktere patri
       });
 
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || "Nastala chyba při nahrávání");
+        setError("Nastala chyba při nahrávání");
       }
 
       const result = await response.json();
       setUploadSuccess(true);
       setMaterial(result.material);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Nastala chyba při nahrávání");
+    } catch {
+      setError("Nastala chyba při nahrávání");
     } finally {
       setUploading(false);
     }
@@ -48,14 +46,14 @@ export default function Materials({ lessonId, data }: Props) {
 
   const deleteMaterial = async (materialId: number) => {
     try {
-      const response = await fetch("/api/file", {
+      await fetch("/api/file", {
         method: "DELETE",
         body: JSON.stringify({ materialId }),
         headers: { "Content-Type": "application/json" },
       });
 
       setMaterial(null);
-    } catch (err) {
+    } catch {
       setError("Nastala chyba při mazání materiálu");
     }
   };
@@ -63,22 +61,27 @@ export default function Materials({ lessonId, data }: Props) {
   const downloadFile = async (materialId: number, fileName: string) => {
     try {
       const response = await fetch(`/api/download?id=${materialId}`);
-      
+
       if (!response.ok) {
-        throw new Error('Soubor nelze stáhnout');
+        setError("Soubor nelze stáhnout");
       }
-      
-      const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
-      
-      const a = document.createElement('a');
-      a.style.display = 'none';
-      a.href = url;
-      a.download = fileName;
+
+      const blob = await response.blob(); // prevedeni na binarni objekt
+      const url = window.URL.createObjectURL(blob); // vytvoreni odkazu na stazeni
+
+      console.log(blob)
+      console.log(url)
+
+      const a = document.createElement("a"); // vytvoreni elementtu pro odkaz
+      a.style.display = "none";
+      a.href = url; // nastaveni odkazu na stazeni
+      a.download = fileName; // atribut pro nastaveni jmena souboru
       document.body.appendChild(a);
-      a.click();
-      
-      window.URL.revokeObjectURL(url);
+      a.click(); // spusti stazeni
+
+      (console.log(a))
+
+      window.URL.revokeObjectURL(url); // odstraneni odkazu na stazeni
       document.body.removeChild(a);
     } catch (err) {
       setError("Nastala chyba při stahování souboru");

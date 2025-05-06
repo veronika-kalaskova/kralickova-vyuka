@@ -4,22 +4,19 @@ import Button from "./Button";
 import CreateLectorModal from "./auth/CreateLectorModal";
 import CreateStudentModal from "./auth/CreateStudentModal";
 import { Course, Group, User } from "@prisma/client";
-import CreateUpdateGroupModal from "./forms/CreateUpdateGroupModal";
 import CreateUpdateCourseModal from "./forms/CreateUpdateCourseModal";
-import CreateUpdateLessonModal from "./forms/CreateUpdateLessonModal";
 
 interface Props {
   coursesWithoutLector: (Course & { group: Group | null })[];
   coursesWithoutStudent: (Course & { group: Group | null })[];
   coursesWithoutGroup: Course[];
   allLectors: User[];
-  roles?: string[];
+  roles?: string[]; // kdyby session nebyla dostupna
 }
 
 export default function QuickActions({
   coursesWithoutLector,
   coursesWithoutStudent,
-  coursesWithoutGroup,
   allLectors,
   roles,
 }: Props) {

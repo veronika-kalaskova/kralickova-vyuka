@@ -64,6 +64,7 @@ export const authOptions: NextAuthOptions = {
     }),
   ],
   callbacks: {
+    // udaje z usera se ulozi do tokenu
     async jwt({ token, user }) {
       if (user) {
         return {
@@ -78,7 +79,8 @@ export const authOptions: NextAuthOptions = {
 
       return token;
     },
-    async session({ session, user, token }) {
+    // vrati se pokud frontend zavola session a prida do session hodnoty z tokenu
+    async session({ session, token }) {
       return {
         ...session,
         user: {

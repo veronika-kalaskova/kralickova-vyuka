@@ -44,9 +44,7 @@ export default function SidebarItems({ closeMenu }: SidebarItemsProps) {
         </Link>
       ))}
       <button
-        onClick={() =>
-          signOut()
-        }
+        onClick={() => signOut()}
         className="sidebar-item mt-auto text-center"
       >
         Odhlásit se
