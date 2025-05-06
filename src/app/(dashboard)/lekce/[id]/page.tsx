@@ -1,7 +1,7 @@
 import Comments from "@/components/Comments";
 import LessonDetailButtons from "@/components/LessonDetailButtons";
 import Materials from "@/components/Materials";
-import AttendanceTable from "@/components/table/TableAttendance";
+import TableAttendance from "@/components/table/TableAttendance";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { getServerSession } from "next-auth";
@@ -217,7 +217,7 @@ export default async function Lekce({params}: {params: Promise<{ id: string }>})
 
           <Materials lessonId={lesson.id} data={materials} />
 
-          <AttendanceTable data={attendance} />
+          <TableAttendance data={attendance} />
         </div>
 
         {/* RIGHT */}

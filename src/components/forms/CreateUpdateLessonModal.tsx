@@ -40,8 +40,6 @@ export default function CreateUpdateLessonModal({
     register,
     handleSubmit,
     formState: { errors },
-    watch,
-    setValue,
     reset,
   } = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
@@ -69,16 +67,18 @@ export default function CreateUpdateLessonModal({
     }
   }, [data, isOpen, reset]);
 
+  const parseDateTime = (dateStr: string, timeStr: string) => {
+    const [year, month, day] = dateStr.split("-").map(Number); // 2025-05-06 -> ["2025", "05", "06"], pomoci map se to prevede na cisla
+    const [hour, minute] = timeStr.split(":").map(Number); // 14:30 → ["14", "30"]
+    return new Date(year, month - 1, day, hour, minute);
+  };
+
   const onSubmit = async (values: z.infer<typeof FormSchema>) => {
     try {
       const { date, startTime, endTime, repeat } = values;
 
-      const [year, month, day] = values.date.split("-").map(Number);
-      const [startHour, startMinute] = values.startTime.split(":").map(Number);
-      const [endHour, endMinute] = values.endTime.split(":").map(Number);
-
-      const startDate = new Date(year, month - 1, day, startHour, startMinute);
-      const endDate = new Date(year, month - 1, day, endHour, endMinute);
+      const startDate = parseDateTime(date, startTime);
+      const endDate = parseDateTime(date, endTime);
 
       const lessonData = {
         courseId: course.id,
@@ -113,7 +113,6 @@ export default function CreateUpdateLessonModal({
         );
       }
     } catch (error) {
-      console.error("Chyba při odesílání formuláře:", error);
       setMessage("Nastala neočekávaná chyba.");
     }
   };
@@ -128,8 +127,25 @@ export default function CreateUpdateLessonModal({
           <p className="mt-4 text-xs font-normal text-gray-500">
             Tento kurz učí {course.teacher?.firstName}{" "}
             {course.teacher?.lastName} a trvá od{" "}
-            {course.startDate.toLocaleDateString()} do{" "}
-            {course.endDate.toLocaleDateString()}
+            {course.startDate.toLocaleString("cs-CZ", {
+              day: "2-digit",
+              month: "2-digit",
+              year: "numeric",
+              hour: "2-digit",
+              minute: "2-digit",
+              hour12: false,
+              timeZone: "Europe/Prague",
+            })}{" "}
+            do{" "}
+            {course.endDate.toLocaleString("cs-CZ", {
+              day: "2-digit",
+              month: "2-digit",
+              year: "numeric",
+              hour: "2-digit",
+              minute: "2-digit",
+              hour12: false,
+              timeZone: "Europe/Prague",
+            })}
           </p>
         </h2>
         <form onSubmit={handleSubmit(onSubmit)}>

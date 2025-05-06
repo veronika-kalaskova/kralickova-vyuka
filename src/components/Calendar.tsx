@@ -12,13 +12,13 @@ import withDragAndDrop, {
 } from "react-big-calendar/lib/addons/dragAndDrop";
 import "react-big-calendar/lib/addons/dragAndDrop/styles.css";
 import Link from "next/link";
-import { LessonWithCourseAndTeacher } from "@/types/LessonType";
+import { LessonWithCourseTeacherStudentAndTeacher } from "@/types/LessonType";
 
 const localizer = momentLocalizer(moment);
 moment.locale("cs"); // kalendar do cestiny
 
 interface Props {
-  lessons: LessonWithCourseAndTeacher[];
+  lessons: LessonWithCourseTeacherStudentAndTeacher[];
   defaultView?: View;
   availableViews?: View[];
   classNameProp?: string;
@@ -37,10 +37,10 @@ export default function CalendarComponent({
 
   const [date, setDate] = useState<Date>(new Date());
 
-  const [events, setEvents] = useState<LessonWithCourseAndTeacher[]>(lessons);
+  const [events, setEvents] = useState<LessonWithCourseTeacherStudentAndTeacher[]>(lessons);
 
   const [selectedLesson, setSelectedLesson] =
-    useState<LessonWithCourseAndTeacher | null>(null);
+    useState<LessonWithCourseTeacherStudentAndTeacher | null>(null);
 
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
 
@@ -50,14 +50,14 @@ export default function CalendarComponent({
     setView(selectedView);
   };
 
-  const handleSelectedEvent = (event: LessonWithCourseAndTeacher) => {
+  const handleSelectedEvent = (event: LessonWithCourseTeacherStudentAndTeacher) => {
     setSelectedLesson(event);
     setIsModalOpen(true);
   };
 
   const closeModal = () => {
-    setIsModalOpen(false);
     setSelectedLesson(null);
+    setIsModalOpen(false);
   };
 
   const messages = {
@@ -76,14 +76,14 @@ export default function CalendarComponent({
   };
 
   const DragAndDropCalendar =
-    withDragAndDrop<LessonWithCourseAndTeacher>(Calendar);
+    withDragAndDrop<LessonWithCourseTeacherStudentAndTeacher>(Calendar);
 
   const onEventDrop = useCallback(
     async ({
       event,
       start,
       end,
-    }: EventInteractionArgs<LessonWithCourseAndTeacher>) => {
+    }: EventInteractionArgs<LessonWithCourseTeacherStudentAndTeacher>) => {
       if (!isAdmin) {
         alert("Pouze administrátor může přesouvat lekce.");
         return;
@@ -120,7 +120,7 @@ export default function CalendarComponent({
       event,
       start,
       end,
-    }: EventInteractionArgs<LessonWithCourseAndTeacher>) => {
+    }: EventInteractionArgs<LessonWithCourseTeacherStudentAndTeacher>) => {
       if (!isAdmin) {
         alert("Pouze administrátor může upravovat délku lekcí.");
         return;
@@ -167,7 +167,7 @@ export default function CalendarComponent({
   useEffect(() => {
     const isMobile = window.innerWidth < 768;
     if (isMobile) {
-      setView("work_week");
+      setView("day");
       setFilteredViews(["agenda", "work_week", "day"]);
       setIsMobile(true);
     } else {

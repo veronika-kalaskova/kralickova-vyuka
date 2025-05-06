@@ -1,18 +1,21 @@
 "use client";
-import { useState, useEffect } from "react";
-import { Calendar, DollarSign, Clock, Users, BookOpen } from "lucide-react";
-import { Course, Lesson, User } from "@prisma/client";
+import { useState } from "react";
+import { Calendar, DollarSign, Clock, Users } from "lucide-react";
+import { Course, Lesson } from "@prisma/client";
 
 type LessonType = Lesson & { course: Course };
 
 interface Props {
-  lessons: LessonType[];
+  data: LessonType[];
 }
 
-export default function Calculator({ lessons }: Props) {
+export default function Calculator({ data }: Props) {
   const [fromDate, setFromDate] = useState("");
   const [toDate, setToDate] = useState("");
+
+  const [lessons, setLessons] = useState<LessonType[]>(data);
   const [filteredLessons, setFilteredLessons] = useState<LessonType[]>([]);
+
   const [totalPayment, setTotalPayment] = useState(0);
   const [showResults, setShowResults] = useState(false);
 
@@ -24,36 +27,29 @@ export default function Calculator({ lessons }: Props) {
     { type: "kurz", duration: 45, price: 300 },
   ];
 
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat("cs-CZ", {
-      style: "currency",
-      currency: "CZK",
-    })
-      .format(amount)
-      .replace(",00", "");
-  };
-
-  const filterLessons = () => {
+  const showLessons = () => {
     if (!fromDate && !toDate) return;
 
-    const from = fromDate ? new Date(fromDate) : undefined;
-    const to = toDate ? new Date(toDate) : undefined;
-    if (to) to.setDate(to.getDate() + 1);
+    const from = new Date(fromDate);
+    const to = new Date(toDate);
 
-    const filtered = lessons.filter((lesson) => {
+    if (to) to.setDate(to.getDate() + 1); // aby to zahrnovalo cely den
+
+    const filteredLessons = lessons.filter((lesson) => {
       const lessonDate = new Date(lesson.startDate);
-      return (!from || from <= lessonDate) && (!to || lessonDate < to);
+      return from <= lessonDate && lessonDate < to;
     });
 
-    filtered.sort(
-      (a, b) =>
-        new Date(a.startDate).getTime() - new Date(b.startDate).getTime(),
-    );
+    setFilteredLessons(filteredLessons);
+    sumPrice(filteredLessons);
+    setShowResults(true);
+  };
 
-    setFilteredLessons(filtered);
+  const sumPrice = (filteredLessons: LessonType[]) => {
+    let totalPrice = 0;
+    let price = 0;
 
-    let total = 0;
-    for (const lesson of filtered) {
+    for (const lesson of filteredLessons) {
       const type = lesson.course.isIndividual
         ? "individuál"
         : lesson.course.isPair
@@ -64,18 +60,16 @@ export default function Calculator({ lessons }: Props) {
         (item) => item.type === type && item.duration === lesson.duration,
       );
 
-      let price = 0;
       if (match) {
         price = match.price;
       } else {
         price = 0;
       }
 
-      total += price;
+      totalPrice += price;
     }
 
-    setTotalPayment(total);
-    setShowResults(true);
+    setTotalPayment(totalPrice);
   };
 
   const getLessonStats = () => {
@@ -112,7 +106,7 @@ export default function Calculator({ lessons }: Props) {
     return { counts, earnings };
   };
 
-  const { counts: typeCounts, earnings: typeEarnings } = getLessonStats();
+  const { counts, earnings } = getLessonStats();
 
   return (
     <div className="mt-10">
@@ -148,7 +142,7 @@ export default function Calculator({ lessons }: Props) {
         </div>
 
         <button
-          onClick={filterLessons}
+          onClick={showLessons}
           className="w-full cursor-pointer rounded-lg bg-orange-400 px-4 py-3 font-medium text-white transition-all hover:bg-orange-500"
         >
           Vypočítat odměnu
@@ -178,7 +172,7 @@ export default function Calculator({ lessons }: Props) {
                 </span>
               </div>
               <p className="text-xl font-bold text-green-600">
-                {formatCurrency(totalPayment)}
+                {totalPayment} Kč
               </p>
             </div>
           </div>
@@ -195,24 +189,20 @@ export default function Calculator({ lessons }: Props) {
                 <p className="text-sm font-medium text-blue-700">
                   Individuální
                 </p>
-                <p className="text-lg font-semibold">{typeCounts.individuál}</p>
+                <p className="text-lg font-semibold">{counts.individuál}</p>
                 <p className="text-sm text-blue-800">
-                  {formatCurrency(typeEarnings.individuál)}
+                  {earnings.individuál} Kč
                 </p>
               </div>
               <div className="rounded-md bg-orange-50 p-2">
                 <p className="text-sm font-medium text-orange-500">Párové</p>
-                <p className="text-lg font-semibold">{typeCounts.dvojice}</p>
-                <p className="text-sm text-orange-500">
-                  {formatCurrency(typeEarnings.dvojice)}
-                </p>
+                <p className="text-lg font-semibold">{counts.dvojice}</p>
+                <p className="text-sm text-orange-500">{earnings.dvojice} Kč</p>
               </div>
               <div className="rounded-md bg-green-50 p-2">
                 <p className="text-sm font-medium text-green-800">Skupinové</p>
-                <p className="text-lg font-semibold">{typeCounts.kurz}</p>
-                <p className="text-sm text-green-800">
-                  {formatCurrency(typeEarnings.kurz)}
-                </p>
+                <p className="text-lg font-semibold">{counts.kurz}</p>
+                <p className="text-sm text-green-800">{earnings.kurz} Kč</p>
               </div>
             </div>
           </div>
@@ -232,7 +222,7 @@ export default function Calculator({ lessons }: Props) {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-50">
-                    {filteredLessons.map((lesson, idx) => {
+                    {filteredLessons.map((lesson) => {
                       const type = lesson.course.isIndividual
                         ? "individuál"
                         : lesson.course.isPair
@@ -246,12 +236,13 @@ export default function Calculator({ lessons }: Props) {
                       );
 
                       let price = 0;
+
                       if (match) {
                         price = match.price;
                       }
 
                       return (
-                        <tr key={lesson.id || idx} className="hover:bg-gray-50">
+                        <tr key={lesson.id} className="hover:bg-gray-50">
                           <td className="py-2.5 text-sm text-gray-800">
                             {new Date(lesson.startDate).toLocaleDateString()}
                           </td>
@@ -278,7 +269,7 @@ export default function Calculator({ lessons }: Props) {
                             {price === 0 ? (
                               <span className="text-red-500">Neznámá cena</span>
                             ) : (
-                              formatCurrency(price)
+                              `${price} Kč`
                             )}
                           </td>
                         </tr>

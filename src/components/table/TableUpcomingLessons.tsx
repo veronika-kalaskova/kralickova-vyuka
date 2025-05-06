@@ -2,25 +2,18 @@ import Link from "next/link";
 import Image from "next/image";
 import { Course, Lesson, User } from "@prisma/client";
 import React from "react";
+import { LessonWithCourseAndTeacher } from "@/types/LessonType";
 
-export interface LessonWithCourseAndTeacher extends Lesson {
-  teacher: User;
-  course: Course | null;
-}
 interface Props {
   lessons: LessonWithCourseAndTeacher[];
 }
 
 export default function TableUpcomingLessons({ lessons }: Props) {
-  const sortedLessons = [...lessons].sort(
-    (a, b) => a.startDate.getTime() - b.startDate.getTime(),
-  );
-
   return (
     <div className="mb-8 rounded-md border border-gray-200 p-4 shadow-sm">
       <h2 className="mb-3 text-xl font-semibold">Nadcházející lekce</h2>
 
-      {sortedLessons.length > 0 ? (
+      {lessons.length > 0 ? (
         <table className="w-full">
           <thead>
             <tr className="text-left text-xs text-gray-500 uppercase">
@@ -31,7 +24,7 @@ export default function TableUpcomingLessons({ lessons }: Props) {
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-50">
-            {sortedLessons.map((lesson, index) => (
+            {lessons.map((lesson, index) => (
               <tr key={lesson.id} className="hover:bg-gray-50">
                 <td className="py-2.5">
                   <div className="flex items-center">
@@ -53,7 +46,7 @@ export default function TableUpcomingLessons({ lessons }: Props) {
                 </td>
                 <td className="py-2.5 text-sm text-gray-800">
                   <span className="inline-block rounded-full bg-[#FFE3C5] px-3 py-1 text-xs font-semibold">
-                    {lesson.course?.name || "Nezařazeno"}
+                    {lesson.course.name}
                   </span>
                 </td>
                 <td className="py-2.5">

@@ -2,13 +2,10 @@
 
 import React from "react";
 import { Course, Lesson, Attendance, Replacement } from "@prisma/client";
+import { CourseWithLessonsAttendances } from "@/types/CourseType";
 
 interface Props {
-  courses: (Course & {
-    Lesson: (Lesson & {
-      Attendance: Attendance[];
-    })[];
-  })[];
+  courses: CourseWithLessonsAttendances[];
   replacements: Replacement[];
 }
 
@@ -28,12 +25,12 @@ export default function TableStudentAttendance({
     });
   };
 
-  const getAttendanceStatus = (attendanceRecords: Attendance[]) => {
-    if (!attendanceRecords || attendanceRecords.length === 0) {
+  const getAttendanceStatus = (attendances: Attendance[]) => {
+    if (attendances.length === 0) {
       return <span className="text-gray-500">Nezaznamenáno</span>;
     }
 
-    const latestAttendance = attendanceRecords[0];
+    const latestAttendance = attendances[0];
 
     switch (latestAttendance.type) {
       case "present":

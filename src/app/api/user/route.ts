@@ -14,7 +14,7 @@ export async function POST(req: Request) {
       email,
       courseIds,
       roleId,
-      color
+      color,
     } = body;
 
     const hashedPassword = await hash(password, 10);
@@ -90,7 +90,7 @@ export async function PUT(req: Request) {
       email,
       courseIds,
       roleId,
-      color
+      color,
     } = body;
 
     const existingUser = await db.user.findFirst({
@@ -140,6 +140,11 @@ export async function PUT(req: Request) {
     await db.group.updateMany({
       where: { Course: { some: { id: { in: courseIds } } } },
       data: { teacherId: id },
+    });
+
+    await db.lesson.updateMany({
+      where: { courseId: { in: courseIds } },
+      data: { teacherId: updatedUser.id },
     });
 
     return NextResponse.json(

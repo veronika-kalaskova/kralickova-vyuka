@@ -1,0 +1,10 @@
+import { User, Course, Group, StudentGroup } from "@prisma/client";
+
+export type UserWithCoursesAndGroups = User & {
+  CoursesTaken?: (Course & { group?: Group | null })[];
+  StudentGroup?: (StudentGroup & {
+    group: Group & {
+      Course: Course[];
+    };
+  })[];
+};

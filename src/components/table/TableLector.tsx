@@ -7,20 +7,10 @@ import CreateLectorModal from "../auth/CreateLectorModal";
 import Link from "next/link";
 import SearchInput from "../SearchInput";
 
-interface Lector {
-  id: number;
-  firstName: string;
-  lastName: string;
-  username: string;
-  phone: string | null;
-  email: string | null;
-  color: string | null;
-  createdAt: Date;
-  CoursesTaught?: Course[];
-}
+type LectorType = (User & {CoursesTaught: Course[]})
 
 interface Props {
-  data: Lector[];
+  data: LectorType[];
   coursesWithoutLector: (Course & { group: Group | null })[];
   roles?: string[];
 }
@@ -38,9 +28,9 @@ export default function TableLector({
 
   const isAdmin = roles?.includes("admin");
 
-  const [selectedLector, setSelectedLector] = useState<Lector | null>(null);
+  const [selectedLector, setSelectedLector] = useState<LectorType | null>(null);
   const [isOpenUpdate, setIsOpenUpdate] = useState(false);
-  const openModalUpdate = (lector: Lector) => {
+  const openModalUpdate = (lector: LectorType) => {
     setSelectedLector(lector);
     setIsOpenUpdate(true);
   };

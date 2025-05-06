@@ -2,8 +2,6 @@ import Link from "next/link";
 import { prisma } from "@/lib/db";
 import { User, BookOpen, Users, School, Mail, Phone } from "lucide-react";
 import React from "react";
-import TableLessons from "@/components/table/TableLessons";
-import CourseDetail from "@/components/detail/CourseDetail";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import TableUpcomingLessons from "@/components/table/TableUpcomingLessons";
@@ -139,7 +137,7 @@ export default async function Lektor({params}: {params: Promise<{ id: string }>}
               ))}
             </div>
           </div>
-          <Calculator lessons={lessons} />
+          <Calculator data={lessons} />
         </div>
       </div>
     </div>

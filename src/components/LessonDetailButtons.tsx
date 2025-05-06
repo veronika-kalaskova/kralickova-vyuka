@@ -4,10 +4,10 @@ import CreateUpdateAttendanceModal from "./forms/CreateUpdateAttendance";
 import { Attendance, Course, Group, Lesson, User } from "@prisma/client";
 import CreateUpdateLessonModal from "./forms/CreateUpdateLessonModal";
 import CreateLessonReplacement from "./forms/CreateLessonReplacementModal";
-import { LessonWithCourseAndTeacher } from "@/types/LessonType";
+import { LessonWithCourseTeacherStudentAndTeacher } from "@/types/LessonType";
 
 interface Props {
-  lesson: LessonWithCourseAndTeacher;
+  lesson: LessonWithCourseTeacherStudentAndTeacher;
   students: User[];
   lectors: User[];
   roles?: string[];

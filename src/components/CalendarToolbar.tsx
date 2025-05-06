@@ -3,7 +3,7 @@
 import React from "react";
 import { ToolbarProps } from "react-big-calendar";
 import Image from "next/image";
-import { LessonWithCourseAndTeacher } from "@/types/LessonType";
+import { LessonWithCourseTeacherStudentAndTeacher } from "@/types/LessonType";
 
 function getViewLabel(view: string): string {
   switch (view) {
@@ -22,7 +22,7 @@ function getViewLabel(view: string): string {
 }
 
 export default function CalendarToolbar(
-  props: ToolbarProps<LessonWithCourseAndTeacher, object>,
+  props: ToolbarProps<LessonWithCourseTeacherStudentAndTeacher, object>,
 ) {
   const goToBack = () => {
     props.onNavigate("PREV");

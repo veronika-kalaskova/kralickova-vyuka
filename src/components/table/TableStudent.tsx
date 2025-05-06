@@ -7,16 +7,10 @@ import CreateLectorModal from "../auth/CreateLectorModal";
 import Link from "next/link";
 import SearchInput from "../SearchInput";
 import CreateStudentModal from "../auth/CreateStudentModal";
+import { UserWithCoursesAndGroups } from "@/types/UserType";
 
 interface Props {
-  data: (User & {
-    CoursesTaken?: (Course & { group?: Group | null })[];
-    StudentGroup?: (StudentGroup & {
-      group: Group & {
-        Course: Course[];
-      };
-    })[];
-  })[];
+  data: UserWithCoursesAndGroups[];
   coursesWithoutStudent: (Course & { group: Group | null })[];
   roles?: string[];
 }
@@ -36,6 +30,7 @@ export default function TableStudent({
 
   const [selectedStudent, setSelectedStudent] = useState<User | null>(null);
   const [isOpenUpdate, setIsOpenUpdate] = useState(false);
+
   const openModalUpdate = (student: User) => {
     setSelectedStudent(student);
     setIsOpenUpdate(true);
@@ -50,8 +45,8 @@ export default function TableStudent({
   const handleSearch = (query: string) => {
     setSearchQuery(
       query
-        .normalize("NFD")
-        .replace(/[\u0300-\u036f]/g, "")
+        .normalize("NFD") // prevadi znaky s diakritikou
+        .replace(/[\u0300-\u036f]/g, "") // odstrani diakritiku
         .toLowerCase(),
     );
   };
@@ -120,7 +115,7 @@ export default function TableStudent({
                   </td>
 
                   <td className="hidden px-3 py-2 md:table-cell">
-                    <div className="flex flex-wrap gap-1 max-w-[400px]">
+                    <div className="flex max-w-[400px] flex-wrap gap-1">
                       {student.CoursesTaken?.map(
                         (course: Course, index: number) => (
                           <span

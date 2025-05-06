@@ -2,28 +2,15 @@ import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { Course, Group } from "@prisma/client";
+import { Course, Group, User } from "@prisma/client";
 
-// TODO: prejmenovat na createUpdateModal a presunout do forms slozky
-
-interface Lector {
-  id: number;
-  firstName: string;
-  lastName: string;
-  username: string;
-  email: string | null;
-  phone: string | null;
-  color: string | null;
-  createdAt: Date;
-  CoursesTaught?: Course[];
-}
 
 interface Props {
   roleId: number;
   isOpen: boolean;
   onClose: () => void;
   courses: (Course & { group: Group | null })[];
-  data?: Lector | null;
+  data?: (User & {CoursesTaught: Course[]}) | null;
   type?: string;
 }
 

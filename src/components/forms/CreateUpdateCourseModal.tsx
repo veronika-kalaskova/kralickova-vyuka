@@ -4,8 +4,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Course, Group, User } from "@prisma/client";
 
-
-
 interface Props {
   isOpen: boolean;
   onClose: () => void;
@@ -40,7 +38,6 @@ export default function CreateUpdateCourseModal({
     handleSubmit,
     formState: { errors },
     watch,
-    setValue,
     reset,
   } = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
@@ -51,6 +48,10 @@ export default function CreateUpdateCourseModal({
 
   const [message, setMessage] = useState("");
 
+  function formatDate(date: Date) {
+    return date.toISOString().split("T")[0];
+  }
+
   useEffect(() => {
     if (data && isOpen) {
       reset({
@@ -58,12 +59,8 @@ export default function CreateUpdateCourseModal({
         description: data.description || "",
         textbook: data.textbook || "",
         teacherId: data.teacherId?.toString() || "",
-        startDate: data.startDate
-          ? new Date(data.startDate).toISOString().split("T")[0]
-          : "",
-        endDate: data.endDate
-          ? new Date(data.endDate).toISOString().split("T")[0]
-          : "",
+        startDate: formatDate(data.startDate),
+        endDate: formatDate(data.endDate),
       });
     }
   }, [data, isOpen, reset]);
@@ -72,7 +69,7 @@ export default function CreateUpdateCourseModal({
     try {
       const { courseType, ...rest } = values;
 
-      const courseData: any = {
+      const courseData = {
         ...rest,
         isIndividual: courseType === "individual",
         isPair: courseType === "pair",
