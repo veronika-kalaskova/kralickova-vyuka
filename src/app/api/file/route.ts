@@ -22,7 +22,7 @@ export async function POST(req: Request) {
     if (existingMaterial) {
       await db.studyMaterial.delete({
         where: { id: existingMaterial.id }
-      });
+      }); // vymaze jelikoz, tam muze byt jen jeden material
     }
     
     const buffer = Buffer.from(await file.arrayBuffer());

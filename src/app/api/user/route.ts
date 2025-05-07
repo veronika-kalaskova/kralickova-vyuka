@@ -23,7 +23,7 @@ export async function POST(req: Request) {
       where: {
         OR: [
           { username: username, deletedAt: null },
-          { email: email, deletedAt: null },
+          { email: email, deletedAt: null }, // uzivatel, u ktereho je bud username neboo email stejny
         ],
       },
     });
@@ -51,19 +51,22 @@ export async function POST(req: Request) {
             roleId: parseInt(roleId),
           },
         },
-        CoursesTaught:
-          courseIds && courseIds.length > 0
-            ? {
-                connect: courseIds.map((courseId: number) => ({
-                  id: courseId,
-                })),
-              }
-            : undefined,
+        CoursesTaught: {
+          connect: courseIds.map((courseId: number) => ({
+            // pripoji veskere kurzy
+            id: courseId,
+          })),
+        },
       },
     });
 
     await db.group.updateMany({
-      where: { Course: { some: { id: { in: courseIds } } } },
+      where: { Course: { some: { id: { in: courseIds } } } }, // nastavi skupiny
+      data: { teacherId: newUser.id },
+    });
+
+    await db.lesson.updateMany({
+      where: { courseId: { in: courseIds } },
       data: { teacherId: newUser.id },
     });
 

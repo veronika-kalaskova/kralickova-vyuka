@@ -4,7 +4,7 @@ import { db } from "@/lib/db";
 export async function GET(req: Request) {
   try {
     const url = new URL(req.url);
-    const id = url.searchParams.get("id");
+    const id = url.searchParams.get("id"); // ziska id materialu z query parametru
     
     if (!id) {
       return NextResponse.json(
@@ -34,11 +34,11 @@ export async function GET(req: Request) {
       );
     }
     
-    const fileName = material.fileName.split("/").pop() || "soubor";
+    const fileName = material.fileName.split("/").pop() || "soubor"; // ziska jmeno souboru bez cesty
 
     const headers = new Headers();
     headers.set("Content-Type", material.fileType || "application/octet-stream");
-    headers.set("Content-Disposition", `attachment; filename="${fileName}"`);
+    headers.set("Content-Disposition", `attachment; filename="${fileName}"`); // soubor bude stazeny s nazvem souboru
     
     return new Response(material.fileData as Buffer, {
       status: 200,

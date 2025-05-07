@@ -27,6 +27,7 @@ export default async function SeznamStudentu() {
         },
         include: {
           group: true,
+          teacher: true,
         },
       },
       StudentGroup: {
@@ -36,7 +37,11 @@ export default async function SeznamStudentu() {
         include: {
           group: {
             include: {
-              Course: true,
+              Course: {
+                include: {
+                  teacher: true,
+                },
+              },
             },
           },
         },

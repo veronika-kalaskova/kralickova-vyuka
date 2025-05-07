@@ -11,7 +11,7 @@ export async function POST(req: Request) {
         lessonId,
         userId: user.id,
         text,
-        createdAt
+        createdAt,
       },
       include: {
         user: true,

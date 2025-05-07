@@ -17,8 +17,7 @@ export async function PUT(req: Request) {
     // });
 
     const course = await db.course.findUnique({
-      where: { id: id },
-      select: { groupId: true },
+      where: { id: id }
     });
 
     if (!course) {

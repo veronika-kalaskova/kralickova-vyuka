@@ -9,7 +9,9 @@ export async function PUT(req: Request) {
     const parsedStart = new Date(startDate);
     const parsedEnd = new Date(endDate);
 
-    const duration = Math.round((parsedEnd.getTime() - parsedStart.getTime()) / 60000);
+    const duration = Math.round(
+      (parsedEnd.getTime() - parsedStart.getTime()) / 60000,
+    );
 
     const updatedLesson = await db.lesson.update({
       where: { id },
@@ -22,10 +24,13 @@ export async function PUT(req: Request) {
 
     return NextResponse.json(
       { course: updatedLesson, message: "lekce upravena" },
-      { status: 200 }
+      { status: 200 },
     );
   } catch (error) {
     console.error("Chyba při aktualizaci lekce:", error);
-    return NextResponse.json({ message: "Chyba při aktualizaci lekce" }, { status: 500 });
+    return NextResponse.json(
+      { message: "Chyba při aktualizaci lekce" },
+      { status: 500 },
+    );
   }
 }

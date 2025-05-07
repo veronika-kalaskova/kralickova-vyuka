@@ -4,8 +4,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Course, Group, User } from "@prisma/client";
 
-// TODO: prejmenovat na createUpdateModal a presunout do forms slozky
-
 interface Props {
   roleId: number;
   isOpen: boolean;
@@ -80,15 +78,15 @@ export default function CreateStudentModal({
           (course) => course.id === parseInt(courseId) && course.group,
         ),
       )
-      .filter(Boolean) as (Course & { group: Group })[];
+      .filter(Boolean) || []; // vybere skupinove kurzy
 
-    const group = groupCourses.map((course) => course.group);
-    const name = group.map((group) => group.name).join(", ");
+    const group = groupCourses.map((course) => course?.group);
+    const groupName = group.map((group) => group?.name).join(", ");
 
     if (groupCourses.length > 0) {
-      const courseNames = groupCourses.map((course) => course.name).join(", ");
+      const courseNames = groupCourses.map((course) => course?.name).join(", ");
       setMessage(
-        `Upozornění: Výběrem skupinového kurzu (${courseNames}) se student přiřadí také do skupiny: ${name}.`,
+        `Upozornění: Výběrem skupinového kurzu (${courseNames}) se student přiřadí také do skupiny: ${groupName}.`,
       );
     } else {
       setMessage("");
@@ -124,7 +122,7 @@ export default function CreateStudentModal({
   }, [data, isOpen, reset]);
 
   const onSubmit = async (values: z.infer<typeof FormSchema>) => {
-    const courseIds = values.courseIds?.map((id) => parseInt(id, 10));
+    const courseIds = values.courseIds?.map((id) => parseInt(id));
 
     const body =
       type === "update"
@@ -149,7 +147,7 @@ export default function CreateStudentModal({
       } else if (errorData.message === "Group course without groupId.") {
         const invalidCoursesNames = errorData.invalidCourses.map(
           (course: Course) => course.name,
-        );
+        ); // kurzy se berou z api
         setMessage(
           `Pro kurz ${invalidCoursesNames.join(", ")} není vytvořena skupina.`,
         );
@@ -257,7 +255,6 @@ export default function CreateStudentModal({
               )}
             </div>
 
-            {/* TODO: hezci design */}
             <div className="mb-4 flex items-center gap-2">
               <input
                 type="checkbox"

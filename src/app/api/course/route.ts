@@ -43,14 +43,14 @@ export async function POST(req: Request) {
       },
     });
 
-    if (!newCourse.isIndividual) { 
+    if (!newCourse.isIndividual) {
       const existingGroup = await db.group.findFirst({
         where: {
           name: name,
           deletedAt: null,
         },
       });
-  
+
       if (existingGroup) {
         return NextResponse.json(
           {
@@ -59,7 +59,7 @@ export async function POST(req: Request) {
           { status: 409 },
         );
       }
-  
+
       const newGroup = await db.group.create({
         data: {
           name,
@@ -71,8 +71,6 @@ export async function POST(req: Request) {
           },
         },
       });
-
-
     }
 
     await db.user.update({

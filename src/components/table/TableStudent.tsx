@@ -51,13 +51,22 @@ export default function TableStudent({
     );
   };
 
-  const filteredData = sortedData.filter((student) =>
-    `${student.firstName} ${student.lastName}`
+  const filteredData = sortedData.filter((student) => {
+    const studentName = `${student.firstName} ${student.lastName}`
       .normalize("NFD")
       .replace(/[\u0300-\u036f]/g, "")
-      .toLowerCase()
-      .includes(searchQuery),
-  );
+      .toLowerCase(); // vyhledavani podle studenta
+  
+    const teacherNames = getTeacherNames(student)
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .toLowerCase(); // vyhledavani podle lektora
+  
+    return (
+      studentName.includes(searchQuery) || teacherNames.includes(searchQuery)
+    );
+  });
+  
 
   const handleDelete = async (id: number) => {
     const confirmed = confirm("Opravdu chcete smazat tohoto studenta?");
@@ -75,6 +84,28 @@ export default function TableStudent({
       alert("Chyba při mazání studenta.");
     }
   };
+
+function getTeacherNames(student: UserWithCoursesAndGroups): string {
+  const individualTeachers =
+    student.CoursesTaken?.map((course) => course.teacher).filter(Boolean) || [];
+
+  const groupTeachers =
+    student.StudentGroup?.flatMap((sg) =>
+      sg.group.Course.map((course) => course.teacher),
+    ).filter(Boolean) || [];
+
+  const allTeachers = [...individualTeachers, ...groupTeachers];
+
+  const uniqueTeachers = allTeachers.filter(
+    (teacher, index, self) =>
+      teacher && index === self.findIndex((t) => t?.id === teacher?.id), // pomoci self vyhledame unikatniho lektora skrze cele pole
+  );
+
+  return uniqueTeachers
+    .map((teacher) => `${teacher?.firstName} ${teacher?.lastName}`)
+    .join(", ");
+}
+
 
   return (
     <>
@@ -100,6 +131,7 @@ export default function TableStudent({
                 <th className="px-3 py-2">Jméno</th>
                 <th className="hidden px-3 py-2 md:table-cell">Email</th>
                 <th className="hidden px-3 py-2 md:table-cell">Kurzy</th>
+                <th className="hidden px-3 py-2 md:table-cell">Lektor</th>
                 <th className="px-3 py-2"></th>
               </tr>
             </thead>
@@ -136,6 +168,12 @@ export default function TableStudent({
                           </span>
                         )),
                       )}
+                    </div>
+                  </td>
+
+                  <td className="hidden px-3 py-2 md:table-cell">
+                    <div className="max-w-[400px]">
+                      {getTeacherNames(student)}
                     </div>
                   </td>
 

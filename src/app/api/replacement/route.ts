@@ -6,10 +6,10 @@ function getDurationInMinutes(start: Date, end: Date): number {
 }
 
 function buildDateTime(date: Date, hours: number, minutes: number): Date {
-  const d = new Date(date);
-  d.setHours(hours, minutes, 0, 0);
-  return d;
-}
+  const result = new Date(date);
+  result.setHours(hours, minutes, 0, 0);
+  return result;
+} // musi se nastavit i hodniny a minuty, jinak to bude 0:00
 
 export async function POST(req: Request) {
   try {

@@ -11,7 +11,7 @@ export async function PUT(req: Request) {
       data: {
         deletedAt: new Date(),
         CoursesTaught: {
-            set: [],
+            set: [], // smaze jeho kurzy
         }
       }
     });

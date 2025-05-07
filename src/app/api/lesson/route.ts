@@ -1,15 +1,15 @@
 import { db } from "@/lib/db";
 import { NextResponse } from "next/server";
 
-function getDurationInMinutes(start: Date, end: Date): number {
+function getDuration(start: Date, end: Date): number {
   return Math.round((end.getTime() - start.getTime()) / 60000);
 }
 
 function buildDateTime(date: Date, hours: number, minutes: number): Date {
-  const d = new Date(date);
-  d.setHours(hours, minutes, 0, 0);
-  return d;
-}
+  const result = new Date(date);
+  result.setHours(hours, minutes, 0, 0);
+  return result;
+} // musi se nastavit i hodniny a minuty, jinak to bude 0:00
 
 export async function POST(req: Request) {
   try {
@@ -21,6 +21,7 @@ export async function POST(req: Request) {
 
     const startHours = startRaw.getHours();
     const startMinutes = startRaw.getMinutes();
+
     const endHours = endRaw.getHours();
     const endMinutes = endRaw.getMinutes();
 
@@ -29,15 +30,15 @@ export async function POST(req: Request) {
       return NextResponse.json({ message: "Kurz nenalezen" }, { status: 404 });
     }
 
+    const duration = getDuration(startRaw, endRaw);
     const lessons = [];
-    const duration = getDurationInMinutes(startRaw, endRaw);
 
     if (repeat === "weekly") {
       const courseEnd = new Date(course.endDate);
       let currentDate = new Date(startRaw);
 
       while (currentDate <= courseEnd) {
-        const start = buildDateTime(currentDate, startHours, startMinutes);
+        const start = buildDateTime(currentDate, startHours, startMinutes); // vezme dnesni datum ktery se pak posune o 7 dni
         const end = buildDateTime(currentDate, endHours, endMinutes);
 
         lessons.push({
@@ -103,10 +104,9 @@ export async function PUT(req: Request) {
       );
     }
 
-
     const start = new Date(startDate);
     const end = new Date(endDate);
-    const duration = getDurationInMinutes(start, end);
+    const duration = getDuration(start, end);
 
     const updatedLesson = await db.lesson.update({
       where: { id },

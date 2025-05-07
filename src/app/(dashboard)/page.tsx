@@ -5,33 +5,32 @@ import { prisma } from "@/lib/db";
 import { getServerSession } from "next-auth";
 
 export default async function Home() {
-
   const session = await getServerSession(authOptions);
 
   const coursesWithoutLector = await prisma.course.findMany({
     where: {
-      teacherId: null
+      teacherId: null,
     },
     include: {
-      group: true
-    }
+      group: true,
+    },
   });
 
   const coursesWithoutStudent = await prisma.course.findMany({
     where: {
-      studentId: null
+      studentId: null,
     },
     include: {
-      group: true
-    }
+      group: true,
+    },
   });
 
   const coursesWithoutGroup = await prisma.course.findMany({
     where: {
       groupId: null,
-      isIndividual: false
-    }
-  })
+      isIndividual: false,
+    },
+  });
 
   const allLectors = await prisma.user.findMany({
     where: {
@@ -41,7 +40,7 @@ export default async function Home() {
           roleId: 2,
         },
       },
-    }
+    },
   });
 
   const allLessons = await prisma.lesson.findMany({
@@ -52,14 +51,13 @@ export default async function Home() {
       course: {
         include: {
           teacher: true,
-          student: true
-        }
+          student: true,
+        },
       },
       teacher: true,
-    }
+    },
   });
-  
-  
+
   return (
     <div className="flex flex-col items-center justify-center gap-8 p-4 xl:flex-row xl:items-start">
       {/* PREHLED LEKCI */}
@@ -68,7 +66,13 @@ export default async function Home() {
         <CalendarComponent lessons={allLessons} roles={session?.user.roles} />
       </div>
 
-      <QuickActions roles={session?.user.roles} coursesWithoutLector={coursesWithoutLector} coursesWithoutStudent={coursesWithoutStudent} coursesWithoutGroup={coursesWithoutGroup} allLectors={allLectors} />
+      <QuickActions
+        roles={session?.user.roles}
+        coursesWithoutLector={coursesWithoutLector}
+        coursesWithoutStudent={coursesWithoutStudent}
+        coursesWithoutGroup={coursesWithoutGroup}
+        allLectors={allLectors}
+      />
     </div>
   );
 }

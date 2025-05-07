@@ -73,15 +73,15 @@ export default function CreateLectorModal({
           (course) => course.id === parseInt(courseId) && course.group,
         ),
       )
-      .filter(Boolean) as (Course & { group: Group })[];
+      .filter(Boolean);
 
-    const group = groupCourses.map((course) => course.group);
-    const name = group.map((group) => group.name).join(", ");
+    const group = groupCourses.map((course) => course?.group);
+    const groupName = group.map((group) => group?.name).join(", ");
 
     if (groupCourses.length > 0) {
-      const courseNames = groupCourses.map((course) => course.name).join(", ");
+      const courseNames = groupCourses.map((course) => course?.name).join(", ");
       setMessage(
-        `Upozornění: Výběrem skupinového kurzu (${courseNames}) se lektor stává lektorem i pro skupinu: ${name}.`,
+        `Upozornění: Výběrem skupinového kurzu (${courseNames}) se lektor stává lektorem i pro skupinu: ${groupName}.`,
       );
     } else {
       setMessage("");

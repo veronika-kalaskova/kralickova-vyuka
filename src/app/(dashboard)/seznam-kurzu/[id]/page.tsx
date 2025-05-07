@@ -6,7 +6,11 @@ import TableLessons from "@/components/table/TableLessons";
 import CourseDetail from "@/components/detail/CourseDetail";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
-export default async function Kurz({params}: {params: Promise<{ id: string }>}) {
+export default async function Kurz({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
   const { id } = await params;
 
   const course = await prisma.course.findFirst({
@@ -35,7 +39,6 @@ export default async function Kurz({params}: {params: Promise<{ id: string }>}) 
       },
     },
   });
-  
 
   const session = await getServerSession(authOptions);
 
@@ -50,7 +53,9 @@ export default async function Kurz({params}: {params: Promise<{ id: string }>}) 
   const students =
     course.isIndividual && course.student
       ? [course.student]
-      : course.group?.StudentGroup.map((studentInGroup) => studentInGroup.student) || [];
+      : course.group?.StudentGroup.map(
+          (studentInGroup) => studentInGroup.student,
+        ) || [];
 
   return (
     <div className="p-4">
@@ -58,10 +63,22 @@ export default async function Kurz({params}: {params: Promise<{ id: string }>}) 
         <div>
           <h1 className="title mb-0">Kurz - {course.name}</h1>
           {course.description && (
-          <p className="mt-3 text-sm text-gray-500">
-            {course.description}
-          </p>
+            <p className="mt-3 text-sm text-gray-500">{course.description}</p>
           )}
+          <p className="mt-3 text-sm text-gray-500">
+            Kurz probíhá od{" "}
+            {course.startDate.toLocaleDateString("cs-CZ", {
+              year: "numeric",
+              month: "2-digit",
+              day: "2-digit",
+            })}{" "}
+            do{" "}
+            {course.endDate.toLocaleDateString("cs-CZ", {
+              year: "numeric",
+              month: "2-digit",
+              day: "2-digit",
+            })}
+          </p>
         </div>
 
         <CourseDetail course={course} roles={session?.user.roles} />

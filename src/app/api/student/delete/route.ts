@@ -11,20 +11,20 @@ export async function PUT(req: Request) {
       data: {
         deletedAt: new Date(),
         CoursesTaken: {
-            set: [],
-        }
-      }
+          set: [],
+        },
+      },
     });
 
     await db.studentGroup.updateMany({
-        where: {
-          studentId: id,
-          deletedAt: null,
-        },
-        data: {
-          deletedAt: new Date(),
-        },
-      });
+      where: {
+        studentId: id,
+        deletedAt: null,
+      },
+      data: {
+        deletedAt: new Date(),
+      },
+    });
 
     return NextResponse.json(
       { user: updatedUser, message: "user deleted" },
