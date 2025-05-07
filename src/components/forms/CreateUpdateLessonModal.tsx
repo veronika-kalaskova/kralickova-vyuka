@@ -80,6 +80,24 @@ export default function CreateUpdateLessonModal({
       const startDate = parseDateTime(date, startTime);
       const endDate = parseDateTime(date, endTime);
 
+      const courseStart = new Date(course.startDate);
+      const courseEnd = new Date(course.endDate);
+  
+      if (startDate < courseStart) {
+        setMessage("Lekce nemůže začínat před začátkem kurzu.");
+        return;
+      }
+  
+      if (endDate > courseEnd) {
+        setMessage("Lekce nemůže končit po konci kurzu.");
+        return;
+      }
+  
+      if (startDate >= endDate) {
+        setMessage("Čas začátku musí být před časem konce.");
+        return;
+      }  
+
       const lessonData = {
         courseId: course.id,
         date: new Date(date),

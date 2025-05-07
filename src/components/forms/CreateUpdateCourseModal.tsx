@@ -19,7 +19,8 @@ export default function CreateUpdateCourseModal({
   data,
   type,
 }: Props) {
-  const FormSchema = z.object({
+  const FormSchema = z
+  .object({
     name: z.string().min(1, "Jméno je povinné"),
     teacherId: z.string().min(1, "Lektor je povinný"),
     description: z.string().optional(),
@@ -32,7 +33,17 @@ export default function CreateUpdateCourseModal({
         : z.enum(["individual", "pair", "group"]).optional(),
     startDate: z.string().min(1, "Začátek je povinný"),
     endDate: z.string().min(1, "Konec je povinný"),
-  });
+  })
+  .refine(
+    (data) => {
+      return data.endDate > data.startDate;
+    },
+    {
+      path: ["endDate"],
+      message: "Datum konce musí být po začátku",
+    }
+  );
+
   const {
     register,
     handleSubmit,
@@ -212,7 +223,14 @@ export default function CreateUpdateCourseModal({
                 {...register("endDate", { required: true })}
                 className="rounded-md border-[1.5px] border-gray-300 p-2 focus:border-orange-300"
               />
+                            {errors.endDate && (
+                <p className="text-xs text-red-500">
+                  {errors.endDate.message}
+                </p>
+              )}
             </div>
+
+            
 
             {message && (
               <div className="col-span-2 mt-2 text-xs text-red-500">

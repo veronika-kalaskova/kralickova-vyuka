@@ -141,11 +141,12 @@ export default function CreateLessonReplacement({
         <form onSubmit={handleSubmit(onSubmit)} className="grid gap-4">
           <div>
             <label className="text-xs text-gray-500">
-              Datum náhraní lekce*
+              Datum náhradní lekce*
             </label>
             <input
               type="date"
               {...register("date")}
+              min={new Date().toISOString().split("T")[0]}
               className="w-full rounded-md border border-gray-300 p-2"
             />
             {errors.date && (
@@ -155,7 +156,7 @@ export default function CreateLessonReplacement({
 
           <div>
             <label className="text-xs text-gray-500">
-              Čas začátku náhraní lekce*
+              Čas začátku náhradní lekce*
             </label>
             <input
               type="time"
@@ -169,7 +170,7 @@ export default function CreateLessonReplacement({
 
           <div>
             <label className="text-xs text-gray-500">
-              Čas konce náhraní lekce*
+              Čas konce náhradní lekce*
             </label>
             <input
               type="time"
