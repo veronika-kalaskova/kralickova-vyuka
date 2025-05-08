@@ -72,13 +72,14 @@ export default function CreateStudentModal({
   }, [firstName, lastName, setValue]);
 
   useEffect(() => {
-    const groupCourses = selectedCourses
-      .map((courseId) =>
-        courses.find(
-          (course) => course.id === parseInt(courseId) && course.group,
-        ),
-      )
-      .filter(Boolean) || []; // vybere skupinove kurzy
+    const groupCourses =
+      selectedCourses
+        .map((courseId) =>
+          courses.find(
+            (course) => course.id === parseInt(courseId) && course.group,
+          ),
+        )
+        .filter(Boolean) || []; // vybere skupinove kurzy
 
     const group = groupCourses.map((course) => course?.group);
     const groupName = group.map((group) => group?.name).join(", ");
@@ -194,7 +195,7 @@ export default function CreateStudentModal({
         {type === "create" && <h2 className="title">Vytvořit studenta</h2>}
         <form onSubmit={handleSubmit(onSubmit)}>
           <div className="grid w-full grid-cols-2 gap-4 md:grid-cols-3">
-            <div className="mb-4 flex flex-col gap-2">
+            <div className="col-span-3 mb-4 flex flex-col gap-2 md:col-span-1">
               <label className="text-xs text-gray-500">Jméno*</label>
               <input
                 type="text"
@@ -208,7 +209,7 @@ export default function CreateStudentModal({
               )}
             </div>
 
-            <div className="mb-4 flex flex-col gap-2">
+            <div className="col-span-3 mb-4 flex flex-col gap-2 md:col-span-1">
               <label className="text-xs text-gray-500">Příjmení*</label>
               <input
                 {...register("lastName")}
@@ -221,7 +222,7 @@ export default function CreateStudentModal({
               )}
             </div>
 
-            <div className="mb-4 flex flex-col gap-2">
+            <div className="col-span-3 mb-4 flex flex-col gap-2 md:col-span-1">
               <label className="text-xs text-gray-500">Email*</label>
               <input
                 type="email"
@@ -233,7 +234,7 @@ export default function CreateStudentModal({
               )}
             </div>
 
-            <div className="mb-4 flex flex-col gap-2">
+            <div className="col-span-3 mb-4 flex flex-col gap-2 md:col-span-1">
               <label className="text-xs text-gray-500">Telefon*</label>
               <input
                 {...register("phone")}
@@ -244,7 +245,7 @@ export default function CreateStudentModal({
               )}
             </div>
 
-            <div className="mb-4 flex flex-col gap-2">
+            <div className="col-span-3 mb-4 flex flex-col gap-2 md:col-span-1">
               <label className="text-xs text-gray-500">Třída</label>
               <input
                 {...register("class")}
@@ -255,7 +256,7 @@ export default function CreateStudentModal({
               )}
             </div>
 
-            <div className="mb-4 flex items-center gap-2">
+            <div className="mb-4 flex items-center gap-2 col-span-3  md:col-span-1">
               <input
                 type="checkbox"
                 {...register("pickup")}

@@ -144,9 +144,15 @@ export async function PUT(req: Request) {
 
     const existingUser = await db.user.findFirst({
       where: {
-        OR: [
-          { username: username, deletedAt: null },
-          { email: email, deletedAt: null }, // uzivatel, u ktereho je bud username neboo email stejny
+        AND: [
+          { id: { not: id } },
+
+          {
+            OR: [
+              { username: username, deletedAt: null },
+              { email: email, deletedAt: null },
+            ],
+          },
         ],
       },
     });
