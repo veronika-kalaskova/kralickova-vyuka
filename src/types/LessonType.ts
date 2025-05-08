@@ -6,9 +6,9 @@ export type LessonWithCourseTeacherStudentAndTeacher = Lesson & {
     student: User | null;
   };
 } & {
-  teacher: User | null;
+  teacher: User;
 };
 
 export type LessonWithCourseAndTeacher = Lesson & { course: Course } & {
-  teacher: User | null;
+  teacher: User;
 };

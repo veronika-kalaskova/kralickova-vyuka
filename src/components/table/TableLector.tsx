@@ -6,8 +6,9 @@ import Button from "../Button";
 import CreateLectorModal from "../auth/CreateLectorModal";
 import Link from "next/link";
 import SearchInput from "../SearchInput";
+import ReplaceLectorModal from "../forms/ReplaceLectorModal";
 
-type LectorType = (User & {CoursesTaught: Course[]})
+type LectorType = User & { CoursesTaught: Course[] };
 
 interface Props {
   data: LectorType[];
@@ -25,6 +26,10 @@ export default function TableLector({
   const openModal = () => {
     setIsOpen(true);
   };
+
+  const [isReplaceModalOpen, setIsReplaceModalOpen] = useState(false);
+  const [deletedLectorId, setDeletedLectorId] = useState<number | null>(null);
+  const [deletedLector, setDeletedLector] = useState<LectorType | null>(null);
 
   const isAdmin = roles?.includes("admin");
 
@@ -58,22 +63,29 @@ export default function TableLector({
       .includes(searchQuery),
   );
 
-  const handleDelete = async (id: number) => {
-    const confirmed = confirm("Opravdu chcete smazat tohoto lektora?");
-    if (!confirmed) return;
+  const handleDelete = (lector: LectorType) => {
+    setDeletedLectorId(lector.id);
+    setDeletedLector(lector)
+    setIsReplaceModalOpen(true);
 
-    const response = await fetch("/api/user/delete", {
-      method: "PUT",
-      body: JSON.stringify({ id }),
-      headers: { "Content-Type": "application/json" },
-    });
-
-    if (response.ok) {
-      window.location.reload();
-    } else {
-      alert("Chyba při mazání lektora.");
-    }
   };
+
+  // const handleDelete = async (id: number) => {
+  //   const confirmed = confirm("Opravdu chcete smazat tohoto lektora?");
+  //   if (!confirmed) return;
+
+  //   const response = await fetch("/api/user/delete", {
+  //     method: "PUT",
+  //     body: JSON.stringify({ id }),
+  //     headers: { "Content-Type": "application/json" },
+  //   });
+
+  //   if (response.ok) {
+  //     window.location.reload();
+  //   } else {
+  //     alert("Chyba při mazání lektora.");
+  //   }
+  // };
 
   return (
     <>
@@ -114,7 +126,7 @@ export default function TableLector({
                   </td>
 
                   <td className="hidden px-3 py-2 md:table-cell">
-                    <div className="flex flex-wrap gap-1 max-w-[400px]">
+                    <div className="flex max-w-[400px] flex-wrap gap-1">
                       {lector.CoursesTaught?.map((course, index) => (
                         <span
                           key={index}
@@ -156,7 +168,7 @@ export default function TableLector({
                           <button
                             className="transform cursor-pointer rounded-full px-2 py-2 transition-all duration-300 hover:bg-red-300"
                             onClick={() => {
-                              handleDelete(lector.id);
+                              handleDelete(lector);
                             }}
                           >
                             <Image
@@ -192,6 +204,14 @@ export default function TableLector({
         }}
         data={selectedLector}
         type="update"
+      />
+      <ReplaceLectorModal
+        isOpen={isReplaceModalOpen}
+        onClose={() => setIsReplaceModalOpen(false)}
+        lectors={data.filter(
+          (deletedLector) => deletedLector.id !== deletedLectorId,
+        )}
+        deletedLectorId={deletedLectorId}
       />
     </>
   );

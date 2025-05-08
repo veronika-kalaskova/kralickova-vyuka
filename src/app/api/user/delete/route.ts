@@ -4,10 +4,30 @@ import { NextResponse } from "next/server";
 export async function PUT(req: Request) {
   try {
     const body = await req.json();
-    const { id, roleId } = body;
+    const { id, roleId, oldLectorId, newLectorId } = body;
 
-    const updatedUser = await db.user.update({
-      where: { id: id },
+    const deletedUser = await db.user.findFirst({
+      where: {
+        id: oldLectorId,
+      },
+      include: {
+        CoursesTaught: true,
+      },
+    });
+
+    await db.user.update({
+      where: {
+        id: newLectorId,
+      },
+      data: {
+        CoursesTaught: {
+          set: deletedUser?.CoursesTaught,
+        },
+      },
+    });
+
+    await db.user.update({
+      where: { id: oldLectorId },
       data: {
         deletedAt: new Date(),
         CoursesTaught: {
@@ -17,23 +37,20 @@ export async function PUT(req: Request) {
     });
 
     await db.group.updateMany({
-      where: { teacherId: id },
-      data: { teacherId: null },
+      where: { teacherId: oldLectorId },
+      data: { teacherId: newLectorId },
     });
 
     await db.lesson.updateMany({
       where: {
-        teacherId: id,
+        teacherId: parseInt(oldLectorId),
       },
       data: {
-        teacherId: null,
+        teacherId: parseInt(newLectorId),
       },
     });
 
-    return NextResponse.json(
-      { user: updatedUser, message: "user deleted" },
-      { status: 200 },
-    );
+    return NextResponse.json({ message: "user deleted" }, { status: 200 });
   } catch (error) {
     console.error("Error deleting teacher:", error);
     return NextResponse.json(

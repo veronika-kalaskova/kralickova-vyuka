@@ -34,6 +34,7 @@ export default async function SeznamLektoru() {
   const coursesWithoutLector = await prisma.course.findMany({
     where: {
       teacherId: null,
+      deletedAt: null,
     },
     include: {
       group: true,

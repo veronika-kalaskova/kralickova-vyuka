@@ -8,7 +8,7 @@ export type CourseWithLessonsAttendances = Course & {
 
 export type CourseWithLesson = Course & {
   Lesson: (Lesson & {
-    teacher: User | null
+    teacher: User
   })[];
 };
 
