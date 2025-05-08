@@ -9,7 +9,11 @@ import Link from "next/link";
 import React from "react";
 import { User, BookOpen, Users, School } from "lucide-react";
 
-export default async function Lekce({params}: {params: Promise<{ id: string }>}) {
+export default async function Lekce({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
   const { id } = await params;
 
   const lesson = await prisma.lesson.findFirst({
@@ -18,7 +22,7 @@ export default async function Lekce({params}: {params: Promise<{ id: string }>})
       course: {
         include: {
           teacher: true,
-          student: true
+          student: true,
         },
       },
       teacher: true,
@@ -70,7 +74,7 @@ export default async function Lekce({params}: {params: Promise<{ id: string }>})
   const materials = await prisma.studyMaterial.findFirst({
     where: {
       lessonId: parseInt(id),
-    }
+    },
   });
 
   const comments = await prisma.comment.findMany({
@@ -101,7 +105,7 @@ export default async function Lekce({params}: {params: Promise<{ id: string }>})
   const loggedUser = await prisma.user.findFirst({
     where: {
       username: session?.user.username,
-      deletedAt: null
+      deletedAt: null,
     },
     include: {
       UserRole: true,
@@ -142,7 +146,7 @@ export default async function Lekce({params}: {params: Promise<{ id: string }>})
 
   return (
     <div className="p-4">
-      <div className="mb-6 flex gap-2 md:gap-0 flex-col md:flex-row md:items-center md:justify-between">
+      <div className="mb-6 flex flex-col gap-2 md:flex-row md:items-center md:justify-between md:gap-0">
         <div>
           <h1 className="title mb-0">
             Lekce {formatTime(lesson.startDate, lesson.endDate)}
@@ -155,9 +159,7 @@ export default async function Lekce({params}: {params: Promise<{ id: string }>})
           )}
 
           {lesson.deletedAt && (
-            <p className="mt-3 text-sm text-red-500">
-              Lekce byla nahrazena
-            </p>
+            <p className="mt-3 text-sm text-red-500">Lekce byla nahrazena</p>
           )}
         </div>
 
@@ -180,10 +182,14 @@ export default async function Lekce({params}: {params: Promise<{ id: string }>})
               <div className="flex items-center gap-2">
                 <User className="h-4 w-4 text-orange-500" />
                 <span className="font-semibold">Lektor:</span>
-                <span>
-                  {lesson.teacher.firstName}{" "}
-                  {lesson.teacher.lastName}
-                </span>
+
+                {lesson.teacher ? (
+                  <span>
+                    {lesson.teacher.firstName} {lesson.teacher.lastName}
+                  </span>
+                ) : (
+                  <span>Není nastaven</span>
+                )}
               </div>
 
               <div className="flex items-center gap-2">
