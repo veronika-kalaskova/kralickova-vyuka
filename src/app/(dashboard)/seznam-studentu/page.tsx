@@ -52,6 +52,7 @@ export default async function SeznamStudentu() {
   const coursesWithoutStudent = await prisma.course.findMany({
     where: {
       studentId: null,
+      deletedAt: null,
     },
     include: {
       group: true,

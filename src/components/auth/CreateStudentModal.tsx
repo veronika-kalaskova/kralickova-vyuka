@@ -162,6 +162,7 @@ export default function CreateStudentModal({
     }
   };
 
+
   if (!isOpen) return null;
 
   const CourseSelector = ({
