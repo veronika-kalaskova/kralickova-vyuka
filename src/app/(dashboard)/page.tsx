@@ -10,6 +10,7 @@ export default async function Home() {
   const coursesWithoutLector = await prisma.course.findMany({
     where: {
       teacherId: null,
+      deletedAt: null
     },
     include: {
       group: true,
@@ -19,6 +20,7 @@ export default async function Home() {
   const coursesWithoutStudent = await prisma.course.findMany({
     where: {
       studentId: null,
+      deletedAt: null
     },
     include: {
       group: true,
@@ -29,6 +31,7 @@ export default async function Home() {
     where: {
       groupId: null,
       isIndividual: false,
+      deletedAt: null
     },
   });
 

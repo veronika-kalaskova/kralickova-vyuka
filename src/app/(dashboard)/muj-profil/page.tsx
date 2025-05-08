@@ -12,6 +12,7 @@ export default async function MujProfil() {
   const loggedUser = await prisma.user.findFirst({
     where: {
       username: session?.user.username,
+      deletedAt: null
     },
     include: {
       UserRole: {

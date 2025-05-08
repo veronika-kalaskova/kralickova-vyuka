@@ -8,8 +8,11 @@ import TableUpcomingLessons from "@/components/table/TableUpcomingLessons";
 import Calculator from "@/components/Calculator";
 import CalendarComponent from "@/components/Calendar";
 
-export default async function Lektor({params}: {params: Promise<{ id: string }>}) {
-
+export default async function Lektor({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
   const { id } = await params;
 
   const lector = await prisma.user.findFirst({
@@ -25,7 +28,7 @@ export default async function Lektor({params}: {params: Promise<{ id: string }>}
       course: {
         include: {
           teacher: true,
-          student: true
+          student: true,
         },
       },
       teacher: true,
@@ -41,6 +44,7 @@ export default async function Lektor({params}: {params: Promise<{ id: string }>}
       startDate: {
         gte: new Date(),
       },
+      deletedAt: null,
     },
     include: {
       teacher: true,
@@ -54,6 +58,7 @@ export default async function Lektor({params}: {params: Promise<{ id: string }>}
   const courses = await prisma.course.findMany({
     where: {
       teacherId: parseInt(id),
+      deletedAt: null,
     },
     include: {
       student: true,

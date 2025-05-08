@@ -133,6 +133,7 @@ export default async function Student({
           },
         },
       ],
+      deletedAt: null
     },
     include: {
       teacher: true,

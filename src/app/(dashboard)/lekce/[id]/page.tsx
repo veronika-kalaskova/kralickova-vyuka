@@ -101,6 +101,7 @@ export default async function Lekce({params}: {params: Promise<{ id: string }>})
   const loggedUser = await prisma.user.findFirst({
     where: {
       username: session?.user.username,
+      deletedAt: null
     },
     include: {
       UserRole: true,
