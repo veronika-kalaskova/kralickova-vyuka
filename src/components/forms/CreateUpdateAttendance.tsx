@@ -104,10 +104,6 @@ export default function CreateUpdateAttendance({
         <h2 className="title">
           {typeForm === "update" ? "Upravit docházku" : "Zaznamenat docházku"}
 
-          <p className="mt-4 text-xs font-normal text-gray-500">
-            Docházku zadává lektor {lesson.course.teacher?.firstName}{" "}
-            {lesson.course.teacher?.lastName}
-          </p>
         </h2>
         <form onSubmit={handleSubmit(onSubmit)}>
           <div className="grid w-full grid-cols-2 gap-4">
