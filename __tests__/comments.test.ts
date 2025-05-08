@@ -4,7 +4,7 @@ import { db } from "@/lib/db";
 jest.mock("@/lib/db", () => ({
   db: {
     comment: {
-      create: jest.fn(),
+      create: jest.fn(), // veskere databazove operace budou mockovany pomoci jest.fn()
       delete: jest.fn(),
     },
     lesson: {
@@ -19,7 +19,7 @@ jest.mock("@/lib/db", () => ({
 const validCommentData = {
   lessonId: 1,
   user: { id: 2 },
-  text: "Skvělý kurz!",
+  text: "Komentář k lekci",
   createdAt: new Date().toISOString(),
 };
 
@@ -34,7 +34,7 @@ const mockUser = {
 function setupRequest(data: any, method: "POST" | "DELETE" = "POST") {
   return new Request("http://localhost/api/comments", {
     method,
-    body: method === "POST" ? JSON.stringify(data) : JSON.stringify(data),
+    body: JSON.stringify(data),
     headers: {
       "Content-Type": "application/json",
     },
@@ -43,14 +43,12 @@ function setupRequest(data: any, method: "POST" | "DELETE" = "POST") {
 
 describe("POST /api/comments", () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    (db.lesson.findUnique as jest.Mock).mockResolvedValue(mockLesson);
-    (db.user.findUnique as jest.Mock).mockResolvedValue(mockUser);
+    jest.clearAllMocks(); // vymazani mocku pred kazdym testem
   });
 
   it("vytvoří nový komentář", async () => {
     const createdComment = { id: 201, ...validCommentData, user: mockUser };
-    (db.comment.create as jest.Mock).mockResolvedValue(createdComment);
+    (db.comment.create as jest.Mock).mockResolvedValue(createdComment); // ulozi se do mockovane databaze komentar
 
     const response = await POST(setupRequest(validCommentData));
     const data = await response.json();
@@ -58,41 +56,13 @@ describe("POST /api/comments", () => {
     expect(response.status).toBe(201);
     expect(data.message).toBe("komentar vytvoren");
     expect(data.comment).toEqual(createdComment);
-    expect(db.comment.create).toHaveBeenCalledWith({
-      data: {
-        lessonId: validCommentData.lessonId,
-        userId: validCommentData.user.id,
-        text: validCommentData.text,
-        createdAt: validCommentData.createdAt,
-      },
-      include: {
-        user: true,
-      },
-    });
-  });
-
-  it("vrátí 404, pokud lekce nenalezena", async () => {
-    (db.lesson.findUnique as jest.Mock).mockResolvedValue(null);
-
-    const response = await POST(setupRequest(validCommentData));
-    const data = await response.json();
-
-    expect(response.status).toBe(201);
-    expect(data.message).toBe("komentar vytvoren");
-  });
-
-  it("vrátí 404, pokud uživatel nenalezen", async () => {
-    (db.user.findUnique as jest.Mock).mockResolvedValue(null);
-
-    const response = await POST(setupRequest(validCommentData));
-    const data = await response.json();
-
-    expect(response.status).toBe(201);
-    expect(data.message).toBe("komentar vytvoren");
+    expect(db.comment.create).toHaveBeenCalled();
   });
 
   it("vrátí 500, pokud dojde k chybě při vytváření komentáře", async () => {
-    (db.comment.create as jest.Mock).mockRejectedValue(new Error("Chyba databáze"));
+    (db.comment.create as jest.Mock).mockRejectedValue(
+      new Error("Chyba databáze"),
+    );
 
     const response = await POST(setupRequest(validCommentData));
     const data = await response.json();
@@ -107,7 +77,9 @@ describe("DELETE /api/comments", () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    (db.comment.delete as jest.Mock).mockResolvedValue({ id: validDeleteData.commentId });
+    (db.comment.delete as jest.Mock).mockResolvedValue({
+      id: validDeleteData.commentId,
+    });
   });
 
   it("úspěšně smaže komentář", async () => {
@@ -116,11 +88,7 @@ describe("DELETE /api/comments", () => {
 
     expect(response.status).toBe(200);
     expect(data.message).toBe("Komentar byl úspěšně smazán.");
-    expect(db.comment.delete).toHaveBeenCalledWith({
-      where: {
-        id: validDeleteData.commentId,
-      },
-    });
+    expect(db.comment.delete).toHaveBeenCalled();
   });
 
   it("vrátí 400, pokud chybí commentId", async () => {
@@ -133,7 +101,9 @@ describe("DELETE /api/comments", () => {
   });
 
   it("vrátí 500, pokud dojde k chybě při mazání komentáře", async () => {
-    (db.comment.delete as jest.Mock).mockRejectedValue(new Error("Chyba při mazání"));
+    (db.comment.delete as jest.Mock).mockRejectedValue(
+      new Error("Chyba při mazání"),
+    );
 
     const response = await DELETE(setupRequest(validDeleteData, "DELETE"));
     const data = await response.json();

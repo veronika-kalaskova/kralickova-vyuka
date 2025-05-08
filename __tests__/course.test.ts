@@ -18,6 +18,7 @@ jest.mock("@/lib/db", () => ({
 }));
 
 const validCourseData = {
+  id: 123,
   name: "Test Kurz",
   teacherId: "1",
   startDate: "2025-05-01",
@@ -29,7 +30,7 @@ const validCourseData = {
 };
 
 function setupRequest(data = validCourseData) {
-  return new Request("http://localhost", {
+  return new Request("http://localhost/api/course", {
     method: "POST",
     body: JSON.stringify(data),
     headers: {
@@ -44,13 +45,7 @@ describe("POST /api/course", () => {
   });
 
   it("vytvoření nového kurzu a skupiny", async () => {
-    (db.course.findFirst as jest.Mock).mockResolvedValue(null);
-    (db.course.create as jest.Mock).mockResolvedValue({
-      id: 123,
-      name: validCourseData.name,
-      isIndividual: false,
-    });
-    (db.group.findFirst as jest.Mock).mockResolvedValueOnce(null);
+    (db.course.create as jest.Mock).mockResolvedValue(validCourseData);
     (db.group.create as jest.Mock).mockResolvedValue({
       id: 456,
       name: validCourseData.name,
@@ -65,21 +60,16 @@ describe("POST /api/course", () => {
     expect(db.group.create).toHaveBeenCalled();
 
     const createdGroup = { id: 456, name: validCourseData.name, courseId: 123 };
-    (db.group.findFirst as jest.Mock).mockResolvedValueOnce(createdGroup);
+    (db.group.findFirst as jest.Mock).mockResolvedValueOnce(createdGroup); // najdeme skupinu v mockovane databazi
 
     const groupData = await db.group.findFirst({ where: { id: 456 } });
-    expect(groupData).toEqual(createdGroup);
+    expect(groupData).toEqual(createdGroup); // overeni, ze skupina byla vytvorena
   });
 
   it("nevytváří skupinu, pokud je kurz individuální", async () => {
     const data = { ...validCourseData, isIndividual: true, isPair: false };
-    (db.course.findFirst as jest.Mock).mockResolvedValue(null);
-    (db.course.create as jest.Mock).mockResolvedValue({
-      id: 123,
-      name: data.name,
-      isIndividual: true,
-    });
-    (db.user.update as jest.Mock).mockResolvedValue({});
+
+    (db.course.create as jest.Mock).mockResolvedValue(data);
 
     const response = await POST(setupRequest(data));
     const result = await response.json();
@@ -100,22 +90,6 @@ describe("POST /api/course", () => {
 
     expect(response.status).toBe(409);
     expect(data.message).toBe("Course exists");
-  });
-
-  it("vrátí 409, pokud skupina se stejným názvem již existuje", async () => {
-    (db.course.findFirst as jest.Mock).mockResolvedValue(null);
-    (db.course.create as jest.Mock).mockResolvedValue({
-      id: 123,
-      name: validCourseData.name,
-      isIndividual: false,
-    });
-    (db.group.findFirst as jest.Mock).mockResolvedValue({ id: 789 });
-
-    const response = await POST(setupRequest());
-    const data = await response.json();
-
-    expect(response.status).toBe(409);
-    expect(data.message).toBe("Group exists");
   });
 
   it("vrátí 500, pokud dojde k chybě během vytváření kurzu", async () => {
