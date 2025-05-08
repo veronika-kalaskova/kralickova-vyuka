@@ -78,7 +78,7 @@ model StudentGroup {
 model Lesson {
   id        Int       @id @default(autoincrement())
   courseId  Int
-  teacherId Int
+  teacherId Int?
   startDate DateTime
   endDate   DateTime
   repeat    String
@@ -87,7 +87,7 @@ model Lesson {
   deletedAt DateTime?
 
   course                Course          @relation(fields: [courseId], references: [id])
-  teacher               User            @relation("TeacherLesson", fields: [teacherId], references: [id])
+  teacher               User?            @relation("TeacherLesson", fields: [teacherId], references: [id])
   Attendance            Attendance[]
   StudyMaterial         StudyMaterial[]
   Comment               Comment[]

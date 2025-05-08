@@ -11,14 +11,23 @@ export async function PUT(req: Request) {
       data: {
         deletedAt: new Date(),
         CoursesTaught: {
-            set: [], // smaze jeho kurzy
-        }
-      }
+          set: [], // smaze jeho kurzy
+        },
+      },
     });
 
     await db.group.updateMany({
       where: { teacherId: id },
       data: { teacherId: null },
+    });
+
+    await db.lesson.updateMany({
+      where: {
+        teacherId: id,
+      },
+      data: {
+        teacherId: null,
+      },
     });
 
     return NextResponse.json(
