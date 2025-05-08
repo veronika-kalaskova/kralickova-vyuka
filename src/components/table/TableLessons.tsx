@@ -2,18 +2,10 @@ import Link from "next/link";
 import Image from "next/image";
 import { Course, Lesson, User } from "@prisma/client";
 import React from "react";
-
-export interface LessonWithTeacher extends Lesson {
-  teacher: User;
-}
-
-export interface CourseWithLessons extends Course {
-  Lesson: LessonWithTeacher[];
-  teacher: User | null;
-}
+import { CourseWithLesson } from "@/types/CourseType";
 
 interface Props {
-  course: CourseWithLessons;
+  course: CourseWithLesson;
 }
 
 export default function TableLessons({ course }: Props) {
