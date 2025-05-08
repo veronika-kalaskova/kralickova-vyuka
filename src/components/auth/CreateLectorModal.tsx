@@ -279,6 +279,7 @@ export default function CreateLectorModal({
               <input
                 type="color"
                 {...register("color")}
+                defaultValue="#FF8A05"
                 className="h-10 w-14 rounded-md border-[1.5px] border-gray-300 p-1 focus:border-orange-300"
               />
               {errors.color && (
