@@ -103,11 +103,10 @@ export default function CreateUpdateAttendance({
       <div className="max-h-screen w-full overflow-y-auto bg-white p-6 shadow-md sm:h-auto sm:max-w-xl md:rounded-md">
         <h2 className="title">
           {typeForm === "update" ? "Upravit docházku" : "Zaznamenat docházku"}
-
         </h2>
         <form onSubmit={handleSubmit(onSubmit)}>
-          <div className="grid w-full grid-cols-2 gap-4">
-            <div className="max-h-96 space-y-2 overflow-y-auto">
+          <div className="w-full">
+            <div className="max-h-96 space-y-4 overflow-y-auto md:space-y-2">
               {students.map((student) => (
                 <div
                   key={student.id}
