@@ -86,7 +86,7 @@ describe("DELETE /api/comments", () => {
     const response = await DELETE(setupRequest(validDeleteData, "DELETE"));
     const data = await response.json();
 
-    expect(response.status).toBe(200);
+    expect(response.status).toBe(201);
     expect(data.message).toBe("Komentar byl úspěšně smazán.");
     expect(db.comment.delete).toHaveBeenCalled();
   });

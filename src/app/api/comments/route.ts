@@ -43,7 +43,7 @@ export async function DELETE(req: Request) {
 
     return NextResponse.json(
       { message: "Komentar byl úspěšně smazán." },
-      { status: 200 },
+      { status: 201 },
     );
   } catch (error) {
     return NextResponse.json(

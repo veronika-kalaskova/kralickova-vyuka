@@ -152,7 +152,7 @@ export async function PUT(req: Request) {
 
     return NextResponse.json(
       { user: updatedUser, message: "uzivatel upraven" },
-      { status: 200 },
+      { status: 201 },
     );
   } catch (error) {
     return NextResponse.json({ message: "Error" }, { status: 500 });
