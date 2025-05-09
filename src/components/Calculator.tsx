@@ -25,6 +25,7 @@ export default function Calculator({ data }: Props) {
     { type: "individuál", duration: 90, price: 500 },
     { type: "dvojice", duration: 60, price: 300 },
     { type: "kurz", duration: 45, price: 300 },
+        { type: "kurz", duration: 60, price: 300 },
   ];
 
   const showLessons = () => {
