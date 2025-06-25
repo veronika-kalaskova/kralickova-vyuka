@@ -13,9 +13,13 @@ import withDragAndDrop, {
 import "react-big-calendar/lib/addons/dragAndDrop/styles.css";
 import Link from "next/link";
 import { LessonWithCourseTeacherStudentAndTeacher } from "@/types/LessonType";
+import { CzechHoliday } from "@/types/CzechHolidays";
 
 const localizer = momentLocalizer(moment);
-moment.locale("cs"); // kalendar do cestiny
+moment.locale("cs");
+
+// Typ pro kombinaci lekcí a svátků
+type CalendarEvent = LessonWithCourseTeacherStudentAndTeacher | CzechHoliday;
 
 interface Props {
   lessons: LessonWithCourseTeacherStudentAndTeacher[];
@@ -23,6 +27,7 @@ interface Props {
   availableViews?: View[];
   classNameProp?: string;
   roles?: string[];
+  showHolidays?: boolean;
 }
 
 export default function CalendarComponent({
@@ -31,27 +36,116 @@ export default function CalendarComponent({
   availableViews = ["month", "work_week", "day", "agenda"],
   classNameProp = "h-[700px] w-full",
   roles = [],
+  showHolidays = true,
 }: Props) {
   const [view, setView] = useState<View>(defaultView);
   const [filteredViews, setFilteredViews] = useState<View[]>(availableViews);
-
   const [date, setDate] = useState<Date>(new Date());
-
-  const [events, setEvents] = useState<LessonWithCourseTeacherStudentAndTeacher[]>(lessons);
-
+  const [events, setEvents] = useState<CalendarEvent[]>([]);
+  const [holidays, setHolidays] = useState<CzechHoliday[]>([]);
+  const [holidaysLoading, setHolidaysLoading] = useState<boolean>(false);
   const [selectedLesson, setSelectedLesson] =
     useState<LessonWithCourseTeacherStudentAndTeacher | null>(null);
-
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
 
   const isAdmin = roles.includes("admin");
+
+  const fetchHolidays = async (year: number): Promise<CzechHoliday[]> => {
+    try {
+      const response = await fetch(
+        `https://svatkyapi.cz/api/day/${year}-01-01/interval/365`,
+      );
+
+      if (!response.ok) {
+        console.warn(`Nepodařilo se načíst svátky pro rok ${year}`);
+        return [];
+      }
+
+      const data = await response.json();
+
+      return data
+        .map((day: any) => {
+          if (day.date === `${year}-05-01`) {
+            return {
+              ...day,
+              isHoliday: true,
+              holidayName: "Svátek práce",
+            };
+          }
+
+          return day;
+        })
+        .filter((day: any) => day.isHoliday === true && day.holidayName)
+        .map((holiday: any) => ({
+          id: `holiday-${year}-${holiday.date}`,
+          title: holiday.holidayName,
+          startDate: new Date(holiday.date),
+          endDate: new Date(holiday.date),
+          isHoliday: true as const,
+          date: holiday.date,
+        }));
+    } catch (error) {
+      console.error(`Chyba při načítání svátků pro rok ${year}:`, error);
+      return [];
+    }
+  };
+
+  useEffect(() => {
+    if (!showHolidays) {
+      setHolidays([]);
+      return;
+    }
+
+    const loadHolidays = async () => {
+      setHolidaysLoading(true);
+
+      const currentYear = new Date().getFullYear();
+      const viewYear = date.getFullYear();
+
+      const yearsToLoad = Array.from(
+        new Set([currentYear, viewYear, viewYear - 1, viewYear + 1]),
+      );
+
+      try {
+        const holidayPromises = yearsToLoad.map((year) => fetchHolidays(year));
+        const holidayArrays = await Promise.all(holidayPromises);
+        const allHolidays = holidayArrays.flat();
+
+        setHolidays(allHolidays);
+      } catch (error) {
+        console.error("Chyba při načítání svátků:", error);
+      } finally {
+        setHolidaysLoading(false);
+      }
+    };
+
+    loadHolidays();
+  }, [showHolidays, date.getFullYear()]);
+
+  useEffect(() => {
+    const combinedEvents: CalendarEvent[] = [...lessons];
+
+    if (showHolidays && holidays.length > 0) {
+      combinedEvents.push(...holidays);
+    }
+
+    setEvents(combinedEvents);
+  }, [lessons, holidays, showHolidays]);
 
   const handleOnChangeView = (selectedView: View) => {
     setView(selectedView);
   };
 
-  const handleSelectedEvent = (event: LessonWithCourseTeacherStudentAndTeacher) => {
-    setSelectedLesson(event);
+  const handleSelectedEvent = (event: CalendarEvent) => {
+    // Kontrola, jestli je to lekce nebo svátek
+    if ("isHoliday" in event) {
+      // Je to svátek - zobrazit informaci
+      
+      return;
+    }
+
+    // Je to lekce
+    setSelectedLesson(event as LessonWithCourseTeacherStudentAndTeacher);
     setIsModalOpen(true);
   };
 
@@ -75,23 +169,26 @@ export default function CalendarComponent({
     noEventsInRange: "Žádné události v tomto období",
   };
 
-  const DragAndDropCalendar =
-    withDragAndDrop<LessonWithCourseTeacherStudentAndTeacher>(Calendar);
+  const DragAndDropCalendar = withDragAndDrop<CalendarEvent>(Calendar);
 
   const onEventDrop = useCallback(
-    async ({
-      event,
-      start,
-      end,
-    }: EventInteractionArgs<LessonWithCourseTeacherStudentAndTeacher>) => {
+    async ({ event, start, end }: EventInteractionArgs<CalendarEvent>) => {
+      // Zabránit přesunu svátků
+      if ("isHoliday" in event) {
+        alert("Svátky nelze přesouvat.");
+        return;
+      }
+
       if (!isAdmin) {
         alert("Pouze administrátor může přesouvat lekce.");
         return;
       }
 
+      const lesson = event as LessonWithCourseTeacherStudentAndTeacher;
+
       const response = await fetch("/api/calendar", {
         method: "PUT",
-        body: JSON.stringify({ id: event.id, startDate: start, endDate: end }),
+        body: JSON.stringify({ id: lesson.id, startDate: start, endDate: end }),
         headers: { "Content-Type": "application/json" },
       });
 
@@ -101,7 +198,7 @@ export default function CalendarComponent({
       }
 
       const updatedEvents = events.map((existingEvent) =>
-        existingEvent.id === event.id
+        "id" in existingEvent && existingEvent.id === lesson.id
           ? {
               ...existingEvent,
               startDate: start as Date,
@@ -116,20 +213,24 @@ export default function CalendarComponent({
   );
 
   const onEventResize = useCallback(
-    async ({
-      event,
-      start,
-      end,
-    }: EventInteractionArgs<LessonWithCourseTeacherStudentAndTeacher>) => {
+    async ({ event, start, end }: EventInteractionArgs<CalendarEvent>) => {
+      // Zabránit změně velikosti svátků
+      if ("isHoliday" in event) {
+        alert("Svátky nelze upravovat.");
+        return;
+      }
+
       if (!isAdmin) {
         alert("Pouze administrátor může upravovat délku lekcí.");
         return;
       }
 
+      const lesson = event as LessonWithCourseTeacherStudentAndTeacher;
+
       const response = await fetch("/api/calendar", {
         method: "PUT",
         body: JSON.stringify({
-          id: event.id,
+          id: lesson.id,
           startDate: start,
           endDate: end,
         }),
@@ -142,7 +243,7 @@ export default function CalendarComponent({
       }
 
       const updatedEvents = events.map((existingEvent) =>
-        existingEvent.id === event.id
+        "id" in existingEvent && existingEvent.id === lesson.id
           ? { ...existingEvent, startDate: start as Date, endDate: end as Date }
           : existingEvent,
       );
@@ -178,6 +279,11 @@ export default function CalendarComponent({
 
   return (
     <div className={classNameProp}>
+      {/* Indikátor načítání svátků */}
+      {holidaysLoading && (
+        <div className="mb-2 text-sm text-gray-600">Načítám svátky...</div>
+      )}
+
       <DragAndDropCalendar
         localizer={localizer}
         events={events}
@@ -187,23 +293,42 @@ export default function CalendarComponent({
         onView={handleOnChangeView}
         onEventDrop={onEventDrop}
         onEventResize={onEventResize}
-        titleAccessor={(event) =>
-          `${event.course.name} (${event.teacher?.lastName || "lektor neznámý"}) \n ${getCourseType(event.course)}`
-        }
-        startAccessor="startDate" // vlastnost startDate se bere jako zacatek
+        titleAccessor={(event: CalendarEvent) => {
+          // Kontrola typu události
+          if ("isHoliday" in event) {
+            return `🎉 ${event.title}`;
+          }
+
+          const lesson = event as LessonWithCourseTeacherStudentAndTeacher;
+          return `${lesson.course.name} (${lesson.teacher?.lastName || "lektor neznámý"}) \n ${getCourseType(lesson.course)}`;
+        }}
+        startAccessor="startDate"
         endAccessor="endDate"
         min={new Date(new Date().setHours(8, 0, 0, 0))}
         max={new Date(new Date().setHours(20, 0, 0, 0))}
         culture="cs"
         step={15}
-        timeslots={2} // 2 bloky po 15 minutach - pro drag and drop
+        timeslots={2}
         popup
         messages={messages}
         onSelectEvent={handleSelectedEvent}
-        eventPropGetter={(event) => {
+        eventPropGetter={(event: CalendarEvent) => {
+          if ("isHoliday" in event) {
+            return {
+              style: {
+                backgroundColor: "#3175AE",
+                borderColor: "#1348E6",
+                color: "white",
+                fontWeight: "bold",
+                fontSize: "12px",
+              },
+            };
+          }
+
+          const lesson = event as LessonWithCourseTeacherStudentAndTeacher;
           const backgroundColor =
             view !== "agenda"
-              ? event.teacher?.color || "#ff8903"
+              ? lesson.teacher?.color || "#ff8903"
               : isMobile && view !== "agenda"
                 ? "#ccc"
                 : "";
@@ -217,15 +342,17 @@ export default function CalendarComponent({
         }}
         doShowMoreDrillDown
         style={{ height: "100%" }}
-        onNavigate={(date) => {
-          setDate(new Date(date));
+        onNavigate={(newDate) => {
+          setDate(new Date(newDate));
         }}
         components={{
           toolbar: CalendarToolbar,
         }}
         resizable={isAdmin}
         selectable
-        draggableAccessor={() => isAdmin}
+        draggableAccessor={(event: CalendarEvent) => {
+          return isAdmin && !("isHoliday" in event);
+        }}
       />
 
       {isModalOpen && selectedLesson && (
