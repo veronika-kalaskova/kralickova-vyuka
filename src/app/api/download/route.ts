@@ -38,7 +38,10 @@ export async function GET(req: Request) {
 
     const headers = new Headers();
     headers.set("Content-Type", material.fileType || "application/octet-stream");
-    headers.set("Content-Disposition", `attachment; filename="${fileName}"`); // soubor bude stazeny s nazvem souboru
+    
+    // Oprava pro správné zobrazení diakritiky - použití RFC 5987 formátu
+    const encodedFileName = encodeURIComponent(fileName);
+    headers.set("Content-Disposition", `attachment; filename*=UTF-8''${encodedFileName}`);
     
     return new Response(material.fileData as Buffer, {
       status: 200,

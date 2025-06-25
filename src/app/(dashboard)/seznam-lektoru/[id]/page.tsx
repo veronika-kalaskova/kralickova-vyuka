@@ -68,6 +68,8 @@ export default async function Lektor({
 
   const session = await getServerSession(authOptions);
 
+  console.log(session?.user.roles)
+
   if (!lector) {
     return (
       <div className="p-4">
@@ -142,7 +144,9 @@ export default async function Lektor({
               ))}
             </div>
           </div>
-          <Calculator data={lessons} />
+          {session?.user.roles.includes("admin") || session?.user.username === lector.username ? (
+            <Calculator data={lessons} />
+          ) : null}
         </div>
       </div>
     </div>
