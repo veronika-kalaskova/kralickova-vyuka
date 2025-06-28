@@ -5,6 +5,7 @@ import CreateLectorModal from "./auth/CreateLectorModal";
 import CreateStudentModal from "./auth/CreateStudentModal";
 import { Course, Group, User } from "@prisma/client";
 import CreateUpdateCourseModal from "./forms/CreateUpdateCourseModal";
+import CreateUpdateHolidaysModal from "./forms/CreateUpdateHolidaysModal";
 
 interface Props {
   coursesWithoutLector: (Course & { group: Group | null })[];
@@ -58,6 +59,11 @@ export default function QuickActions({
                 title="Vytvořit kurz"
                 onClick={() => openModal("course")}
               />
+
+              <Button
+                title="Přidat prázdniny"
+                onClick={() => openModal("holiday")}
+              />
             </div>
           </div>
 
@@ -87,6 +93,14 @@ export default function QuickActions({
               isOpen={isOpen}
               onClose={() => setIsOpen(false)}
               lectors={allLectors}
+              type="create"
+            />
+          )}
+
+          {modal === "holiday" && (
+            <CreateUpdateHolidaysModal
+              isOpen={isOpen}
+              onClose={() => setIsOpen(false)}
               type="create"
             />
           )}

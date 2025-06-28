@@ -314,13 +314,16 @@ export default function CalendarComponent({
         onSelectEvent={handleSelectedEvent}
         eventPropGetter={(event: CalendarEvent) => {
           if ("isHoliday" in event) {
+                      const backgroundColor =
+            view !== "agenda"
+              ?  "#3175AE"
+              : isMobile && view !== "agenda"
+                ? "#ccc"
+                : "";
             return {
               style: {
-                backgroundColor: "#3175AE",
-                borderColor: "#1348E6",
-                color: "white",
-                fontWeight: "bold",
-                fontSize: "12px",
+                backgroundColor: backgroundColor,
+                borderColor: backgroundColor,
               },
             };
           }

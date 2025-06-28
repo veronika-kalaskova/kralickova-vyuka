@@ -163,3 +163,11 @@ model Course {
   group   Group?   @relation(fields: [groupId], references: [id])
   Lesson  Lesson[]
 }
+
+model Holiday {
+  id        Int      @id @default(autoincrement())
+  name      String
+  startDate DateTime
+  endDate   DateTime
+  createdAt DateTime @default(now())
+}
