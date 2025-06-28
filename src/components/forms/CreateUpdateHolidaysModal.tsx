@@ -63,7 +63,7 @@ export default function CreateUpdateHolidaysModal({
     try {
       const body =
         type === "update"
-          ? JSON.stringify({ values, id: data?.id })
+          ? JSON.stringify({ ...values, id: data?.id })
           : JSON.stringify(values);
 
       const method = type === "update" ? "PUT" : "POST";
@@ -89,6 +89,24 @@ export default function CreateUpdateHolidaysModal({
       setMessage("Nastala neočekávaná chyba.");
     }
   };
+
+  const deleteHolidays = async (id: number) => {
+    try {
+        const response = await fetch("/api/holidays", {
+          method: "DELETE",
+          body: JSON.stringify({ id }),
+          headers: { "Content-Type": "application/json" },
+        });
+
+        if (response.ok) {
+          onClose();
+          window.location.reload();
+        }
+    } catch (error) {
+        console.error("Chyba při mazání prázdnin:", error);
+        setMessage("Nastala chyba při mazání prázdnin.");
+    }
+  }
 
   if (!isOpen) return null;
 
@@ -152,6 +170,14 @@ export default function CreateUpdateHolidaysModal({
               >
                 {type === "update" ? "Upravit" : "Vytvořit"}
               </button>
+              {type === "update" && data && (
+                <button
+                  onClick={() => data && deleteHolidays(data.id)}
+                  className="cursor-pointer rounded-lg bg-red-400 px-4 py-3 font-medium text-white transition-all hover:bg-red-500"
+                >
+                  Smazat
+                </button>
+              )}
             </div>
           </div>
         </form>

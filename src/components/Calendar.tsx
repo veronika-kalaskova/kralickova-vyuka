@@ -5,7 +5,7 @@ import "react-big-calendar/lib/css/react-big-calendar.css";
 import moment from "moment";
 import "moment/locale/cs";
 import { useCallback, useEffect, useState } from "react";
-import { Course, Lesson, User } from "@prisma/client";
+import { Course, Holiday, Lesson, User } from "@prisma/client";
 import CalendarToolbar from "./CalendarToolbar";
 import withDragAndDrop, {
   EventInteractionArgs,
@@ -14,15 +14,21 @@ import "react-big-calendar/lib/addons/dragAndDrop/styles.css";
 import Link from "next/link";
 import { LessonWithCourseTeacherStudentAndTeacher } from "@/types/LessonType";
 import { CzechHoliday } from "@/types/CzechHolidays";
+import { set } from "react-hook-form";
+import CreateUpdateHolidaysModal from "./forms/CreateUpdateHolidaysModal";
 
 const localizer = momentLocalizer(moment);
 moment.locale("cs");
 
 // Typ pro kombinaci lekcí a svátků
-type CalendarEvent = LessonWithCourseTeacherStudentAndTeacher | CzechHoliday;
+type CalendarEvent =
+  | LessonWithCourseTeacherStudentAndTeacher
+  | CzechHoliday
+  | Holiday;
 
 interface Props {
   lessons: LessonWithCourseTeacherStudentAndTeacher[];
+  manualHolidays?: Holiday[];
   defaultView?: View;
   availableViews?: View[];
   classNameProp?: string;
@@ -32,6 +38,7 @@ interface Props {
 
 export default function CalendarComponent({
   lessons,
+  manualHolidays = [],
   defaultView = Views.MONTH,
   availableViews = ["month", "work_week", "day", "agenda"],
   classNameProp = "h-[700px] w-full",
@@ -43,10 +50,15 @@ export default function CalendarComponent({
   const [date, setDate] = useState<Date>(new Date());
   const [events, setEvents] = useState<CalendarEvent[]>([]);
   const [holidays, setHolidays] = useState<CzechHoliday[]>([]);
+  const [manualHolidaysState, setManualHolidaysState] = useState<Holiday[]>([]);
   const [holidaysLoading, setHolidaysLoading] = useState<boolean>(false);
   const [selectedLesson, setSelectedLesson] =
     useState<LessonWithCourseTeacherStudentAndTeacher | null>(null);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+
+  const [selectedManualHoliday, setSelectedManualHoliday] =
+    useState<Holiday | null>(null);
+  const [showManualHolidays, setShowManualHolidays] = useState<boolean>(false);
 
   const isAdmin = roles.includes("admin");
 
@@ -125,12 +137,16 @@ export default function CalendarComponent({
   useEffect(() => {
     const combinedEvents: CalendarEvent[] = [...lessons];
 
+    if (manualHolidays.length > 0) {
+      combinedEvents.push(...manualHolidays);
+    }
+
     if (showHolidays && holidays.length > 0) {
       combinedEvents.push(...holidays);
     }
 
     setEvents(combinedEvents);
-  }, [lessons, holidays, showHolidays]);
+  }, [lessons, holidays, showHolidays, manualHolidays]);
 
   const handleOnChangeView = (selectedView: View) => {
     setView(selectedView);
@@ -139,14 +155,21 @@ export default function CalendarComponent({
   const handleSelectedEvent = (event: CalendarEvent) => {
     // Kontrola, jestli je to lekce nebo svátek
     if ("isHoliday" in event) {
-      // Je to svátek - zobrazit informaci
-      
       return;
+    } else if (
+      "name" in event &&
+      "startDate" in event &&
+      "endDate" in event &&
+      !("isHoliday" in event)
+    ) {
+      setSelectedManualHoliday(event as Holiday);
+      setShowManualHolidays(true);
+      return;
+    } else {
+      // Je to lekce
+      setSelectedLesson(event as LessonWithCourseTeacherStudentAndTeacher);
+      setIsModalOpen(true);
     }
-
-    // Je to lekce
-    setSelectedLesson(event as LessonWithCourseTeacherStudentAndTeacher);
-    setIsModalOpen(true);
   };
 
   const closeModal = () => {
@@ -171,21 +194,89 @@ export default function CalendarComponent({
 
   const DragAndDropCalendar = withDragAndDrop<CalendarEvent>(Calendar);
 
-  const onEventDrop = useCallback(
-    async ({ event, start, end }: EventInteractionArgs<CalendarEvent>) => {
-      // Zabránit přesunu svátků
-      if ("isHoliday" in event) {
-        alert("Svátky nelze přesouvat.");
-        return;
-      }
+const onEventDrop = useCallback(
+  async ({ event, start, end }: EventInteractionArgs<CalendarEvent>) => {
+    // Zabránit přesunu státních svátků
+    if ("isHoliday" in event && event.isHoliday === true) {
+      alert("Státní svátky nelze přesouvat.");
+      return;
+    }
 
+    // Zpracování manuálních prázdnin/svátků
+    if (
+      "name" in event &&
+      "startDate" in event &&
+      "endDate" in event &&
+      !("isHoliday" in event)
+    ) {
       if (!isAdmin) {
-        alert("Pouze administrátor může přesouvat lekce.");
+        alert("Pouze administrátor může přesouvat manuální prázdniny.");
         return;
       }
 
-      const lesson = event as LessonWithCourseTeacherStudentAndTeacher;
+      const manualHoliday = event as Holiday;
 
+      try {
+        const response = await fetch("/api/holidays", {
+          method: "PUT",
+          body: JSON.stringify({ 
+            id: manualHoliday.id, 
+            startDate: start, 
+            endDate: end 
+          }),
+          headers: { "Content-Type": "application/json" },
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          alert(`Chyba při úpravě prázdnin: ${errorData.message || 'Neznámá chyba'}`);
+          return;
+        }
+
+        // Aktualizace stavu - najdeme a aktualizujeme manuální prázdninu
+        const updatedEvents = events.map((existingEvent) => {
+          if (
+            "id" in existingEvent && 
+            existingEvent.id === manualHoliday.id &&
+            "name" in existingEvent &&
+            !("isHoliday" in existingEvent)
+          ) {
+            return {
+              ...existingEvent,
+              startDate: start as Date,
+              endDate: end as Date,
+            };
+          }
+          return existingEvent;
+        });
+
+        setEvents(updatedEvents);
+
+        // Aktualizace také stavu manuálních prázdnin
+        setManualHolidaysState(prev => 
+          prev.map(holiday => 
+            holiday.id === manualHoliday.id 
+              ? { ...holiday, startDate: start as Date, endDate: end as Date }
+              : holiday
+          )
+        );
+
+      } catch (error) {
+        console.error("Chyba při přesunu manuální prázdniny:", error);
+        alert("Došlo k chybě při přesunu prázdniny.");
+      }
+      return;
+    }
+
+    // Zpracování lekcí (původní logika)
+    if (!isAdmin) {
+      alert("Pouze administrátor může přesouvat lekce.");
+      return;
+    }
+
+    const lesson = event as LessonWithCourseTeacherStudentAndTeacher;
+
+    try {
       const response = await fetch("/api/calendar", {
         method: "PUT",
         body: JSON.stringify({ id: lesson.id, startDate: start, endDate: end }),
@@ -193,7 +284,8 @@ export default function CalendarComponent({
       });
 
       if (!response.ok) {
-        alert("Chyba při úpravě lekce.");
+        const errorData = await response.json();
+        alert(`Chyba při úpravě lekce: ${errorData.message || 'Neznámá chyba'}`);
         return;
       }
 
@@ -208,25 +300,98 @@ export default function CalendarComponent({
       );
 
       setEvents(updatedEvents);
-    },
-    [events, isAdmin],
-  );
 
-  const onEventResize = useCallback(
-    async ({ event, start, end }: EventInteractionArgs<CalendarEvent>) => {
-      // Zabránit změně velikosti svátků
-      if ("isHoliday" in event) {
-        alert("Svátky nelze upravovat.");
-        return;
-      }
+    } catch (error) {
+      console.error("Chyba při přesunu lekce:", error);
+      alert("Došlo k chybě při přesunu lekce.");
+    }
+  },
+  [events, isAdmin],
+);
 
+const onEventResize = useCallback(
+  async ({ event, start, end }: EventInteractionArgs<CalendarEvent>) => {
+    // Zabránit změně velikosti státních svátků
+    if ("isHoliday" in event && event.isHoliday === true) {
+      alert("Státní svátky nelze upravovat.");
+      return;
+    }
+
+    // Zpracování manuálních prázdnin/svátků
+    if (
+      "name" in event &&
+      "startDate" in event &&
+      "endDate" in event &&
+      !("isHoliday" in event)
+    ) {
       if (!isAdmin) {
-        alert("Pouze administrátor může upravovat délku lekcí.");
+        alert("Pouze administrátor může upravovat velikost manuálních prázdnin.");
         return;
       }
 
-      const lesson = event as LessonWithCourseTeacherStudentAndTeacher;
+      const manualHoliday = event as Holiday;
 
+      try {
+        const response = await fetch("/api/holidays", {
+          method: "PUT",
+          body: JSON.stringify({
+            id: manualHoliday.id,
+            startDate: start,
+            endDate: end,
+          }),
+          headers: { "Content-Type": "application/json" },
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          alert(`Chyba při úpravě prázdnin: ${errorData.message || 'Neznámá chyba'}`);
+          return;
+        }
+
+        // Aktualizace stavu - najdeme a aktualizujeme manuální prázdninu
+        const updatedEvents = events.map((existingEvent) => {
+          if (
+            "id" in existingEvent && 
+            existingEvent.id === manualHoliday.id &&
+            "name" in existingEvent &&
+            !("isHoliday" in existingEvent)
+          ) {
+            return {
+              ...existingEvent,
+              startDate: start as Date,
+              endDate: end as Date,
+            };
+          }
+          return existingEvent;
+        });
+
+        setEvents(updatedEvents);
+
+        // Aktualizace také stavu manuálních prázdnin
+        setManualHolidaysState(prev => 
+          prev.map(holiday => 
+            holiday.id === manualHoliday.id 
+              ? { ...holiday, startDate: start as Date, endDate: end as Date }
+              : holiday
+          )
+        );
+
+      } catch (error) {
+        console.error("Chyba při změně velikosti manuální prázdniny:", error);
+        alert("Došlo k chybě při úpravě prázdniny.");
+      }
+      return;
+    }
+
+    // Zpracování lekcí (původní logika)
+    if (!isAdmin) {
+      alert("Pouze administrátor může upravovat délku lekcí.");
+      return;
+    }
+
+    const lesson = event as LessonWithCourseTeacherStudentAndTeacher;
+
+    try {
       const response = await fetch("/api/calendar", {
         method: "PUT",
         body: JSON.stringify({
@@ -238,7 +403,8 @@ export default function CalendarComponent({
       });
 
       if (!response.ok) {
-        alert("Chyba při úpravě lekce.");
+        const errorData = await response.json();
+        alert(`Chyba při úpravě lekce: ${errorData.message || 'Neznámá chyba'}`);
         return;
       }
 
@@ -249,9 +415,14 @@ export default function CalendarComponent({
       );
 
       setEvents(updatedEvents);
-    },
-    [events, isAdmin],
-  );
+
+    } catch (error) {
+      console.error("Chyba při změne velikosti lekce:", error);
+      alert("Došlo k chybě při úpravě lekce.");
+    }
+  },
+  [events, isAdmin],
+);
 
   const getCourseType = (course: Course) => {
     if (course.isIndividual) {
@@ -299,6 +470,15 @@ export default function CalendarComponent({
             return `🎉 ${event.title}`;
           }
 
+          if (
+            "name" in event &&
+            "startDate" in event &&
+            "endDate" in event &&
+            !("isHoliday" in event)
+          ) {
+            return `🎉 ${(event as Holiday).name}`;
+          }
+
           const lesson = event as LessonWithCourseTeacherStudentAndTeacher;
           return `${lesson.course.name} (${lesson.teacher?.lastName || "lektor neznámý"}) \n ${getCourseType(lesson.course)}`;
         }}
@@ -313,13 +493,19 @@ export default function CalendarComponent({
         messages={messages}
         onSelectEvent={handleSelectedEvent}
         eventPropGetter={(event: CalendarEvent) => {
-          if ("isHoliday" in event) {
-                      const backgroundColor =
-            view !== "agenda"
-              ?  "#3175AE"
-              : isMobile && view !== "agenda"
-                ? "#ccc"
-                : "";
+          if (
+            "isHoliday" in event ||
+            ("name" in event &&
+              "startDate" in event &&
+              "endDate" in event &&
+              !("isHoliday" in event))
+          ) {
+            const backgroundColor =
+              view !== "agenda"
+                ? "#3175AE"
+                : isMobile && view !== "agenda"
+                  ? "#ccc"
+                  : "";
             return {
               style: {
                 backgroundColor: backgroundColor,
@@ -394,6 +580,15 @@ export default function CalendarComponent({
             </div>
           </div>
         </div>
+      )}
+
+      {showManualHolidays && selectedManualHoliday && (
+        <CreateUpdateHolidaysModal
+          isOpen={true}
+          onClose={() => setShowManualHolidays(false)}
+          data={selectedManualHoliday}
+          type="update"
+        />
       )}
     </div>
   );

@@ -142,6 +142,14 @@ export default async function Lekce({
     );
   }
 
+  const calculateDuration = (start: Date, end: Date): string => {
+    const startDate = new Date(start);
+    const endDate = new Date(end);
+    const duration = Math.abs(endDate.getTime() - startDate.getTime());
+    const minutes = Math.floor(duration / (1000 * 60));
+    return `${minutes} minut`;
+  };
+
   const roles = session?.user.roles;
 
   return (
@@ -149,7 +157,8 @@ export default async function Lekce({
       <div className="mb-6 flex flex-col gap-2 md:flex-row md:items-center md:justify-between md:gap-0">
         <div>
           <h1 className="title mb-0">
-            Lekce {formatTime(lesson.startDate, lesson.endDate)}
+            Lekce {formatTime(lesson.startDate, lesson.endDate)} {" "}
+            <span className="text-orange-500">({calculateDuration(lesson.startDate, lesson.endDate)})</span>
           </h1>
 
           {lesson.course.description && (

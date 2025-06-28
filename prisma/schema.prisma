@@ -170,4 +170,5 @@ model Holiday {
   startDate DateTime
   endDate   DateTime
   createdAt DateTime @default(now())
+  deletedAt DateTime?
 }

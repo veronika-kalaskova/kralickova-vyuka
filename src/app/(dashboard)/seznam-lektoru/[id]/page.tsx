@@ -6,7 +6,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import TableUpcomingLessons from "@/components/table/TableUpcomingLessons";
 import Calculator from "@/components/Calculator";
-import CalendarComponent from "@/components/Calendar";
+import SmallCalendarComponent from "@/components/SmallCalendar";
 
 export default async function Lektor({
   params,
@@ -107,7 +107,7 @@ export default async function Lektor({
               </div>
             </div>
           </div>
-          <CalendarComponent
+          <SmallCalendarComponent
             lessons={lessons}
             defaultView={"work_week"}
             availableViews={["work_week"]}

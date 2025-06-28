@@ -13,9 +13,9 @@ import {
 import React from "react";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
-import CalendarComponent from "@/components/Calendar";
 import TableStudentAttendance from "@/components/table/TableStudentAttendance";
 import TableUpcomingLessons from "@/components/table/TableUpcomingLessons";
+import SmallCalendarComponent from "@/components/SmallCalendar";
 
 export default async function Student({
   params,
@@ -213,7 +213,7 @@ export default async function Student({
               </div>
             </div>
           </div>
-          <CalendarComponent
+          <SmallCalendarComponent
             lessons={lessons}
             defaultView={"work_week"}
             availableViews={["work_week"]}
@@ -231,7 +231,7 @@ export default async function Student({
               {student.CoursesTaken?.map((course, index) => (
                 <Link
                   href={`/seznam-kurzu/${course.id}`}
-                  key={index}
+                  key={course.id}
                   className="cursor-pointer rounded-lg border border-gray-100 bg-gray-50 p-4 transition-all hover:border-[#ff8904]"
                 >
                   <div className="flex items-center justify-between gap-8">
@@ -252,7 +252,7 @@ export default async function Student({
                 studentGroup.group.Course.map((course, index) => (
                   <Link
                     href={`/seznam-kurzu/${course.id}`}
-                    key={index}
+                    key={course.id}
                     className="cursor-pointer rounded-lg border border-gray-100 bg-gray-50 p-4 transition-all hover:border-[#ff8904]"
                   >
                     <div className="flex items-center justify-between gap-8">

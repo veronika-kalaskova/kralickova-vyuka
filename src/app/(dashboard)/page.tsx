@@ -61,12 +61,18 @@ export default async function Home() {
     },
   });
 
+  const holidays = await prisma.holiday.findMany({
+    where: {
+      deletedAt: null,
+    }
+  });
+
   return (
     <div className="flex flex-col items-center justify-center gap-8 p-4 xl:flex-row xl:items-start">
       {/* PREHLED LEKCI */}
       <div className="w-full">
         <h1 className="title">Přehled lekcí</h1>
-        <CalendarComponent lessons={allLessons} roles={session?.user.roles} />
+        <CalendarComponent lessons={allLessons} roles={session?.user.roles} manualHolidays={holidays} />
       </div>
 
       <QuickActions
