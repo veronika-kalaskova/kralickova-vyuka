@@ -27,6 +27,12 @@ export default async function SeznamLektoru() {
     },
   });
 
+  const holidays = await prisma.holiday.findMany({
+    where: {
+      deletedAt: null,
+    },
+  });
+
   const session = await getServerSession(authOptions);
 
   return (
@@ -34,6 +40,7 @@ export default async function SeznamLektoru() {
       data={allCourses}
       lectors={allLectors}
       roles={session?.user.roles}
+      manualHolidays={holidays}
     />
   );
 }

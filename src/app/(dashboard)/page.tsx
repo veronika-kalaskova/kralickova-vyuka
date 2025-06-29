@@ -81,6 +81,7 @@ export default async function Home() {
         coursesWithoutStudent={coursesWithoutStudent}
         coursesWithoutGroup={coursesWithoutGroup}
         allLectors={allLectors}
+        holidays={holidays}
       />
     </div>
   );

@@ -2,7 +2,8 @@ import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { Course, Group, User } from "@prisma/client";
+import { Course, Group, Holiday, User } from "@prisma/client";
+import { calculateCourseEndDate } from "@/utils/dateCalculator";
 
 interface Props {
   isOpen: boolean;
@@ -10,6 +11,7 @@ interface Props {
   lectors: User[];
   data?: Course | null;
   type?: string;
+  manualHolidays: Holiday[];
 }
 
 export default function CreateUpdateCourseModal({
@@ -18,6 +20,7 @@ export default function CreateUpdateCourseModal({
   lectors,
   data,
   type,
+  manualHolidays
 }: Props) {
   const FormSchema = z
   .object({
@@ -58,10 +61,35 @@ export default function CreateUpdateCourseModal({
   });
 
   const [message, setMessage] = useState("");
+  const [isCalculatingEndDate, setIsCalculatingEndDate] = useState(false);
+  const startDate = watch("startDate");
+
 
   function formatDate(date: Date) {
     return date.toISOString().split("T")[0];
   }
+
+  useEffect(() => {
+  if (startDate && type === "create") {
+    setIsCalculatingEndDate(true);
+    
+    calculateCourseEndDate(startDate, manualHolidays)
+      .then((endDate) => {
+        reset({
+          ...watch(),
+          endDate: endDate
+        });
+      })
+      .catch((error) => {
+        console.error('Chyba při výpočtu koncového data:', error);
+        setMessage('Chyba při výpočtu koncového data kurzu');
+      })
+      .finally(() => {
+        setIsCalculatingEndDate(false);
+      });
+  }
+}, [startDate, type, reset, watch]);
+
 
   useEffect(() => {
     if (data && isOpen) {

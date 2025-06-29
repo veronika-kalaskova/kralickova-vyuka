@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import Button from "./Button";
 import CreateLectorModal from "./auth/CreateLectorModal";
 import CreateStudentModal from "./auth/CreateStudentModal";
-import { Course, Group, User } from "@prisma/client";
+import { Course, Group, Holiday, User } from "@prisma/client";
 import CreateUpdateCourseModal from "./forms/CreateUpdateCourseModal";
 import CreateUpdateHolidaysModal from "./forms/CreateUpdateHolidaysModal";
 
@@ -13,6 +13,7 @@ interface Props {
   coursesWithoutGroup: Course[];
   allLectors: User[];
   roles?: string[]; // kdyby session nebyla dostupna
+  holidays: Holiday[]
 }
 
 export default function QuickActions({
@@ -20,6 +21,7 @@ export default function QuickActions({
   coursesWithoutStudent,
   allLectors,
   roles,
+  holidays
 }: Props) {
   const [isOpen, setIsOpen] = useState(false);
   const [roleId, setRoleId] = useState(0);
@@ -94,6 +96,7 @@ export default function QuickActions({
               onClose={() => setIsOpen(false)}
               lectors={allLectors}
               type="create"
+              manualHolidays={holidays}
             />
           )}
 

@@ -1,5 +1,5 @@
 "use client";
-import { Group, User, Course, StudentGroup } from "@prisma/client";
+import { Group, User, Course, StudentGroup, Holiday } from "@prisma/client";
 import React, { useState } from "react";
 import Image from "next/image";
 import Button from "../Button";
@@ -16,9 +16,10 @@ interface Props {
   data: (Course & { teacher: User | null } & { group: Group | null })[];
   lectors: User[];
   roles?: string[];
+  manualHolidays: Holiday[];
 }
 
-export default function TableCourse({ data, roles, lectors }: Props) {
+export default function TableCourse({ data, roles, lectors, manualHolidays }: Props) {
   const [isOpen, setIsOpen] = useState(false);
 
   const openModal = () => {
@@ -180,6 +181,7 @@ export default function TableCourse({ data, roles, lectors }: Props) {
         onClose={() => setIsOpen(false)}
         type="create"
         lectors={lectors}
+        manualHolidays={manualHolidays}
       />
       <CreateUpdateCourseModal
         isOpen={isOpenUpdate}
@@ -187,6 +189,7 @@ export default function TableCourse({ data, roles, lectors }: Props) {
         lectors={lectors}
         data={selectedCourse}
         type="update"
+        manualHolidays={manualHolidays}
       />
     </>
   );
